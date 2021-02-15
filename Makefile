@@ -1,34 +1,5 @@
-all : zip3.out wordcount.out calc.out
+all : calc.out
 
-##############################
-#
-# Problem 1
-#
-
-# Run the zip3 testbench; capture the result in zip3.out
-
-zip3.out : zip3.ml zip3.tb
-	ocaml -noprompt < zip3.tb > zip3.out
-
-##############################
-#
-# Problem 2
-#
-
-# "ocamlbuild wordcount.native" will also build the word counter
-
-# Compile the wordcount "executable" from the ocamllex input file
-
-wordcount.ml : wordcount.mll
-	ocamllex wordcount.mll
-
-wordcount : wordcount.ml
-	ocamlc -o wordcount wordcount.ml
-
-# Run the word counter on the README file
-
-wordcount.out : wordcount README
-	./wordcount < README > wordcount.out
 
 ##############################
 #
@@ -51,9 +22,6 @@ scanner.ml : scanner.mll
 
 parser.ml parser.mli : parser.mly
 	ocamlyacc $^
-
-calc.out : calc calc.tb
-	./calc < calc.tb > calc.out
 
 # Depedencies from ocamldep
 calc.cmo : scanner.cmo parser.cmi ast.cmi
