@@ -1,11 +1,11 @@
 %{ open Ast %}
 
-%token PLUS MINUS TIMES DIVIDE EOF SEMI EQUALS
+%token PLUS MINUS TIMES DIVIDE EOF SEMI ASSIGN
 %token <int> LITERAL
 %token <string> NAME
 
 %left SEMI
-%right EQUALS
+%right ASSIGN
 %left PLUS MINUS
 %left TIMES DIVIDE
 
@@ -20,8 +20,8 @@ expr:
 | expr TIMES  expr { Binop($1, Mul, $3) }
 | expr DIVIDE expr { Binop($1, Div, $3) }
 | LITERAL          { Lit($1) }
-| NAME EQUALS expr {Assignmentop($1, Eq, $3)}
-| expr SEMI expr { Binop($1, Semi, $3)}
-| NAME {Getval($1)}
+| NAME ASSIGN expr {Assignmentop($1, Eq, $3)}
+| expr SEMI expr   { Binop($1, Semi, $3)}
+| NAME             {Getval($1)}
 
 
