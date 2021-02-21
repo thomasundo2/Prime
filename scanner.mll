@@ -16,6 +16,8 @@ rule tokenize = parse
 | ')'      { RPAREN }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
+| '['      { RBRACK }
+| ']'      { LBRACK }
 | ','      { COMMA }
 | '='      { EQUALS } (* Binary Operators (semi perhaps not) *)
 | ';'      { SEMI }
