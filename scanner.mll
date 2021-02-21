@@ -39,7 +39,7 @@ rule tokenize = parse
 | "while"  { WHILE }
 | "return" { RETURN }
 | "int"    { INT }
-| "bool"   { BOOL }
+(*| "bool"   { BOOL }*)
 (*| "float"  { FLOAT } *)
 | "lint"   { LINT }  (* OUR CUSTOM TYPES *)
 | "poly"   { POLY } (*More needs to be done here*)
