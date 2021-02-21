@@ -1,11 +1,10 @@
 %{ open Ast %}
-
+(*FLOAT, FLIT, VOID,... etc removed*)
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
 %token EQ NEQ LT LEQ GT GEQ AND OR
-%token RETURN IF ELSE FOR WHILE INT BOOL FLOAT (*add void here if wanted*)
-%token LINT POLY PT RING
+%token RETURN IF ELSE FOR WHILE INT LINT POLY PT RING (*add float/void here if wanted*)
 %token <int> LITERAL
-%token <string> ID FLIT
+%token <string> ID
 %token EOF
 
 %start program
@@ -18,7 +17,7 @@
 %left AND
 %left EQ NEQ
 %left LT GT LEQ GEQ
-%left MOD (*mod takes precedence below all arithmetic operator*)
+%left MOD (* mod takes precedence below all arithmetic operators *)
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right POWER
@@ -54,9 +53,10 @@ formal_list:
 
 typ:
     INT   { Int   }
-  | BOOL  { Bool  }
-  | FLOAT { Float }
-  | VOID  { Void  }
+  | LINT  { Lint  }
+  | POLY  { Poly  }
+  | PT    { Point }
+  | RING  { Ring  }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -85,10 +85,9 @@ expr_opt:
 
 expr:
     LITERAL          { Literal($1)            }
-  | FLIT	     { Fliteral($1)           }
-  | BLIT             { BoolLit($1)            }
   | ID               { Id($1)                 }
   | expr MOD    expr { Binop($1, Mod,   $3)   } (*TODO implement Mod in Binop*)
+  | exp  POWER  expr { Binop($1, Power,   $3) } (*TODO implement Mod in Binop*)
   | expr PLUS   expr { Binop($1, Add,   $3)   }
   | expr MINUS  expr { Binop($1, Sub,   $3)   }
   | expr TIMES  expr { Binop($1, Mult,  $3)   }
@@ -102,7 +101,6 @@ expr:
   | expr AND    expr { Binop($1, And,   $3)   }
   | expr OR     expr { Binop($1, Or,    $3)   }
   | MINUS expr %prec NOT { Unop(Neg, $2)      }
-  | NOT expr         { Unop(Not, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
   | LPAREN expr RPAREN { $2                   }

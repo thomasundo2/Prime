@@ -40,7 +40,7 @@ rule tokenize = parse
 | "return" { RETURN }
 | "int"    { INT }
 | "bool"   { BOOL }
-| "float"  { FLOAT }
+(*| "float"  { FLOAT } *)
 | "lint"   { LINT }  (* OUR CUSTOM TYPES *)
 | "poly"   { POLY } (*More needs to be done here*)
 | "pt"     { POINT }
