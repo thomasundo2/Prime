@@ -48,7 +48,7 @@ rule tokenize = parse
 | "int"    { INT }
 (* | "float"  { FLOAT } *)
 | "lint"   { LINT }  (* OUR CUSTOM TYPES *)
-(* | "poly"   { POLY } (*More needs to be done here*)*)
+| "poly"   { POLY } (*More needs to be done here*)
 | "pt"     { POINT }
 | "ring"   { RING }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { NAME(name) } (*ids can be alpha followed by alphanum and _*)
