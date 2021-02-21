@@ -1,4 +1,4 @@
-(* Ocamllex scanner for PRIME 
+(* Ocamllex scanner for PRIME
    Many thanks to the MicroC compiler example created by
    Professor Edwards
    Many of the symbols here are directly from or follow that.
@@ -39,7 +39,6 @@ rule tokenize = parse
 | ">="     { GEQ }
 | "&&"     { AND }
 | "||"     { OR }
-| "!"      { NOT }
 | "if"     { IF }   (* Keywords and types *)
 | "else"   { ELSE }
 | "for"    { FOR }
