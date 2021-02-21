@@ -51,7 +51,7 @@ rule tokenize = parse
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { NAME(name) } (*ids can be alpha followed by alphanum and _*)
 | ['0'-'9']+ as lit { LITERAL(int_of_string lit) }
 | eof      { EOF }
-| _        { raise (Failure("Undefined character " ^ Char.escaped char)) } (* any other character is not allowed *)
+| _  as char      { raise (Failure("Undefined character " ^ Char.escaped char)) } (* any other character is not allowed *)
 
 (* part of rule for ending comments *)
 and comment = parse
