@@ -16,6 +16,8 @@ rule tokenize = parse
 | ')'      { RPAREN }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
+| '['      { RBRACK }
+| ']'      { LBRACK }
 | ','      { COMMA }
 | '='      { EQUALS } (* Binary Operators (semi perhaps not) *)
 | ';'      { SEMI }
@@ -25,6 +27,7 @@ rule tokenize = parse
 | '/'      { DIVIDE }
 | '^'      { POWER }
 | '%'      { MOD }
+| '.'      { ACCESS }
 | "=="     { EQ }   (* Relational Ops (which ones of these do we want?)*)
 | "!="     { NEQ }
 | '<'      { LT }
@@ -40,18 +43,15 @@ rule tokenize = parse
 | "while"  { WHILE }
 | "return" { RETURN }
 | "int"    { INT }
-| "bool"   { BOOL }
-| "float"  { FLOAT }
+(* | "float"  { FLOAT } *)
 | "lint"   { LINT }  (* OUR CUSTOM TYPES *)
 (* | "poly"   { POLY } (*More needs to be done here*)*)
 | "pt"     { POINT }
 | "ring"   { RING }
-(* | "void"   { VOID } *) (* Want or not? *)
-| "true"   { BLIT(true)  }
-| "false"  { BLIT(false) }
-| ['a'-'z']+ as name { NAME(name) }
+| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { NAME(name) } (*ids can be alpha followed by alphanum and _*)
 | ['0'-'9']+ as lit { LITERAL(int_of_string lit) }
-| eof { EOF }
+| eof      { EOF }
+| _        { raise (Failure("Undefined character " ^ Char.escaped char)) } (* any other character is not allowed *)
 
 (* part of rule for ending comments *)
 and comment = parse
