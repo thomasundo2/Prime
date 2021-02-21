@@ -19,6 +19,8 @@ rule tokenize = parse
 | '['      { RBRACK }
 | ']'      { LBRACK }
 | ','      { COMMA }
+| '\''     { CHARM }    (* Char and String MARKERS *)
+| '\"'     { STRINGM }
 | '='      { EQUALS } (* Binary Operators (semi perhaps not) *)
 | ';'      { SEMI }
 | '+'      { PLUS }
@@ -27,6 +29,8 @@ rule tokenize = parse
 | '/'      { DIVIDE }
 | '^'      { POWER }
 | '%'      { MOD }
+| '.'      { ACCESS }
+| ':'      { OVERLOAD }
 | "=="     { EQ }   (* Relational Ops (which ones of these do we want?)*)
 | "!="     { NEQ }
 | '<'      { LT }
@@ -41,17 +45,15 @@ rule tokenize = parse
 | "while"  { WHILE }
 | "return" { RETURN }
 | "int"    { INT }
-(*| "bool"   { BOOL }*)
-(*| "float"  { FLOAT } *)
+(* | "float"  { FLOAT } *)
 | "lint"   { LINT }  (* OUR CUSTOM TYPES *)
 | "poly"   { POLY } (*More needs to be done here*)
 | "pt"     { POINT }
 | "ring"   { RING }
-(* | "void"   { VOID } *) (* Want or not? *)
-| digits as lxm { LITERAL(int_of_string lxm) }
-| digits '.'  digit* ( ['e' 'E'] ['+' '-']? digits )? as lxm { FLIT(lxm) }
-| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']*     as lxm { ID(lxm) }
-| eof { EOF }
+| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { NAME(name) } (*ids can be alpha followed by alphanum and _*)
+| ['0'-'9']+ as lit { LITERAL(int_of_string lit) }
+| eof      { EOF }
+| _  as char      { raise (Failure("Undefined character " ^ Char.escaped char)) } (* any other character is not allowed *)
 
 (* part of rule for ending comments *)
 and comment = parse
