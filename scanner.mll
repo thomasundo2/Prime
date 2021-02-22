@@ -30,7 +30,7 @@ rule tokenize = parse
 | '^'      { POWER }
 | '%'      { MOD }
 | '.'      { ACCESS }
-| ':'      { OVERLOAD }
+(* | ':'      { OVERLOAD } Not included in this part*)
 | "=="     { EQ }   (* Relational Ops (which ones of these do we want?)*)
 | "!="     { NEQ }
 | '<'      { LT }
@@ -39,12 +39,15 @@ rule tokenize = parse
 | ">="     { GEQ }
 | "&&"     { AND }
 | "||"     { OR }
+| "!"      { NOT }
 | "if"     { IF }   (* Keywords and types *)
 | "else"   { ELSE }
 | "for"    { FOR }
 | "while"  { WHILE }
 | "return" { RETURN }
 | "int"    { INT }
+| "char"   { CHAR }
+| "string" { STRING }
 (* | "float"  { FLOAT } *)
 | "lint"   { LINT }  (* OUR CUSTOM TYPES *)
 | "poly"   { POLY } (*More needs to be done here*)
