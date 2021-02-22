@@ -3,7 +3,7 @@ A programming language designed for cryptography.
 
 ## Team Members and Roles:
 - Nikhil (Language Guru)
-- Alex (Manager)
+- Alex (Project Manager)
 - Thomas (Architect)
 - Pedro (Tester)
 
