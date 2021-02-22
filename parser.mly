@@ -5,6 +5,8 @@
 //%token ACCESS CHARM STRINGM
 %token RETURN IF ELSE FOR WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
+%token <char> CHARLIT
+%token <string> STRLIT
 %token <string> ID
 %token EOF
 
@@ -90,7 +92,9 @@ expr_opt:
 
 expr:
     ID               {  }
-  | LITERAL         {  }
+  | LITERAL          {  }
+  | CHARLIT          {  }
+  | STRLIT           {  }
   | expr MOD    expr {  } 
   | expr POWER  expr {  } 
   | expr PLUS   expr {  }
@@ -109,12 +113,8 @@ expr:
   | NOT expr         {  }
   | ID ASSIGN expr   {   }
   | ID LPAREN args_opt RPAREN {  }
+  | LBRACK args_list RBRACK    {   }    // Point initialisation 
   | LPAREN expr RPAREN {    }
-
-// constant:
-//     LITERAL {}
-//   // | CHARM CHARM {} //(* Character literals *)
-//   // | STRINGM STRINGM {}  //(* String literals *)
 
 args_opt:
     /* nothing */ {  }
