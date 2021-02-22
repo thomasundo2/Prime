@@ -19,8 +19,8 @@ rule tokenize = parse
 | '['      { RBRACK }
 | ']'      { LBRACK }
 | ','      { COMMA }
-| '\''     { CHARM }    (* Char and String MARKERS *)
-| '\"'     { STRINGM }
+(* | '\''     { CHARM }    (* Char and String MARKERS *)
+| '\"'     { STRINGM } *)
 | '='      { EQUALS } (* Binary Operators (semi perhaps not) *)
 | ';'      { SEMI }
 | '+'      { PLUS }
@@ -29,7 +29,7 @@ rule tokenize = parse
 | '/'      { DIVIDE }
 | '^'      { POWER }
 | '%'      { MOD }
-| '.'      { ACCESS }
+(* | '.'      { ACCESS } *)
 (* | ':'      { OVERLOAD } Not included in this part*)
 | "=="     { EQ }   (* Relational Ops (which ones of these do we want?)*)
 | "!="     { NEQ }
@@ -55,6 +55,8 @@ rule tokenize = parse
 | "ring"   { RING }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { NAME(name) } (*ids can be alpha followed by alphanum and _*)
 | ['0'-'9']+ as lit { LITERAL(int_of_string lit) }
+| '"'_*'"'  as lit { STRLIT(lit) }  (* Make a separate rule for looking through string literals and comment literals *)
+| "'"_"'"  as lit { CHARLIT(lit) } 
 | eof      { EOF }
 | _  as char      { raise (Failure("Undefined character " ^ Char.escaped char)) } (* any other character is not allowed *)
 

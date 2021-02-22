@@ -2,7 +2,7 @@
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
 %token EQ NEQ LT LEQ GT GEQ AND OR
-%token ACCESS CHARM STRINGM
+//%token ACCESS CHARM STRINGM
 %token RETURN IF ELSE FOR WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
 %token <string> ID
@@ -67,14 +67,6 @@ declarator:
   | ID LPAREN params_opt RPAREN {}
   | ID LBRACK expr RBRACK {}
 
-// vdecl_list:
-//     /* nothing */    { }
-//   | vdecl_list vdecl { }
-
-// vdecl: (* allow initialization here too *)
-//    typ ID SEMI {}
-//   | typ ID ASSIGN assign_expr SEMI {}
-
 seq_stmts:
   decls stmt_list {}
 
@@ -88,7 +80,7 @@ stmt:
   | LBRACE seq_stmts RBRACE                 {  } //(* Seq stmts *)
   | IF LPAREN expr RPAREN stmt %prec NOELSE {  } //(* If dangling *)
   | IF LPAREN expr RPAREN stmt ELSE stmt    {  } //(* If no dangle *)
-  | FOR LPAREN expr_opt SEMI expr SEMI expr_opt
+  | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
                                             {  } //(* Loops no infinite FOR *)
   | WHILE LPAREN expr RPAREN stmt           {  }
 
@@ -98,7 +90,7 @@ expr_opt:
 
 expr:
     ID               {  }
-  | constant         {  }
+  | LITERAL         {  }
   | expr MOD    expr {  } 
   | expr POWER  expr {  } 
   | expr PLUS   expr {  }
@@ -119,14 +111,10 @@ expr:
   | ID LPAREN args_opt RPAREN {  }
   | LPAREN expr RPAREN {    }
 
-constant:
-    int_list {}
-  // | CHARM CHARM {} //(* Character literals *)
-  // | STRINGM STRINGM {}  //(* String literals *)
-
-int_list:
-    LITERAL {}
-  | int_list COMMA LITERAL {}
+// constant:
+//     LITERAL {}
+//   // | CHARM CHARM {} //(* Character literals *)
+//   // | STRINGM STRINGM {}  //(* String literals *)
 
 args_opt:
     /* nothing */ {  }
