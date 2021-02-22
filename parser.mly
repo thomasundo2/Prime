@@ -2,7 +2,7 @@
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
 %token EQ NEQ LT LEQ GT GEQ AND OR
-//%token ACCESS CHARM STRINGM
+%token ACCESS
 %token RETURN IF ELSE FOR WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
 %token <char> CHARLIT
@@ -26,6 +26,7 @@
 %left TIMES DIVIDE MOD //(* Change this order later if necessary *)
 %right NOT
 %right POWER
+%left ACCESS    // Built in access methods 
 
 %%
 
@@ -95,6 +96,7 @@ expr:
   | LITERAL          {  }
   | CHARLIT          {  }
   | STRLIT           {  }
+  | expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr {  } 
   | expr POWER  expr {  } 
   | expr PLUS   expr {  }

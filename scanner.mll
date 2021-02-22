@@ -21,8 +21,6 @@ rule tokenize = parse
 | '['      { RBRACK }
 | ']'      { LBRACK }
 | ','      { COMMA }
-(* | '\''     { CHARM }    (* Char and String MARKERS *)
-| '\"'     { STRINGM } *)
 | '='      { EQUALS } (* Binary Operators (semi perhaps not) *)
 | ';'      { SEMI }
 | '+'      { PLUS }
@@ -31,7 +29,7 @@ rule tokenize = parse
 | '/'      { DIVIDE }
 | '^'      { POWER }
 | '%'      { MOD }
-(* | '.'      { ACCESS } *)
+| '.'      { ACCESS }
 (* | ':'      { OVERLOAD } Not included in this part*)
 | "=="     { EQ }   (* Relational Ops (which ones of these do we want?)*)
 | "!="     { NEQ }
