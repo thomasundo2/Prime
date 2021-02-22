@@ -1,15 +1,17 @@
 %{ open Ast %}
-(* TODO LBRACK RBRACK*)
+
 %token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
 %token EQ NEQ LT LEQ GT GEQ AND OR
-%token RETURN IF ELSE FOR WHILE INT LINT POLY PT RING (*add float/void here if wanted*)
+%token ACCESS CHARM STRINGM
+%token RETURN IF ELSE FOR WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
 %token <string> ID
 %token EOF
 
 %start program
+%type <Ast.program> program //(* Add in later when we define the AST *)
 
-(*precedence*)
+// (*precedence*)
 %nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
@@ -17,98 +19,119 @@
 %left AND
 %left EQ NEQ
 %left LT GT LEQ GEQ
-%left MOD (* mod takes precedence below all arithmetic operators *)
+// %left MOD (* mod takes precedence below all arithmetic operators *)
 %left PLUS MINUS
-%left TIMES DIVIDE
+%left TIMES DIVIDE MOD //(* Change this order later if necessary *)
+%right NOT
 %right POWER
-
-%start expr
-%type <Ast.expr> expr
 
 %%
 
+//(* All the semantic action braces will be empty for this submission *)
+
 program:
-  decls EOF { $1 }
+  decls EOF { }
 
 decls:
-   /* nothing */ { ([], [])               }
- | decls vdecl { (($2 :: fst $1), snd $1) }
- | decls fdecl { (fst $1, ($2 :: snd $1)) }
+   /* nothing */ {}
+  | decls declare_init {}  //(* No external variables ? or keep as is*)
+  | decls fdecl {}
 
 fdecl:
-   typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
-     { { typ = $1;
-	 fname = $2;
-	 formals = List.rev $4;
-	 locals = List.rev $7;
-	 body = List.rev $8 } }
+   typ ID LPAREN params_opt RPAREN LBRACE seq_stmts RBRACE
+     { }
 
-formals_opt:
-    /* nothing */ { [] }
-  | formal_list   { $1 }
+params_opt:
+    /* nothing */ {  }
+  | params_list   {  }
 
-formal_list:
-    typ ID                   { [($1,$2)]     }
-  | formal_list COMMA typ ID { ($3,$4) :: $1 }
+params_list:
+    typ ID                   {  }
+  | params_list COMMA typ ID {  }
 
 typ:
-    INT   { Int   }
-  | LINT  { Lint  }
-  | POLY  { Poly  }
-  | PT    { Point }
-  | RING  { Ring  }
+    INT   {  }
+  | LINT  {  }
+  | POLY  {  }
+  | POINT {  }
+  | RING  {  }
+  | CHAR  {  }
+  | STRING { }
 
-vdecl_list:
-    /* nothing */    { [] }
-  | vdecl_list vdecl { $2 :: $1 }
+declare_init:
+  typ declarator SEMI {}
 
-vdecl:
-   typ ID SEMI { ($1, $2) }
+declarator:
+    ID {}
+  | ID ASSIGN expr {}
+  | ID LPAREN params_opt RPAREN {}
+  | ID LBRACK expr RBRACK {}
+
+// vdecl_list:
+//     /* nothing */    { }
+//   | vdecl_list vdecl { }
+
+// vdecl: (* allow initialization here too *)
+//    typ ID SEMI {}
+//   | typ ID ASSIGN assign_expr SEMI {}
+
+seq_stmts:
+  decls stmt_list {}
 
 stmt_list:
-    /* nothing */  { [] }
-  | stmt_list stmt { $2 :: $1 }
+    /* nothing */  {}
+  | stmt_list stmt {}
 
 stmt:
-    expr SEMI                               { Expr $1               }
-  | RETURN expr_opt SEMI                    { Return $2             }
-  | LBRACE stmt_list RBRACE                 { Block(List.rev $2)    }
-  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
-  | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7)        }
-  | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
-                                            { For($3, $5, $7, $9)   }
-  | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
+    expr_opt SEMI                           {  } //(* Expr-stmt *)
+  | RETURN expr_opt SEMI                    {  } //(* Return stmt *)
+  | LBRACE seq_stmts RBRACE                 {  } //(* Seq stmts *)
+  | IF LPAREN expr RPAREN stmt %prec NOELSE {  } //(* If dangling *)
+  | IF LPAREN expr RPAREN stmt ELSE stmt    {  } //(* If no dangle *)
+  | FOR LPAREN expr_opt SEMI expr SEMI expr_opt
+                                            {  } //(* Loops no infinite FOR *)
+  | WHILE LPAREN expr RPAREN stmt           {  }
 
 expr_opt:
-    /* nothing */ { Noexpr }
-  | expr          { $1 }
+    /* nothing */ {  }
+  | expr          {  }
 
 expr:
-    LITERAL          { Literal($1)            }
-  | ID               { Id($1)                 }
-  | expr MOD    expr { Binop($1, Mod,   $3)   } (*TODO implement Mod in Binop*)
-  | exp  POWER  expr { Binop($1, Power,   $3) } (*TODO implement Mod in Binop*)
-  | expr PLUS   expr { Binop($1, Add,   $3)   }
-  | expr MINUS  expr { Binop($1, Sub,   $3)   }
-  | expr TIMES  expr { Binop($1, Mult,  $3)   }
-  | expr DIVIDE expr { Binop($1, Div,   $3)   }
-  | expr EQ     expr { Binop($1, Equal, $3)   }
-  | expr NEQ    expr { Binop($1, Neq,   $3)   }
-  | expr LT     expr { Binop($1, Less,  $3)   }
-  | expr LEQ    expr { Binop($1, Leq,   $3)   }
-  | expr GT     expr { Binop($1, Greater, $3) }
-  | expr GEQ    expr { Binop($1, Geq,   $3)   }
-  | expr AND    expr { Binop($1, And,   $3)   }
-  | expr OR     expr { Binop($1, Or,    $3)   }
-  | MINUS expr %prec NOT { Unop(Neg, $2)      }
-  | ID ASSIGN expr   { Assign($1, $3)         }
-  | ID LPAREN args_opt RPAREN { Call($1, $3)  }
-  | LPAREN expr RPAREN { $2                   }
+    ID               {  }
+  | constant         {  }
+  | expr MOD    expr {  } 
+  | expr POWER  expr {  } 
+  | expr PLUS   expr {  }
+  | expr MINUS  expr {  }
+  | expr TIMES  expr {  }
+  | expr DIVIDE expr {  }
+  | expr EQ     expr {  }
+  | expr NEQ    expr {  }
+  | expr LT     expr {  }
+  | expr LEQ    expr {  }
+  | expr GT     expr {  }
+  | expr GEQ    expr {  }
+  | expr AND    expr {  }
+  | expr OR     expr {  }
+  | MINUS expr %prec NOT { }
+  | NOT expr         {  }
+  | ID ASSIGN expr   {   }
+  | ID LPAREN args_opt RPAREN {  }
+  | LPAREN expr RPAREN {    }
+
+constant:
+    int_list {}
+  // | CHARM CHARM {} //(* Character literals *)
+  // | STRINGM STRINGM {}  //(* String literals *)
+
+int_list:
+    LITERAL {}
+  | int_list COMMA LITERAL {}
 
 args_opt:
-    /* nothing */ { [] }
-  | args_list  { List.rev $1 }
+    /* nothing */ {  }
+  | args_list  {  }
 
 args_list:
-    expr                    { [$1] }
-  | args_list COMMA expr { $3 :: $1 }
+    expr                    { }
+  | args_list COMMA expr { }
