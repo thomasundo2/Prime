@@ -114,6 +114,7 @@ expr:
   | MINUS expr %prec NOT { }
   | NOT expr         {  }
   | ID ASSIGN expr   {   }
+  | ID LBRACK expr RBRACK ASSIGN expr {}
   | ID LPAREN args_opt RPAREN {  }
   | LBRACK args_list RBRACK    {   }    // Point initialisation 
   | LPAREN expr RPAREN {    }
