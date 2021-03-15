@@ -1,11 +1,39 @@
 version: 2.1
 jobs:
-  build:
+  Hello-World:
+    # We will add our image provided by professor Edwards here
+    # Here for initial trials of circleci
     docker:
       - image: alpine:3.7
     steps:
       - run:
-        name: Trying cmd
+        name: Trying cmd Hello
         command: |
           echo 'Hello World!'
           echo 'Start of Pipeline'
+  Check-Microc:    
+    docker:
+      - image: columbiasedwards/plt
+    steps:
+      - checkout
+      - run:
+        name: Display Code
+        command: |
+          ls -al
+          echo 'The code above is what we have in the repo'
+      - run:
+        name: Check Opam and Makefile
+        command: |
+          opam --version
+          make parser.ml
+          ls 
+          make clean
+
+workflows:
+  version: 2
+  First_Workflow:
+    jobs:
+      - Hello-World
+      - Check-Microc:
+        requires:
+          - Hello-World
