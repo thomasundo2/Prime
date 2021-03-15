@@ -9,4 +9,15 @@ type expr =
   | Lit of int
 
 type typ = Int | Lint | Chr | Ring | String | Point | Poly
-type program = string (* This is probably wrong but needs to be added for parser *)
+
+type bind = typ * string
+
+type func_decl = {
+  typ : typ;
+  name : string;
+  params : bind list;
+}
+
+(* This is probably wrong but needs to be added for parser *)
+(* Essentially means variable declarations followed by function defs *)
+type program = bind list * func_decl list
