@@ -1,8 +1,7 @@
 version: 2.1
 jobs:
   Hello-World:
-    # We will add our image provided by professor Edwards here
-    # Here for initial trials of circleci
+    # Check CircleCi Working
     docker:
       - image: alpine:3.7
     steps:
@@ -11,7 +10,8 @@ jobs:
         command: |
           echo 'Hello World!'
           echo 'Start of Pipeline'
-  Check-Microc:    
+  # Check that we can get the image OK
+  Check-Microc-Image:    
     docker:
       - image: columbiasedwards/plt
     steps:
@@ -28,12 +28,25 @@ jobs:
           make parser.ml
           ls 
           make clean
+  # Check that HelloWorld Works ok from our code
+  Run-Tests:
+    docker:
+      - image: columbiasedwards/plt
+    steps:
+      - checkout
+      - run:
+        name: Run Hello World Test
+        command: |
+          ./tests/hello_world.sh
 
 workflows:
   version: 2
   First_Workflow:
     jobs:
       - Hello-World
-      - Check-Microc:
+      - Check-Microc-Image:
         requires:
           - Hello-World
+      - Run-Tests:
+        requires:
+          - Check-Microc-Image
