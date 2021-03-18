@@ -43,8 +43,8 @@ workflows:
     jobs:
       - Check-Microc-Image
       - Build:
-        requires:
-          - Check-Microc-Image
+          requires:
+            - Check-Microc-Image
       - Run-Tests:
           requires:
             - Check-Microc-Image
