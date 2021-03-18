@@ -10,7 +10,7 @@ type eqsign = Eq
   | Getval of string
   | Lit of int *)
 
-type typ = Int | Lint | Chr | Ring | String | Point | Poly
+type typ = Int | Lint | Chr | Ring | String | Point | Poly | Void
 
 type bind = typ * string
 
