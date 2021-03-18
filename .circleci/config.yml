@@ -28,6 +28,16 @@ jobs:
             make parser.ml
             ls 
             make clean
+  Build:
+    docker:
+      - image: columbiasedwards/plt
+    steps:
+      - checkout
+      - run:
+        name: Build ocaml
+        command: |
+          make prime.native
+          make clean
   # Check that HelloWorld Works ok from our code
   Run-Tests:
     docker:
@@ -42,10 +52,10 @@ workflows:
   version: 2
   First_Workflow:
     jobs:
-      # - Hello-World
       - Check-Microc-Image
-          # requires:
-          #   - Hello-World
+      - Build:
+        requires:
+          - Check-Microc-Image
       - Run-Tests:
           requires:
             - Check-Microc-Image
