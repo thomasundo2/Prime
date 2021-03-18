@@ -1,4 +1,14 @@
-all : prime.out
+.PHONY : test
+test : all hello_world.sh
+	./hello_world.sh
+
+.PHONY : all
+all : prime.native
+
+# We will now make the compiler
+prime.native : 
+	opam config exec -- \
+	ocamlbuild -use-ocamlfind prime.native
 
 
 ##############################

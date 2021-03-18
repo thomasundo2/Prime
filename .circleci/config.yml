@@ -1,15 +1,15 @@
 version: 2.1
 jobs:
-  Hello-World:
-    # Check CircleCi Working
-    docker:
-      - image: alpine:3.7
-    steps:
-      - run:
-          name: Trying cmd Hello
-          command: |
-            echo 'Hello World!'
-            echo 'Start of Pipeline'
+  # Hello-World:
+  #   # Check CircleCi Working
+  #   docker:
+  #     - image: alpine:3.7
+  #   steps:
+  #     - run:
+  #         name: Trying cmd Hello
+  #         command: |
+  #           echo 'Hello World!'
+  #           echo 'Start of Pipeline'
   # Check that we can get the image OK
   Check-Microc-Image:    
     docker:
@@ -42,10 +42,10 @@ workflows:
   version: 2
   First_Workflow:
     jobs:
-      - Hello-World
-      - Check-Microc-Image:
-          requires:
-            - Hello-World
+      # - Hello-World
+      - Check-Microc-Image
+          # requires:
+          #   - Hello-World
       - Run-Tests:
           requires:
             - Check-Microc-Image
