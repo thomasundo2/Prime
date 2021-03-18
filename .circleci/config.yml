@@ -25,7 +25,8 @@ jobs:
       - run:
           name: Build ocaml
           command: |
-            make prime.native
+            ocamllex scanner.mll
+            ocamlyacc parser.mly
             make clean
   # Check that HelloWorld Works ok from our code
   Run-Tests:
