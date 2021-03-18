@@ -1,16 +1,5 @@
 version: 2.1
 jobs:
-  # Hello-World:
-  #   # Check CircleCi Working
-  #   docker:
-  #     - image: alpine:3.7
-  #   steps:
-  #     - run:
-  #         name: Trying cmd Hello
-  #         command: |
-  #           echo 'Hello World!'
-  #           echo 'Start of Pipeline'
-  # Check that we can get the image OK
   Check-Microc-Image:    
     docker:
       - image: columbiasedwards/plt
@@ -34,10 +23,10 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Build ocaml
-        command: |
-          make prime.native
-          make clean
+          name: Build ocaml
+          command: |
+            make prime.native
+            make clean
   # Check that HelloWorld Works ok from our code
   Run-Tests:
     docker:
