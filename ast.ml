@@ -17,7 +17,7 @@ type bind = typ * string
 type expr = 
     Strlit of string
   | Lit of int
-  |  Id of string
+  | Id of string
   | Call of string * expr list
   | Noexpr
 
