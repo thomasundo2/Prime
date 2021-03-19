@@ -35,54 +35,64 @@
 //(* All the semantic action braces will be empty for this submission *)
 
 program:
-  decls EOF { }
+  decls EOF { $1 }
 
+// fst gets the var decs, snd gets the function decs
 decls:
-   /* nothing */ {}
-  | decls declare_init {}  //(* No external variables ? or keep as is*)
-  | decls fdecl {}
+   /* nothing */ { ([], []) } // Building up list of variable decs and list of function decs
+  | decls declare_init { (($2 :: fst $1), snd $1) }  //(* No external variables ? or keep as is*)
+  | decls fdecl { (fst $1, ($2 :: snd $1)) }
 
+// create the record denoted by AST
+// the body will then contain declarations (allowed by expr)
 fdecl:
    typ ID LPAREN params_opt RPAREN LBRACE seq_stmts RBRACE
-     { }
+     { { typ = $1;
+         name = $2;
+         params = List.rev $4; 
+         locals = List.rev fst $7;
+         body = List.rev snd $7 (* Might have to split this for hello world *)
+        } }
 
 params_opt:
-    /* nothing */ {  }
-  | params_list   {  }
+    /* nothing */ { [] }
+  | params_list   { $1 }
 
+// Have the lists on the left
 params_list:
-    typ ID                   {  }
-  | params_list COMMA typ ID {  }
+    typ ID                   { [($1,$2)] }
+  | params_list COMMA typ ID { ($3,$4) :: $1 }
 
+// Fill in the following types when we need them after Hello world
 typ:
-    INT   {  }
+    INT   { Int }
   | LINT  {  }
   | POLY  {  }
   | POINT {  }
   | RING  {  }
   | CHAR  {  }
-  | STRING { }
+  | STRING { String }
 
 declare_init:
-  typ declarator SEMI {}
+  typ declarator SEMI { ($1, $2) }
 
 declarator:
-    ID {}
-  | ID ASSIGN expr {}
-  | ID LPAREN params_opt RPAREN {}
-  | ID LBRACK expr RBRACK {}
+    ID { $1 }
+  | ID ASSIGN expr {} // Allow assignment
+  | ID LPAREN params_opt RPAREN {} // Points
+  | ID LBRACK expr RBRACK {} // Rings
 
 seq_stmts:
-  decls stmt_list {}
+    decls stmt_list { ($1, $2) }
 
 stmt_list:
-    /* nothing */  {}
-  | stmt_list stmt {}
+    /* nothing */  { [] }
+  | stmt_list stmt { $2 :: $1 }
 
 stmt:
-    expr_opt SEMI                           {  } //(* Expr-stmt *)
-  | RETURN expr_opt SEMI                    {  } //(* Return stmt *)
-  | LBRACE seq_stmts RBRACE                 {  } //(* Seq stmts *)
+    expr_opt SEMI                           { Expr $1 } //(* Expr-stmt *)
+  | RETURN expr_opt SEMI                    { Return $2 } //(* Return stmt *)
+  | LBRACE seq_stmts RBRACE                 {  } //(* Seq stmts (nested?) *)
   | IF LPAREN expr RPAREN stmt %prec NOELSE {  } //(* If dangling *)
   | IF LPAREN expr RPAREN stmt ELSE stmt    {  } //(* If no dangle *)
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
@@ -90,14 +100,14 @@ stmt:
   | WHILE LPAREN expr RPAREN stmt           {  }
 
 expr_opt:
-    /* nothing */ {  }
-  | expr          {  }
+    /* nothing */ { Noexpr }
+  | expr          { $1 }
 
 expr:
-    ID               {  }
-  | LITERAL          {  }
+    ID               { Id($1) }
+  | LITERAL          { Lit($1) }
   | CHARLIT          {  }
-  | STRLIT           {  }
+  | STRLIT           { Strlit($1) }
   | expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr {  } 
   | expr POWER  expr {  } 
@@ -117,14 +127,14 @@ expr:
   | NOT expr         {  }
   | ID ASSIGN expr   {   }
   | ID LBRACK expr RBRACK ASSIGN expr {}
-  | ID LPAREN args_opt RPAREN {  }
+  | ID LPAREN args_opt RPAREN { Call($1, $3) }
   | LBRACK args_list RBRACK    {   }    // Point initialisation 
-  | LPAREN expr RPAREN {    }
+  | LPAREN expr RPAREN {  $2  }
 
 args_opt:
-    /* nothing */ {  }
-  | args_list  {  }
+    /* nothing */ { [] }
+  | args_list  { List.rev $1 }
 
 args_list:
-    expr                    { }
-  | args_list COMMA expr { }
+    expr                    { [$1] }
+  | args_list COMMA expr { $3 :: $1 }
