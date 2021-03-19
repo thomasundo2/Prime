@@ -1,0 +1,51 @@
+version: 2.1
+jobs:
+  Check-Microc-Image:    
+    docker:
+      - image: columbiasedwards/plt
+    steps:
+      - checkout
+      - run:
+          name: Display Code
+          command: |
+            ls -al
+            echo 'The code above is what we have in the repo'
+      - run:
+          name: Check Opam and Makefile
+          command: |
+            opam --version
+            make parser.ml
+            ls 
+            make clean
+  Build:
+    docker:
+      - image: columbiasedwards/plt
+    steps:
+      - checkout
+      - run:
+          name: Build ocaml
+          command: |
+            ocamllex scanner.mll
+            ocamlyacc parser.mly
+            make clean
+  # Check that HelloWorld Works ok from our code
+  Run-Tests:
+    docker:
+      - image: columbiasedwards/plt
+    steps:
+      - checkout
+      - run:
+          name: Run Hello World Test
+          command: |
+            ./tests/hello_world.sh
+workflows:
+  version: 2
+  First_Workflow:
+    jobs:
+      - Check-Microc-Image
+      - Build:
+          requires:
+            - Check-Microc-Image
+      - Run-Tests:
+          requires:
+            - Check-Microc-Image
