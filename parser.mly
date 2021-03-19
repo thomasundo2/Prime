@@ -3,11 +3,11 @@
 // We have made alterations and additions for our language's functionality 
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
-%token EQ NEQ LT LEQ GT GEQ AND OR
+%token EQ NEQ LT LEQ GT GEQ AND OR NOT
 %token ACCESS
 %token RETURN IF ELSE FOR WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
-%token <char> CHARLIT
+%token <string> CHARLIT // Is there a way to change this to char from scanner?
 %token <string> STRLIT
 %token <string> ID
 %token EOF
