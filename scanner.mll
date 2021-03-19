@@ -11,8 +11,8 @@
 let digit = ['0' - '9']
 let digits = digit+
 
-rule tokenize = parse
-  [' ' '\t' '\r' '\n'] { tokenize lexbuf }
+rule token = parse
+  [' ' '\t' '\r' '\n'] { token lexbuf }
 | "/*"                { comment lexbuf }  (* add comments *)
 | '('      { LPAREN } (* Grouping operators *)
 | ')'      { RPAREN }
@@ -21,7 +21,7 @@ rule tokenize = parse
 | '['      { RBRACK }
 | ']'      { LBRACK }
 | ','      { COMMA }
-| '='      { EQUALS } (* Binary Operators (semi perhaps not) *)
+| '='      { ASSIGN } (* Binary Operators (semi perhaps not) *)
 | ';'      { SEMI }
 | '+'      { PLUS }
 | '-'      { MINUS }
@@ -53,7 +53,7 @@ rule tokenize = parse
 | "poly"   { POLY } (*More needs to be done here*)
 | "pt"     { POINT }
 | "ring"   { RING }
-| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { NAME(name) } (*ids can be alpha followed by alphanum and _*)
+| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { ID(name) } (*ids can be alpha followed by alphanum and _*)
 | ['0'-'9']+ as lit { LITERAL(int_of_string lit) }
 | '"'_*'"'  as lit { STRLIT(lit) }  (* Make a separate rule for looking through string literals and comment literals *)
 | "'"_"'"  as lit { CHARLIT(lit) } 
