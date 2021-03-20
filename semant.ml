@@ -96,6 +96,9 @@ let check_function func =
   (* Here is where we check statements (only expr and Block for now)*)
   let rec check_stmt = function
       Expr e -> SExpr (expr e) (* recursive check *)
+    | Return e -> let (t, e') = expr e in 
+        if t = func.typ then SReturn (t, e') (* Correct return type for function *)
+        else raise (Failure "wrong return type")
     | Block sl ->
         let rec check_stmt_list = function
           | s :: ss -> check_stmt s :: check_stmt_list ss (* one statement at a time *)
