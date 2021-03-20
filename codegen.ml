@@ -106,17 +106,17 @@ let translate (globals, functions) =
 
     (* Construct code for an expression; return its value *)
     let rec expr builder ((_, e) : sexpr) = match e with
-	SLiteral i  -> L.const_int i32_t i
+	SLiteral i  -> L.const_int i32_t (*change SLiteral to SLit*)
       | SBoolLit b  -> L.const_int i1_t (if b then 1 else 0)(*bool*)
       | SFliteral l -> L.const_float_of_string float_t l(*float*)
       | SNoexpr     -> L.const_int i32_t 0
       | SId s       -> L.build_load (lookup s) s builder
-      | SAssign (s, e) -> let e' = expr builder e in
+      | SAssign (s, e) -> let e' = expr builder e in(*delete*)
                           ignore(L.build_store e' (lookup s) builder); e'
       | SCall ("print", [e]) | SCall ("printb", [e]) -> (*keep print delete printb printf*)
 	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	    "printf" builder
-      | SCall ("printf", [e]) -> 
+      | SCall ("printf", [e]) -> (*delete*) 
 	  L.build_call printf_func [| float_format_str ; (expr builder e) |]
 	    "printf" builder
       | SCall (f, args) ->
