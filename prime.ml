@@ -16,8 +16,7 @@ let () = (* don't care about return type *)
   (* Construct AST *)
   let ast = Parser.program Scanner.token lexbuf in
     match !action with (* add other options to stop at later *)
-    | Compile -> 
-        let sast = Semant.check ast in
-        let mod = Codegen.translate sast in
+    | Compile -> let mod = 
+        Codegen.translate (Semant.check ast) in
           Llvm_analysis.assert_valid_module mod;
           print_string "Done"
