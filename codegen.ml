@@ -32,14 +32,14 @@ let translate (globals, functions) =
   let i32_t      = L.i32_type    context
   and i8_t       = L.i8_type     context
   and i1_t       = L.i1_type     context
-  and float_t    = L.double_type context
+  and float_t    = L.double_type context (*float*)
   and void_t     = L.void_type   context in
 
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
       A.Int   -> i32_t
-    | A.Bool  -> i1_t
-    | A.Float -> float_t
+    | A.Bool  -> i1_t(*bool*)
+    | A.Float -> float_t (*float*)
     | A.Void  -> void_t
   in
 
@@ -47,7 +47,7 @@ let translate (globals, functions) =
   let global_vars : L.llvalue StringMap.t =
     let global_var m (t, n) = 
       let init = match t with
-          A.Float -> L.const_float (ltype_of_typ t) 0.0
+          A.Float -> L.const_float (ltype_of_typ t) 0.0 (*float*)
         | _ -> L.const_int (ltype_of_typ t) 0
       in StringMap.add n (L.define_global n init the_module) m in
     List.fold_left global_var StringMap.empty globals in
@@ -107,13 +107,13 @@ let translate (globals, functions) =
     (* Construct code for an expression; return its value *)
     let rec expr builder ((_, e) : sexpr) = match e with
 	SLiteral i  -> L.const_int i32_t i
-      | SBoolLit b  -> L.const_int i1_t (if b then 1 else 0)
-      | SFliteral l -> L.const_float_of_string float_t l
+      | SBoolLit b  -> L.const_int i1_t (if b then 1 else 0)(*bool*)
+      | SFliteral l -> L.const_float_of_string float_t l(*float*)
       | SNoexpr     -> L.const_int i32_t 0
       | SId s       -> L.build_load (lookup s) s builder
       | SAssign (s, e) -> let e' = expr builder e in
                           ignore(L.build_store e' (lookup s) builder); e'
-      | SCall ("print", [e]) | SCall ("printb", [e]) ->
+      | SCall ("print", [e]) | SCall ("printb", [e]) -> (*keep print delete printb printf*)
 	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	    "printf" builder
       | SCall ("printf", [e]) -> 
@@ -158,7 +158,7 @@ let translate (globals, functions) =
     (* Add a return if the last block falls off the end *)
     add_terminal builder (match fdecl.styp with
         A.Void -> L.build_ret_void
-      | A.Float -> L.build_ret (L.const_float float_t 0.0)
+      | A.Float -> L.build_ret (L.const_float float_t 0.0)(*float*)
       | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
   in
 
