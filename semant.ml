@@ -100,7 +100,7 @@ let check_function func =
         if t = func.typ then SReturn (t, e') (* Correct return type for function *)
         else raise (Failure "wrong return type")
     | Block sl ->
-        let rec check_stmt_list = function
+        let rec check_stmt_list = function (* Maybe add other return checks here *)
           | s :: ss -> check_stmt s :: check_stmt_list ss (* one statement at a time *)
           | []      -> [] (* done *)
         in SBlock(check_stmt_list sl)
