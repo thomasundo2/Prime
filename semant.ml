@@ -31,8 +31,8 @@ check_binds "global" globals;
 let built_in_decls = 
   let add_bind map (name, ty) = StringMap.add name {
     typ = Void; (* Our built in print functions will return string*)
-    fname = name;
-    formals = [(ty, "x")];
+    name = name;
+    params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map 
   in List.fold_left add_bind StringMap.empty [ ("print", String) ] (* "Only print string for now" *)
@@ -51,7 +51,7 @@ let add_func map fd =
     | _ -> StringMap.add n fd map
 in
 
-(* Make the symbol *)
+(* Make the symbol table starting with the built-in functions *)
 let function_decls = List.fold_left add_func built_in_decls functions
 in
 
