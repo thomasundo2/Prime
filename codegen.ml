@@ -31,8 +31,6 @@ let translate (globals, functions) =
   (* Get types from the context *)
   let i32_t      = L.i32_type    context
   and i8_t       = L.i8_type     context
-  and i1_t       = L.i1_type     context
-  and float_t    = L.double_type context (*float*)
   and void_t     = L.void_type   context in
 
   (* Return the LLVM type for a MicroC type *)
@@ -70,8 +68,7 @@ let translate (globals, functions) =
     let (the_function, _) = StringMap.find fdecl.sname function_decls in
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
-    let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
-    and float_format_str = L.build_global_stringptr "%g\n" "fmt" builder in
+    let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
 
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
@@ -103,7 +100,7 @@ let translate (globals, functions) =
 
     (* Construct code for an expression; return its value *)
     let rec expr builder ((_, e) : sexpr) = match e with
-	SLit i  -> L.const_int i32_t
+	SLit i  -> L.const_int i32_t i
       | SNoexpr    -> L.const_int i32_t 0
       | SId s       -> L.build_load (lookup s) s builder
       | SCall ("print", [e]) -> (*keep print delete printb printf*)

@@ -50,8 +50,8 @@ fdecl:
      { { typ = $1;
          name = $2;
          params = List.rev $4; 
-         locals = List.rev fst $7;
-         body = List.rev snd $7 (* Might have to split this for hello world *)
+         locals = List.rev (fst $7);
+         body = List.rev (snd $7) (* Might have to split this for hello world *)
         } }
 
 params_opt:
@@ -66,21 +66,21 @@ params_list:
 // Fill in the following types when we need them after Hello world
 typ:
     INT   { Int }
-  | LINT  {  }
-  | POLY  {  }
-  | POINT {  }
-  | RING  {  }
-  | CHAR  {  }
-  | STRING { String }
+  //| LINT  {  }
+  //| POLY  {  }
+  //| POINT {  }
+  //| RING  {  }
+  //| CHAR  {  }
+  //| STRING { String }
 
 declare_init:
   typ declarator SEMI { ($1, $2) }
 
 declarator:
     ID { $1 }
-  | ID ASSIGN expr {} // Allow assignment
-  | ID LPAREN params_opt RPAREN {} // Points
-  | ID LBRACK expr RBRACK {} // Rings
+  //| ID ASSIGN expr {} // Allow assignment
+  //| ID LPAREN params_opt RPAREN {} // Points
+  //| ID LBRACK expr RBRACK {} // Rings
 
 seq_stmts:
     decls stmt_list { ($1, $2) }
