@@ -83,7 +83,7 @@ declarator:
   //| ID LBRACK expr RBRACK {} // Rings
 
 seq_stmts:
-    decls stmt_list { ($1, $2) }
+    declare_init stmt_list { ([$1], $2) }
 
 stmt_list:
     /* nothing */  { [] }
@@ -92,12 +92,12 @@ stmt_list:
 stmt:
     expr_opt SEMI                           { Expr $1 } //(* Expr-stmt *)
   | RETURN expr_opt SEMI                    { Return $2 } //(* Return stmt *)
-  | LBRACE seq_stmts RBRACE                 {  } //(* Seq stmts (nested?) *)
-  | IF LPAREN expr RPAREN stmt %prec NOELSE {  } //(* If dangling *)
-  | IF LPAREN expr RPAREN stmt ELSE stmt    {  } //(* If no dangle *)
-  | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
-                                            {  } //(* Loops no infinite FOR *)
-  | WHILE LPAREN expr RPAREN stmt           {  }
+  //| LBRACE seq_stmts RBRACE                 {  } //(* Seq stmts (nested?) *)
+  //| IF LPAREN expr RPAREN stmt %prec NOELSE {  } //(* If dangling *)
+  //| IF LPAREN expr RPAREN stmt ELSE stmt    {  } //(* If no dangle *)
+  //| FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
+  //                                          {  } //(* Loops no infinite FOR *)
+  //| WHILE LPAREN expr RPAREN stmt           {  }
 
 expr_opt:
     /* nothing */ { Noexpr }
@@ -106,29 +106,29 @@ expr_opt:
 expr:
     ID               { Id($1) }
   | LITERAL          { Lit($1) }
-  | CHARLIT          {  }
+  //| CHARLIT          {  }
   | STRLIT           { Strlit($1) }
-  | expr ACCESS expr {  } // will be used for accessor methods
-  | expr MOD    expr {  } 
-  | expr POWER  expr {  } 
-  | expr PLUS   expr {  }
-  | expr MINUS  expr {  }
-  | expr TIMES  expr {  }
-  | expr DIVIDE expr {  }
-  | expr EQ     expr {  }
-  | expr NEQ    expr {  }
-  | expr LT     expr {  }
-  | expr LEQ    expr {  }
-  | expr GT     expr {  }
-  | expr GEQ    expr {  }
-  | expr AND    expr {  }
-  | expr OR     expr {  }
-  | MINUS expr %prec NOT { }
-  | NOT expr         {  }
-  | ID ASSIGN expr   {   }
-  | ID LBRACK expr RBRACK ASSIGN expr {}
+  //| expr ACCESS expr {  } // will be used for accessor methods
+  //| expr MOD    expr {  } 
+  //| expr POWER  expr {  } 
+  //| expr PLUS   expr {  }
+  //| expr MINUS  expr {  }
+  //| expr TIMES  expr {  }
+  //| expr DIVIDE expr {  }
+  //| expr EQ     expr {  }
+  //| expr NEQ    expr {  }
+  //| expr LT     expr {  }
+  //| expr LEQ    expr {  }
+  //| expr GT     expr {  }
+  //| expr GEQ    expr {  }
+  //| expr AND    expr {  }
+  //| expr OR     expr {  }
+  //| MINUS expr %prec NOT { }
+  //| NOT expr         {  }
+  //| ID ASSIGN expr   {   }
+  //| ID LBRACK expr RBRACK ASSIGN expr {}
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
-  | LBRACK args_list RBRACK    {   }    // Point initialisation 
+  //| LBRACK args_list RBRACK    {   }    // Point initialisation 
   | LPAREN expr RPAREN {  $2  }
 
 args_opt:
