@@ -74,8 +74,20 @@ let check_function func =
   in
   (* make local symbol table and functions to use it*)
 
+  (* Build local symbol table of variables for this function *)
+  let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m) StringMap.empty (globals @ func.params @ func.params )
+  in
+
+  (* Return a variable from our local symbol table *)
+  let type_of_identifier s =
+      try StringMap.find s symbols
+      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+  in
+
   (* semantic expression checking *)
   let rec expr = function
+      Lit l -> (Int, SLit l)
+    | Id s -> (type_of_identifier s, SId s)
     | Strlit l -> (String, SStrlit l) (* String literals *)
     | Noexpr   -> (Void, SNoexpr)
     | Call(name, args) as call ->
