@@ -3,7 +3,7 @@ test : all hello_world.sh
 	./hello_world.sh
 
 .PHONY : all
-all : prime.native
+all : clean prime.native
 
 # We will now make the compiler
 prime.native : 

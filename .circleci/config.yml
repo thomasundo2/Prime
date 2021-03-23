@@ -37,7 +37,8 @@ jobs:
       - run:
           name: Run Hello World Test
           command: |
-            ./tests/hello_world.sh
+            make all
+            ./hello_world.sh
 workflows:
   version: 2
   First_Workflow:

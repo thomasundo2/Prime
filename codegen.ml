@@ -100,7 +100,7 @@ let translate (globals, functions) =
 
     (* Construct code for an expression; return its value *)
     let rec expr builder ((_, e) : sexpr) = match e with
-	SLit i  -> L.const_int i32_t i
+        SLit i  -> L.const_int i32_t i
       | SNoexpr    -> L.const_int i32_t 0
       | SId s       -> L.build_load (lookup s) s builder
       | SCall ("print", [e]) -> (*keep print delete printb printf*)

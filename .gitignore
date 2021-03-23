@@ -1,1 +1,8 @@
 .vscode
+_build
+prime.native
+*.test
+*.exe
+*.s
+*.ll
+*.log

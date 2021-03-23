@@ -19,4 +19,4 @@ let () = (* don't care about return type *)
     | Compile -> let modu = 
         Codegen.translate (Semant.check ast) in
           Llvm_analysis.assert_valid_module modu;
-          print_string "Done"
+          print_string (Llvm.string_of_llmodule modu)
