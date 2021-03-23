@@ -7,9 +7,13 @@ A programming language designed for cryptography.
 - Thomas (Architect)
 - Pedro (Tester)
 
-## Parser/Scanner stage
-Here we include how to go through inputted tokens and split them apart according
-to our language documentation.
-The AST file is not in its final form. 
+## Hello World Stage
+At this point, we have decided to limit our program to printing integers and strings. 
+Return statements are also included.
 
-However, in order to test this stage of our project, other than getting the whole thing to compile with OCaml, we implemented a pretty print function that would allow us to visualize the abstract syntax tree "created" by the parser so that we can check for any inconsistencies at this stage.
+## Developments:
+Since the last milestone, we have: 
+- Implemented reduced versions of lexer through to top-level using MicroC as a reference guide to structure.
+- Left structures in place (commented) to iteratively add more features.
+- Added Continuous integration for testing through CircleCI integration.
+- Started regression and (semi)unit test suites
