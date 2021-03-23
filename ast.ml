@@ -4,12 +4,6 @@ type operator = Add | Sub | Mul | Div | Semi
 
 type eqsign = Eq
 
-(* type expr =
-    Binop of expr * operator * expr
-  | Assignmentop of string  * eqsign * expr
-  | Getval of string
-  | Lit of int *)
-
 type typ = Int | Lint | Chr | Ring | String | Point | Poly | Void
 
 type bind = typ * string
