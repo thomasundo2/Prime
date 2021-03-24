@@ -37,6 +37,7 @@ let translate (globals, functions) =
   let ltype_of_typ = function
       A.Int   -> i32_t
     | A.Void  -> void_t
+    | _ -> void_t
   in
 
   (* Create a map of global variables after creating each *)
@@ -113,6 +114,7 @@ let translate (globals, functions) =
                         A.Void -> ""
                       | _ -> f ^ "_result") in
          L.build_call fdef (Array.of_list llargs) result builder
+      | _ -> L.const_int i32_t 0
     in
     
     (* LLVM insists each basic block end with exactly one "terminator" 
