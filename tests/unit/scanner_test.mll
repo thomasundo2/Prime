@@ -50,9 +50,9 @@ rule token = parse
 | "ring"   { printf "type: ring\n" }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { print_string ("ID: " ^ name ^ "\n") } (*ids can be alpha followed by alphanum and _*)
 | ['0'-'9']+ as lit { print_string ("Literal: " ^ lit ^ "\n") }
-| '"'_*'"'  as lit { print_string ("Strlit: " ^ lit ^ "\n") }  (* Make a separate rule for looking through string literals and comment literals *)
-| "'"_"'"  as lit { print_string ("Charlit: " ^ lit ^ "\n") } 
-| eof      { raise End_of_file }
+| '"'(_* as lit)'"' { print_string ("Strlit: " ^ lit ^ "\n") }  (* Make a separate rule for looking through string literals and comment literals *)
+| "'"(_ as lit)"'"  { printf "Charlit: %c\n" lit } 
+| eof      { raise End_of_file } 
 | _  as char      { raise (Failure("Undefined character " ^ Char.escaped char)) } (* any other character is not allowed *)
 
 (* part of rule for ending comments *)
@@ -65,7 +65,7 @@ and comment = parse
   (* Take from file if given else stdin *)
   let rec parse lexbuf = 
     let ret = token lexbuf in
-        parse lexbuf
+        parse lexbuf; ignore ret
 
   let main () =
     let cin =
