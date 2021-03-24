@@ -90,7 +90,7 @@ let check_function func =
     | Id s -> (type_of_identifier s, SId s)
     | Strlit l -> (String, SStrlit l) (* String literals *)
     | Noexpr   -> (Void, SNoexpr)
-    | Call(name, args) as call ->
+    | Call(name, args) (* as call *) ->
         let fd = find_func name in 
         let param_length = List.length fd.params in
         if List.length args != param_length then
@@ -116,6 +116,7 @@ let check_function func =
           | s :: ss -> check_stmt s :: check_stmt_list ss (* one statement at a time *)
           | []      -> [] (* done *)
         in SBlock(check_stmt_list sl)
+    | _   -> raise (Failure "stmt type not implemented")
   in
   { styp = func.typ;
     sname = func.name;

@@ -25,6 +25,7 @@ let () = (* don't care about return type *)
     match !action with (* add other options to stop at later *)
       Ast     -> ()
     | Compile -> let modu =
-        Codegen.translate (Semant.check ast) in
+        Codegen.translate sast in
           Llvm_analysis.assert_valid_module modu;
           print_string (Llvm.string_of_llmodule modu)
+    | _       -> raise (Failure "invalid option provided")
