@@ -5,7 +5,6 @@ type operator = Add | Sub | Mul | Div | Semi
 type eqsign = Eq
 
 type typ = Int | Lint | Chr | Ring | String | Point | Poly | Void
-
 type bind = typ * string
 
 type expr =
@@ -41,13 +40,15 @@ let string_of_op = function
   | Sub -> "-"
   | Mul -> "*"
   | Div -> "/"
+  | _ -> "op PP not implemented"
 
 let rec string_of_expr = function
-  Strlit(l) -> l
+  Strlit(l) -> "\"" ^ l ^ "\""
   | Lit(l) -> string_of_int l
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
+  | _ -> "expr PP not implemented"
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -67,6 +68,7 @@ let string_of_typ = function
     Int -> "int"
   | String -> "String"
   | Void -> "void"
+  | _ -> "typ PP not implemented"
 
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
