@@ -1,7 +1,7 @@
 (* Create a new operator for assignment and create a new expression*)
 (* sequences of expressions *)
 
-type operator = Add | Sub | Mul | Div | Semi
+type operator = Add | Sub | Mul | Div | Mod | Pow | Semi
 type eqsign = Eq
 
 type typ = Int | Lint | Chr | Ring | String | Point | Poly | Void
@@ -12,6 +12,7 @@ type expr =
     Strlit of string
   | Lit of int
   | Id of string
+  | Binop of expr * operator * expr
   | Call of string * expr list
   | Noexpr
 
@@ -41,10 +42,14 @@ let string_of_op = function
   | Sub -> "-"
   | Mul -> "*"
   | Div -> "/"
+  | Mod -> "%"
+  | Pow -> "^"
 
 let rec string_of_expr = function
   Strlit(l) -> l
   | Lit(l) -> string_of_int l
+  | Binop(e1, o, e2) ->
+          string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2 
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""

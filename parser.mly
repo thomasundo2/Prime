@@ -23,9 +23,9 @@
 %left AND
 %left EQ NEQ
 %left LT GT LEQ GEQ
-// %left MOD (* mod takes precedence below all arithmetic operators *)
+%left MOD //(* mod takes precedence below all arithmetic operators - l.guru approves*)
 %left PLUS MINUS
-%left TIMES DIVIDE MOD //(* Change this order later if necessary *)
+%left TIMES DIVIDE //(* Change this order later if necessary \r moved mod up -l.guru*)
 %right NOT
 %right POWER
 %left ACCESS    // Built in access methods 
@@ -109,12 +109,12 @@ expr:
   //| CHARLIT          {  }
   | STRLIT           { Strlit($1) }
   //| expr ACCESS expr {  } // will be used for accessor methods
-  //| expr MOD    expr {  } 
-  //| expr POWER  expr {  } 
-  //| expr PLUS   expr {  }
-  //| expr MINUS  expr {  }
-  //| expr TIMES  expr {  }
-  //| expr DIVIDE expr {  }
+  | expr MOD    expr { Binop($1, Mod, $3) }
+  | expr POWER  expr { Binop($1, Pow, $3) }
+  | expr PLUS   expr { Binop($1, Add, $3) }
+  | expr MINUS  expr { Binop($1, Sub, $3) }
+  | expr TIMES  expr { Binop($1, Mul, $3) }
+  | expr DIVIDE expr { Binop($1, Div, $3) }
   //| expr EQ     expr {  }
   //| expr NEQ    expr {  }
   //| expr LT     expr {  }

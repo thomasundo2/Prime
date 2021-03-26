@@ -90,6 +90,19 @@ let check_function func =
     | Id s -> (type_of_identifier s, SId s)
     | Strlit l -> (String, SStrlit l) (* String literals *)
     | Noexpr   -> (Void, SNoexpr)
+    | Binop(e1, op, e2) as e ->
+            let (t1, e1') = expr e1
+            and (t2, e2') = expr e2 in
+            (* All binary operators require operands of the same type *)
+            let same = t1 = t2 in
+            (* Determine expression type based on operator and operand types *)
+            let ty = match op with
+              Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
+            | _ -> raise (
+                Failure ("illegal binary operator " ^
+                        string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+                        string_of_typ t2 ^ " in " ^ string_of_expr e))
+            in (ty, SBinop((t1, e1'), op, (t2, e2')))
     | Call(name, args) as call ->
         let fd = find_func name in 
         let param_length = List.length fd.params in

@@ -104,6 +104,17 @@ let translate (globals, functions) =
         SLit i  -> L.const_int i32_t i
       | SNoexpr    -> L.const_int i32_t 0
       | SId s       -> L.build_load (lookup s) s builder
+      | SBinop (e1, operator, e2) ->
+              let e1' = expr builder e1
+              and e2' = expr builder e2 in
+              (match operator with
+                A.Add     -> L.build_add 
+              | A.Sub     -> L.build_sub
+              | A.Mul     -> L.build_mul
+              | A.Div     -> L.build_sdiv
+              | A.Mod     -> L.build_srem
+              | A.Pow     -> L.build_mul
+              ) e1' e2' "tmp" builder
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	    "printf" builder
