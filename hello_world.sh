@@ -15,7 +15,7 @@ IsError() {
 
 Difference() {
     echo diff -b -q $1 $2 > $logfile 1>&2
-    diff -b -q $1 $2 > $logfile 2>&1 || {
+    diff -b -q "$1" "$2" > "$logfile" 2>&1 || {
     IsError "Difference in $1"
     }
 }
@@ -71,7 +71,7 @@ fi
 # do
 #     Test $file
 # done
-Test tests/test_hello.pr
+Test tests/test_hello.pr 2>> $logfile
 
 # clean up
 # rm -rf *.exe *.test *.ll *.s
