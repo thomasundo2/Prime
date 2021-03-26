@@ -6,6 +6,8 @@ and sx =
     SLit of int
   | SStrlit of string
   | SId of string
+  | SBinop of sexpr * operator * sexpr
+  | SUnop of uoperator * sexpr
   | SCall of string * sexpr list
   | SNoexpr
 
