@@ -7,6 +7,7 @@ let () = (* don't care about return type *)
   let set_action a () = action := a in
   let options = [
     ("-a", Arg.Unit (set_action Ast), "Print the AST");
+    ("-s", Arg.Unit (set_action Sast), "Print the SAST");
     ("-c", Arg.Unit (set_action Compile),
       "Check and print the generated LLVM IR (default)");
   ] in (* Only one mode for now *)
@@ -24,6 +25,7 @@ let () = (* don't care about return type *)
   | _ -> let sast = Semant.check ast in
     match !action with (* add other options to stop at later *)
       Ast     -> ()
+    | Sast    -> print_string (Sast.string_of_sprogram sast)
     | Compile -> let modu =
         Codegen.translate sast in
           Llvm_analysis.assert_valid_module modu;

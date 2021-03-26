@@ -1,6 +1,6 @@
 int main()
 {
     int test;
-    print("test");
+    prints("test");
     return 0;
 }

@@ -72,6 +72,7 @@ fi
 #     Test $file
 # done
 Test tests/test_hello.pr
+Test tests/test_print.pr
 
 # clean up
 # rm -rf *.exe *.test *.ll *.s
