@@ -17,3 +17,6 @@ Since the last milestone, we have:
 - Left structures in place (commented) to iteratively add more features.
 - Added Continuous integration for testing through CircleCI integration.
 - Started regression and (semi)unit test suites
+
+## Hello World:
+The hello world program (or first Prime program) prints the integer 0. Files for compiling and running test_hello are included in /tests.

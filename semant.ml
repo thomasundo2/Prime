@@ -35,7 +35,7 @@ let built_in_decls =
     params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map 
-  in List.fold_left add_bind StringMap.empty [ ("print", Int) ] (* "Only print string for now" *)
+  in List.fold_left add_bind StringMap.empty [ ("print", Int); ("prints", String) ] (* "Only print string for now" *)
 in
 
 (* Now keep track of these named built-in funcs in the top-level symbol table *)
@@ -112,7 +112,7 @@ let check_function func =
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
                         string_of_typ t2 ^ " in " ^ string_of_expr e))
             in (ty, SBinop((t1, e1'), op, (t2, e2')))
-    | Call(name, args) as call ->
+    | Call(name, args) (* as call *) ->
         let fd = find_func name in 
         let param_length = List.length fd.params in
         if List.length args != param_length then
@@ -138,6 +138,7 @@ let check_function func =
           | s :: ss -> check_stmt s :: check_stmt_list ss (* one statement at a time *)
           | []      -> [] (* done *)
         in SBlock(check_stmt_list sl)
+    | _   -> raise (Failure "stmt type not implemented")
   in
   { styp = func.typ;
     sname = func.name;

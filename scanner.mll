@@ -4,7 +4,7 @@
    Many of the symbols here are directly from or follow that.
 *)
 
-{ 
+{
   open Parser
 }
 
@@ -48,15 +48,13 @@ rule token = parse
 | "int"    { INT }
 | "char"   { CHAR }
 | "string" { STRING }
-(* | "float"  { FLOAT } *)
 | "lint"   { LINT }  (* OUR CUSTOM TYPES *)
 | "poly"   { POLY } (*More needs to be done here*)
 | "pt"     { POINT }
 | "ring"   { RING }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { ID(name) } (*ids can be alpha followed by alphanum and _*)
 | ['0'-'9']+ as lit { LITERAL(int_of_string lit) }
-| '"'_*'"'  as lit { STRLIT(lit) }  (* Make a separate rule for looking through string literals and comment literals *)
-| "'"_"'"  as lit { CHARLIT(lit) } 
+| '"'(_* as lit)'"' { STRLIT(lit) }  (* Make a separate rule for looking through string literals and comment literals *)
 | eof      { EOF }
 | _  as char      { raise (Failure("Undefined character " ^ Char.escaped char)) } (* any other character is not allowed *)
 
@@ -65,15 +63,6 @@ and comment = parse
   "*/" { token lexbuf } (*back to normal scanning *)
 | _    { comment lexbuf } (* keep reading comments *)
 
-(* { testing section
-  (* Source: http://www.iro.umontreal.ca/~monnier/3065/ocamllex-tutorial.pdf *)
-  let main () =
-    let cin =
-      if Array.length Sys.argv > 1
-      then open_in Sys.argv.(1)
-      else stdin
-    in
-    let lexbuf = Lexing.from_channel cin in
-    toy_lang lexbuf
-  let _ = Printexc.print main ()
-} *)
+{ 
+
+}
