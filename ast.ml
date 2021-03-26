@@ -3,6 +3,7 @@
 
 type operator = Add | Sub | Mul | Div | Mod | Pow | Semi
 type eqsign = Eq
+type uoperator = Neg | Not
 
 type typ = Int | Lint | Chr | Ring | String | Point | Poly | Void
 
@@ -13,6 +14,7 @@ type expr =
   | Lit of int
   | Id of string
   | Binop of expr * operator * expr
+  | Unop of uoperator * expr
   | Call of string * expr list
   | Noexpr
 
@@ -45,11 +47,16 @@ let string_of_op = function
   | Mod -> "%"
   | Pow -> "^"
 
+let string_of_uop = function
+    Neg -> "-"
+  | Not -> "!"
+
 let rec string_of_expr = function
   Strlit(l) -> l
   | Lit(l) -> string_of_int l
   | Binop(e1, o, e2) ->
-          string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2 
+          string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
+  | Unop(o, e) -> string_of_uop o ^ string_of_expr e 
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""

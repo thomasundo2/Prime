@@ -90,6 +90,15 @@ let check_function func =
     | Id s -> (type_of_identifier s, SId s)
     | Strlit l -> (String, SStrlit l) (* String literals *)
     | Noexpr   -> (Void, SNoexpr)
+    | Unop(op, e) as ex ->
+            let (t, e') = expr e in
+            let ty = match op with
+              Neg when t = Int -> Int
+            | Not when t = Int -> Int
+            | _ -> raise (Failure ("illegal unary operator " ^
+                                   string_of_uop op ^ string_of_typ t ^
+                                   " in " ^ string_of_expr ex))
+            in (ty, SUnop(op, (t, e')))
     | Binop(e1, op, e2) as e ->
             let (t1, e1') = expr e1
             and (t2, e2') = expr e2 in

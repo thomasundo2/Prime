@@ -123,8 +123,8 @@ expr:
   //| expr GEQ    expr {  }
   //| expr AND    expr {  }
   //| expr OR     expr {  }
-  //| MINUS expr %prec NOT { }
-  //| NOT expr         {  }
+  | MINUS expr %prec NOT { Unop(Neg, $2)  }
+  | NOT expr         { Unop(Not, $2)      }
   //| ID ASSIGN expr   {   }
   //| ID LBRACK expr RBRACK ASSIGN expr {}
   | ID LPAREN args_opt RPAREN { Call($1, $3) }

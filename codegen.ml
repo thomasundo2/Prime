@@ -115,6 +115,11 @@ let translate (globals, functions) =
               | A.Mod     -> L.build_srem
               | A.Pow     -> L.build_mul
               ) e1' e2' "tmp" builder
+      | SUnop(op, ((t, _) as e)) ->
+              let e' = expr builder e in
+              (match op with
+                A.Neg     -> L.build_neg
+              | A.Not     -> L.build_not) e' "tmp" builder
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	    "printf" builder
