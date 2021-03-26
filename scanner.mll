@@ -48,7 +48,6 @@ rule token = parse
 | "int"    { INT }
 | "char"   { CHAR }
 | "string" { STRING }
-(* | "float"  { FLOAT } *)
 | "lint"   { LINT }  (* OUR CUSTOM TYPES *)
 | "poly"   { POLY } (*More needs to be done here*)
 | "pt"     { POINT }
@@ -64,15 +63,6 @@ and comment = parse
   "*/" { token lexbuf } (*back to normal scanning *)
 | _    { comment lexbuf } (* keep reading comments *)
 
-(* { testing section
-  (* Source: http://www.iro.umontreal.ca/~monnier/3065/ocamllex-tutorial.pdf *)
-  let main () =
-    let cin =
-      if Array.length Sys.argv > 1
-      then open_in Sys.argv.(1)
-      else stdin
-    in
-    let lexbuf = Lexing.from_channel cin in
-    toy_lang lexbuf
-  let _ = Printexc.print main ()
-} *)
+{ 
+
+}
