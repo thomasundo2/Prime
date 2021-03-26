@@ -1,0 +1,6 @@
+int main()
+{
+        int test;
+        print(-1*3);
+        return 0;
+}

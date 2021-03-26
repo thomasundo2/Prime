@@ -1,0 +1,6 @@
+int main() 
+{
+    string hello = "Hello World";
+    char test_char = 'H';
+    return hello;
+}

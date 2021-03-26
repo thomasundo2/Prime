@@ -71,6 +71,7 @@ fi
 # do
 #     Test $file
 # done
+
 Test tests/test_hello.pr 2>> $logfile
 
 # clean up
