@@ -1,0 +1,6 @@
+int main()
+{
+    point x;
+    print(0);
+    return 0;
+}
