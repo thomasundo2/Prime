@@ -18,8 +18,8 @@ rule token = parse
 | ')'      { RPAREN }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
-| '['      { RBRACK }
-| ']'      { LBRACK }
+| '['      { LBRACK }
+| ']'      { RBRACK }
 | ','      { COMMA }
 | '='      { ASSIGN } (* Binary Operators (semi perhaps not) *)
 | ';'      { SEMI }
@@ -63,6 +63,6 @@ and comment = parse
   "*/" { token lexbuf } (*back to normal scanning *)
 | _    { comment lexbuf } (* keep reading comments *)
 
-{ 
+{
 
 }
