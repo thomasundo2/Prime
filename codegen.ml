@@ -32,14 +32,16 @@ let translate (globals, functions) =
   let i32_t      = L.i32_type    context
   and i8_t       = L.i8_type     context
   and string_t   = L.pointer_type (L.i8_type context)
+  and point_t    = L.array_type L.i32_type 3 context
   and void_t     = L.void_type   context in
 
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
     A.String   -> string_t
     |  A.Int   -> i32_t
-    | A.Void  -> void_t
-    | _ -> void_t
+    |  A.Point -> point_t
+    |  A.Void  -> void_t
+    |  _ -> void_t
   in
 
   (* Create a map of global variables after creating each *)
@@ -104,9 +106,14 @@ let translate (globals, functions) =
     (* Construct code for an expression; return its value *)
     let rec expr builder ((_, e) : sexpr) = match e with
       SStrlit i  ->  L.build_global_stringptr i "string" builder
-      |  SLit i  -> L.const_int i32_t i
+      | SLit i  -> L.const_int i32_t i
+      | SPtlit (i, j, k) -> L.build_array_malloc i32_t val "point" builder 
+	    (*  let i' = L.const_int i32_t i 
+	      and j' = L.const_int i32_t j 
+              and k' = L.const_int i32_t k 
+              in *)
       | SNoexpr    -> L.const_int i32_t 0
-      | SId s       -> L.build_load (lookup s) s builder
+      | SId s      -> L.build_load (lookup s) s builder
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in

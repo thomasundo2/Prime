@@ -68,10 +68,10 @@ typ:
     INT   { Int }
   //| LINT  {  }
   //| POLY  {  }
-  //| POINT {  }
+    | POINT { Point }
   //| RING  {  }
   //| CHAR  {  }
-  //| STRING { String }
+  //| STRING { String } delete? strings implemented without typ STRING
 
 declare_init:
   typ declarator SEMI { ($1, $2) }
@@ -108,6 +108,7 @@ expr:
   | LITERAL          { Lit($1) }
   //| CHARLIT          {  }
   | STRLIT           { Strlit($1) }
+  | PTLIT   	     { Ptlit($1, $2, $3) }
   //| expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr { Binop($1, Mod, $3) }
   | expr POWER  expr { Binop($1, Pow, $3) }
