@@ -11,6 +11,7 @@ type bind = typ * string
 type expr =
     Strlit of string
   | Lit of int
+  | Ptlit of string
   | Id of string
   | Binop of expr * operator * expr
   | Unop of uoperator * expr
@@ -55,6 +56,7 @@ let string_of_uop = function
 let rec string_of_expr = function
   Strlit(l) -> "\"" ^ l ^ "\""
   | Lit(l) -> string_of_int l
+  | Ptlit(i, j, k) -> "[" ^ string_of_int i ^ "," ^ string_of_int j ^ "," ^ string_of_int k ^ "]"
   | Binop(e1, o, e2) ->
           string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e 
@@ -79,6 +81,7 @@ let rec string_of_stmt = function
 
 let string_of_typ = function
     Int -> "int"
+  | Point -> "Point"
   | String -> "String"
   | Void -> "void"
   | _ -> "typ PP not implemented"
