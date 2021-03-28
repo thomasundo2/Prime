@@ -108,7 +108,8 @@ expr:
   | LITERAL          { Lit($1) }
   //| CHARLIT          {  }
   | STRLIT           { Strlit($1) }
-  | PTLIT   	     { Ptlit($1, $2, $3) }
+  //  | PTLIT   	     { Ptlit($1, $2, $3) }
+  | LBRACK LITERAL COMMA LITERAL COMMA LITERAL RBRACK { Ptlit ($2, $4, $6) }
   //| expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr { Binop($1, Mod, $3) }
   | expr POWER  expr { Binop($1, Pow, $3) }
@@ -129,7 +130,7 @@ expr:
   //| ID ASSIGN expr   {   }
   //| ID LBRACK expr RBRACK ASSIGN expr {}
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
-  //| LBRACK args_list RBRACK    {   }    // Point initialisation 
+  // | LBRACK args_list RBRACK    { Ptlit($1, $2, $3)  }    // Point initialisation 
   | LPAREN expr RPAREN {  $2  }
 
 args_opt:
