@@ -67,13 +67,16 @@ else
 fi
 
 # run tests
-# for file in $files
-# do
-#     Test $file
-# done
+for file in $files
+do
+    Test $file 2>> $logfile
+done
 
-Test tests/test_hello.pr 2>> $logfile
+# Test tests/test_hello.pr 2>> $logfile
 
-# clean up
+# clean up ()
 # rm -rf *.exe *.test *.ll *.s
+
+# print out so we can see return at the end
+cat $logfile
 exit $exitcode
