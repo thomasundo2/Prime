@@ -67,12 +67,16 @@ else
 fi
 
 # run tests
-for file in $files
-do
-    Test $file 2>> $logfile
-done
+# for file in $files
+# do
+#     Test $file 2>> $logfile
+# done
 
-# Test tests/test_hello.pr 2>> $logfile
+# Tests we want to do for now
+Test tests/test_hello.pr 2>> $logfile
+Test tests/test_add.pr 2>> $logfile
+Test tests/test_mod.pr 2>> $logfile
+Test tests/test_neg.pr 2>> $logfile
 
 # clean up ()
 # rm -rf *.exe *.test *.ll *.s
