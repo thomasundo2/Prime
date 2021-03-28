@@ -50,7 +50,6 @@ let string_of_op = function
 let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
-  | _ -> "op PP not implemented"
 
 let rec string_of_expr = function
   Strlit(l) -> "\"" ^ l ^ "\""
