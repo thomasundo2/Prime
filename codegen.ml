@@ -107,6 +107,8 @@ let translate (globals, functions) =
       |  SLit i  -> L.const_int i32_t i
       | SNoexpr    -> L.const_int i32_t 0
       | SId s       -> L.build_load (lookup s) s builder
+      | SAssign (s, e) -> let e' = expr builder e in
+                           ignore(L.build_store e' (lookup s) builder); e' 
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in

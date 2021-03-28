@@ -8,6 +8,7 @@ and sx =
   | SId of string
   | SBinop of sexpr * operator * sexpr
   | SUnop of uoperator * sexpr
+  | SAssign of string * sexpr
   | SCall of string * sexpr list
   | SNoexpr
 
@@ -38,6 +39,7 @@ let rec string_of_sexpr (t, e) =
   | SId(s) -> s
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
+  | SAssign(v, e) -> v ^ " = " ^ string_of_sexpr e
   | SNoexpr -> ""
 				  ) ^ ")"
 

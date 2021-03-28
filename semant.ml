@@ -46,7 +46,7 @@ let add_func map fd =
   and make_err er = raise (Failure er) (* Helper to throw error with msg = er *)
   and n = fd.name
   in match fd with
-    | _ when StringMap.mem n built_in_decls -> make_err built_in_err
+      _ when StringMap.mem n built_in_decls -> make_err built_in_err
     | _ when StringMap.mem n map -> make_err dup_err
     | _ -> StringMap.add n fd map
 in
@@ -95,6 +95,12 @@ let check_function func =
     | Id s -> (type_of_identifier s, SId s)
     | Strlit l -> (String, SStrlit l) (* String literals *)
     | Noexpr   -> (Void, SNoexpr)
+    | Assign(var, e) as ex ->
+            let lt = type_of_identifier var
+            and (rt, e') = expr e in
+            let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
+              string_of_typ rt ^ " in " ^ string_of_expr ex
+            in (check_assign lt rt err, SAssign(var, (rt, e')))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in
             let ty = match op with
