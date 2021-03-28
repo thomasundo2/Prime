@@ -88,7 +88,7 @@ let check_function func =
   let rec expr = function
       Lit l -> (Int, SLit l)
     | Id s -> (type_of_identifier s, SId s) 
-    | Ptlit(i, j, k) -> (Int, Int, Int)
+    | Ptlit(i, j, k) -> (Point, SPtlit(i,j,k))
     | Strlit l -> (String, SStrlit l) (* String literals *)
     | Noexpr   -> (Void, SNoexpr)
     | Unop(op, e) as ex ->
