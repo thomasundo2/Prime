@@ -87,7 +87,8 @@ let check_function func =
   (* semantic expression checking *)
   let rec expr = function
       Lit l -> (Int, SLit l)
-    | Id s -> (type_of_identifier s, SId s)
+    | Id s -> (type_of_identifier s, SId s) 
+    | Ptlit(i, j, k) -> (Int, Int, Int)
     | Strlit l -> (String, SStrlit l) (* String literals *)
     | Noexpr   -> (Void, SNoexpr)
     | Unop(op, e) as ex ->
