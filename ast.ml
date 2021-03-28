@@ -11,7 +11,7 @@ type bind = typ * string
 type expr =
     Strlit of string
   | Lit of int
-  | Ptlit of string
+  | Ptlit of int * int * int
   | Id of string
   | Binop of expr * operator * expr
   | Unop of uoperator * expr
