@@ -69,8 +69,13 @@ let check_function func =
   (* All TODO: *)
   (* check type and identifiers in formal parameters and local vars *)
   (* check all assignments are valid types. Should we co-erce? *)
-  let check_assign lvaltype rvaltype err =  (* used for now in function params *)
-    if lvaltype = rvaltype then lvaltype else raise (Failure err)
+  let check_assign lvaltype rvaltype err =  (* used for now in function params 
+                                               this WONT wrk for lints *)
+    match lvaltype with
+    Lint ->
+        if rvaltype = String then lvaltype else raise (Failure err)
+    | _ -> if lvaltype = rvaltype then lvaltype else raise (Failure err)
+    (* if lvaltype is lint and rvaltype is string then lvaltype else raise failure*)
   in
   (* make local symbol table and functions to use it*)
 

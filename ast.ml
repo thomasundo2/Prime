@@ -80,6 +80,7 @@ let rec string_of_stmt = function
 let string_of_typ = function
     Int -> "int"
   | String -> "String"
+  | Lint -> "lint"
   | Void -> "void"
   | _ -> "typ PP not implemented"
 

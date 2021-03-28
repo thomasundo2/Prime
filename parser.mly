@@ -9,6 +9,7 @@
 %token <int> LITERAL
 %token <string> CHARLIT // Is there a way to change this to char from scanner?
 %token <string> STRLIT
+//%token <string> LNTLIT
 %token <string> ID
 %token EOF
 
@@ -66,7 +67,7 @@ params_list:
 // Fill in the following types when we need them after Hello world
 typ:
     INT   { Int }
-  //| LINT  {  }
+  | LINT  { Lint }
   //| POLY  {  }
   //| POINT {  }
   //| RING  {  }
@@ -108,6 +109,7 @@ expr:
   | LITERAL          { Lit($1) }
   //| CHARLIT          {  }
   | STRLIT           { Strlit($1) }
+  //| LNTLIT           {}
   //| expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr { Binop($1, Mod, $3) }
   | expr POWER  expr { Binop($1, Pow, $3) }
