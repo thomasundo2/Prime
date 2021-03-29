@@ -1,6 +1,6 @@
 int main()
 {
     pt x;
-    printpt([1,2,3]);
+    printpt([1,2]);
     return 0;
 }

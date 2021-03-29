@@ -109,7 +109,7 @@ expr:
   //| CHARLIT          {  }
   | STRLIT           { Strlit($1) }
   //  | PTLIT   	     { Ptlit($1, $2, $3) }
-  | LBRACK expr COMMA expr COMMA expr RBRACK { Ptlit ($2, $4, $6) }
+  | LBRACK expr COMMA expr RBRACK { Ptlit ($2, $4) }
   //| expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr { Binop($1, Mod, $3) }
   | expr POWER  expr { Binop($1, Pow, $3) }
