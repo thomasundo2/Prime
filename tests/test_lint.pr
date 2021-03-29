@@ -1,0 +1,8 @@
+int main()
+{
+    lint test;
+    test = "12341234134123132413241324132413241234123";
+    printl(test + test);
+    printl(test ^ 2);
+    return 0;
+}

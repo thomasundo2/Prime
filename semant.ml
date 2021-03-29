@@ -80,7 +80,7 @@ let check_function func =
   (* make local symbol table and functions to use it*)
 
   (* Build local symbol table of variables for this function *)
-  let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m) StringMap.empty (globals @ func.params @ func.params )
+  let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m) StringMap.empty (globals @ func.params @ func.locals)
   in
 
   (* Return a variable from our local symbol table *)

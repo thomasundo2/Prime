@@ -15,14 +15,12 @@ prime.native :
 	opam config exec -- \
 	ocamlbuild -use-ocamlfind prime.native
 
+# Test the GMP calls we build
+gmpfunc: gmpfunc.c
+	cc -o gmpfunc -DBUILD_TEST gmpfunc.c -lgmp
 
-##############################
-#
-# Prime Makefile 1.0
-#
 
-# "ocamlbuild prime.native" will also build
-
+# Some old stuff:
 prime : parser.cmo scanner.cmo prime.cmo
 	ocamlc -o prime $^
 
@@ -61,6 +59,6 @@ scanner.cmx : parser.cmx
 .PHONY : clean
 clean :
 	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml prime.out prime
-	rm -rf *.exe *.ll *.s *.test a.out
+	rm -rf *.exe *.ll *.s *.test a.out gmpfunc
 	opam config exec -- \
 	ocamlbuild -clean
