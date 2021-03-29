@@ -1,7 +1,7 @@
 (* Create a new operator for assignment and create a new expression*)
 (* sequences of expressions *)
 
-type operator = Add | Sub | Mul | Div | Mod | Pow | Semi
+type operator = Add | Sub | Mul | Div | Mod | Pow
 type eqsign = Eq
 type uoperator = Neg | Not
 
