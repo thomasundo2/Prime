@@ -35,7 +35,7 @@ let built_in_decls =
     params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map
-  in List.fold_left add_bind StringMap.empty [ ("print", Int); ("prints", String) ]  (* "Only print string for now" *)
+  in List.fold_left add_bind StringMap.empty [ ("print", Int); ("prints", String); ("printpt", Point) ]  (* "Only print string for now" *)
 in
 
 (* Now keep track of these named built-in funcs in the top-level symbol table *)
