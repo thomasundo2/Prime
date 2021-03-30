@@ -90,7 +90,10 @@ let check_function func =
     | Id s -> (type_of_identifier s, SId s)
     | Strlit l -> (String, SStrlit l) (* String literals *)
     | Noexpr   -> (Void, SNoexpr)
-    | Ptlit(e1, e2) -> (Point, SPtlit(expr e1, expr e2))
+    | Ptlit(e1, e2) -> 
+	    let e1' = expr e1 
+ 	    and e2' = expr e2 in 
+	    (Point, SPtlit(e1', e2'))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in
             let ty = match op with
