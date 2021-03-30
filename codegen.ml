@@ -36,9 +36,10 @@ let translate (globals, functions) =
 
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
-    A.String   -> string_t
-    |  A.Int   -> i32_t
-    | A.Void  -> void_t
+      A.String   -> string_t
+    | A.Lint     -> string_t
+    | A.Int      -> i32_t
+    | A.Void     -> void_t
     | _ -> void_t
   in
 
@@ -103,8 +104,8 @@ let translate (globals, functions) =
 
     (* Construct code for an expression; return its value *)
     let rec expr builder ((_, e) : sexpr) = match e with
-      SStrlit i  ->  L.build_global_stringptr i "string" builder
-      |  SLit i  -> L.const_int i32_t i
+        SStrlit i  ->  L.build_global_stringptr i "string" builder
+      | SLit i  -> L.const_int i32_t i
       | SNoexpr    -> L.const_int i32_t 0
       | SId s       -> L.build_load (lookup s) s builder
       | SAssign (s, e) -> let e' = expr builder e in
@@ -126,13 +127,16 @@ let translate (globals, functions) =
                 A.Neg     -> L.build_neg
               | A.Not     -> L.build_not) e' "tmp" builder
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
-	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
-	    "printf" builder
-	  | SCall ("prints", [e]) -> (*print string*)
-	  L.build_call printf_func [| string_format_str ; (expr builder e) |]
-	    "printf" builder
+	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
+	        "printf" builder
+      | SCall ("prints", [e]) -> (*print string*)
+          L.build_call printf_func [| string_format_str ; (expr builder e) |]
+          "printf" builder
+      | SCall ("printl", [e]) ->
+          L.build_call printf_func [| string_format_str ; (expr builder e) |]
+          "printf" builder
       | SCall (f, args) ->
-         let (fdef, fdecl) = StringMap.find f function_decls in
+          let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in
 	 let result = (match fdecl.styp with
                         A.Void -> ""

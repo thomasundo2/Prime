@@ -35,7 +35,10 @@ let built_in_decls =
     params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map
-  in List.fold_left add_bind StringMap.empty [ ("print", Int); ("prints", String) ]  (* "Only print string for now" *)
+  in List.fold_left add_bind StringMap.empty [ ("print", Int); 
+                                               ("prints", String);
+                                               ("printl", Lint) ] 
+  (* Add calls to built-in gmp methods here *)
 in
 
 (* Now keep track of these named built-in funcs in the top-level symbol table *)
@@ -69,12 +72,11 @@ let check_function func =
   (* All TODO: *)
   (* check type and identifiers in formal parameters and local vars *)
   (* check all assignments are valid types. Should we co-erce? *)
-  let check_assign lvaltype rvaltype err =  (* used for now in function params 
-                                               this WONT wrk for lints *)
-  (*if lvaltype = rvaltype then lvaltype else raise (Failure err)*)
+  let check_assign lvaltype rvaltype err =  
+    (* print_string ("param: " ^ (string_of_typ lvaltype) ^ " actual: " ^ (string_of_typ rvaltype) ^ "\n"); *)
     match lvaltype with
     Lint ->
-        if rvaltype = String then lvaltype else raise (Failure err)
+        if rvaltype = String || rvaltype = Lint then lvaltype else raise (Failure err)
     | _ -> if lvaltype = rvaltype then lvaltype else raise (Failure err)
     (* if lvaltype is lint and rvaltype is string then lvaltype else raise failure*)
   in
@@ -120,6 +122,7 @@ let check_function func =
             (* Determine expression type based on operator and operand types *)
             let ty = match op with
               Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
+            | Add                               when same && t1 = Lint -> Lint
             | _ -> raise (
                 Failure ("illegal binary operator " ^
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
@@ -133,7 +136,8 @@ let check_function func =
                           " arguments in " ^ name))
         else let check_call (param_typ, _) e = (* validate call *)
           let (et, e') = expr e in (* recursively semantic check expr *)
-          let err = "illegal argument"
+          let err = "illegal argument " ^ string_of_typ et ^
+          " expected " ^ string_of_typ param_typ ^ " in " ^ string_of_expr e
           in (check_assign param_typ et err, e')
         in
         let args' = List.map2 check_call fd.params args

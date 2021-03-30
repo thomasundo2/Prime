@@ -72,7 +72,11 @@ typ:
   //| POINT {  }
   //| RING  {  }
   //| CHAR  {  }
-  //| STRING { String }
+  | STRING { String }
+
+vars:
+  /* nothing */ { [] }
+  | vars declare_init  { $2 :: $1 }
 
 declare_init:
   typ declarator SEMI { ($1, $2) }
@@ -84,7 +88,7 @@ declarator:
   //| ID LBRACK expr RBRACK {} // Rings
 
 seq_stmts:
-    declare_init stmt_list { ([$1], $2) }
+    vars stmt_list { ($1, $2) }
 
 stmt_list:
     /* nothing */  { [] }

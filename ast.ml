@@ -46,7 +46,6 @@ let string_of_op = function
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "^"
-  | _ -> "op PP not implemented"
 
 let string_of_uop = function
     Neg -> "-"
@@ -54,6 +53,7 @@ let string_of_uop = function
 
 let rec string_of_expr = function
   Strlit(l) -> "\"" ^ l ^ "\""
+  | Id(s)   -> s
   | Lit(l) -> string_of_int l
   | Binop(e1, o, e2) ->
           string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
@@ -62,7 +62,6 @@ let rec string_of_expr = function
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
-  | _ -> "expr PP not implemented"
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -80,7 +79,7 @@ let rec string_of_stmt = function
 
 let string_of_typ = function
     Int -> "int"
-  | String -> "String"
+  | String -> "string"
   | Lint -> "lint"
   | Void -> "void"
   | _ -> "typ PP not implemented"

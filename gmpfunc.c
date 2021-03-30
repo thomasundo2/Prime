@@ -69,10 +69,11 @@ char *add(char *left, char *right)
         exit(1);
     }
     mpz_add(n1, n1, n2);
-    mpz_out_str(stdout, 10, n1);
+    // mpz_out_str(stdout, 10, n1);
+    char *ret_str = mpz_get_str(NULL, 10, n1);
     mpz_clear(n1);
     mpz_clear(n2);
-    return NULL;
+    return ret_str;
 }
 
 #ifdef BUILD_TEST
@@ -89,7 +90,9 @@ int main()
     printf("\n");
 
     printf("Adding\n");
-    add("4035273409750284735027430528934750", "139487619823469187364916398427");
+    char *added = add("4035273409750284735027430528934750", "139487619823469187364916398427");
+    
+    printf("%s", added);
     printf("\n");
     // clean up
     return 0;
