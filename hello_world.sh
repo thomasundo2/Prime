@@ -46,7 +46,7 @@ Test() {
     # Run the various compilation parts
     Run "./prime.native" "$1" ">" "$filename.ll" &&
     Run "llc" "-relocation-model=pic" "$filename.ll" ">" "$filename.s" &&
-    Run "cc" "-o" "$filename.exe" "$filename.s" "gmpfunc.o" &&
+    Run "cc" "-o" "$filename.exe" "$filename.s" "gmpfunc.o" "-lgmp" &&
     Run "./$filename.exe" > "$filename.test" &&
     Difference $filename.test ./tests/$filename.out
 
