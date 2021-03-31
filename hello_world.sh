@@ -46,7 +46,7 @@ Test() {
     # Run the various compilation parts
     Run "./prime.native" "$1" ">" "$filename.ll" &&
     Run "llc" "-relocation-model=pic" "$filename.ll" ">" "$filename.s" &&
-    Run "cc" "-o" "$filename.exe" "$filename.s" &&
+    Run "cc" "-o" "$filename.exe" "$filename.s" "gmpfunc.o" &&
     Run "./$filename.exe" > "$filename.test" &&
     Difference $filename.test ./tests/$filename.out
 
@@ -77,6 +77,9 @@ fi
 #         Test $file 2>> $logfile
 #     fi
 # done
+
+# Compile/link in gmpfunc file
+cc -c gmpfunc.c
 
 # Tests we want to do for now
 if [ $# -ge 1 ]

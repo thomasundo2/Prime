@@ -13,6 +13,7 @@ void printl(char *num)
     mpz_set_ui(n, 0);
     if (mpz_set_str(n, num, 10) != 0) {
         printf("Failed to assign number");
+        mpz_clear(n);
         exit(1);
     }
     mpz_out_str(stdout, 10, n);
@@ -62,10 +63,14 @@ char *add(char *left, char *right)
     mpz_init(n2);
     if (mpz_set_str(n1, left, 10) != 0) {
         printf("Failed to assign number");
+        mpz_clear(n1);
+        mpz_clear(n2);
         exit(1);
     }
     if (mpz_set_str(n2, right, 10) != 0) {
         printf("Failed to assign number");
+        mpz_clear(n1);
+        mpz_clear(n2);   
         exit(1);
     }
     mpz_add(n1, n1, n2);
@@ -91,9 +96,9 @@ int main()
 
     printf("Adding\n");
     char *added = add("4035273409750284735027430528934750", "139487619823469187364916398427");
-    
     printf("%s", added);
     printf("\n");
+    free(added);
     // clean up
     return 0;
 }

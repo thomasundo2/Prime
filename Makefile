@@ -11,7 +11,7 @@ gmp:
 	apt install -y libgmp-dev
 
 # We will now make the compiler
-prime.native : 
+prime.native : codegen.ml sast.ml ast.ml semant.ml scanner.mll parser.mly
 	opam config exec -- \
 	ocamlbuild -use-ocamlfind prime.native
 
@@ -19,6 +19,8 @@ prime.native :
 gmpfunc: gmpfunc.c
 	cc -o gmpfunc -DBUILD_TEST gmpfunc.c -lgmp
 
+gmpfunc.o: gmpfunc.c
+	cc -c gmpfunc.c
 
 # Some old stuff:
 prime : parser.cmo scanner.cmo prime.cmo
@@ -59,6 +61,6 @@ scanner.cmx : parser.cmx
 .PHONY : clean
 clean :
 	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml prime.out prime
-	rm -rf *.exe *.ll *.s *.test a.out gmpfunc
+	rm -rf *.exe *.ll *.s *.test a.out gmpfunc gmpfunc.o
 	opam config exec -- \
 	ocamlbuild -clean
