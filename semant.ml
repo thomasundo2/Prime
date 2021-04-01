@@ -37,7 +37,8 @@ let built_in_decls =
   } map
   in List.fold_left add_bind StringMap.empty [ ("print", Int); 
                                                ("prints", String);
-                                               ("printl", Lint) ] 
+                                               ("printl", Lint);
+                                               ("printpt", Point) ] 
   (* Add calls to built-in gmp methods here *)
 in
 
@@ -105,6 +106,10 @@ let check_function func =
             let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
               string_of_typ rt ^ " in " ^ string_of_expr ex
             in (check_assign lt rt err, SAssign(var, (rt, e')))
+    | Ptlit(e1, e2) -> 
+	    let e1' = expr e1 
+ 	    and e2' = expr e2 in 
+	    (Point, SPtlit(e1', e2'))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in
             let ty = match op with
