@@ -1,7 +1,14 @@
 int main()
 {
-    pt x = [50,100];
-    print(x[0]);
+    pt x;
+    int i;
+    int j;
+    x = [20, 30];
+    i = x[0];
+    j = x[1];
+
+    print(i);
+    print(j);
 
     return 0;
 }
