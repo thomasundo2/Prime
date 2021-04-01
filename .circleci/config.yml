@@ -8,8 +8,7 @@ jobs:
       - run:
           name: Build ocaml
           command: |
-            ocamllex scanner.mll
-            ocamlyacc parser.mly
+            make all
             make clean
   # Check that HelloWorld Works ok from our code
   Run-Tests:

@@ -1,6 +1,6 @@
 %{ open Ast %}
 // Thank you again to Professor Edwards for the MicroC template.
-// We have made alterations and additions for our language's functionality 
+// We have made alterations and additions for our language's functionality
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
 %token EQ NEQ LT LEQ GT GEQ AND OR NOT
@@ -9,6 +9,7 @@
 %token <int> LITERAL
 %token <string> CHARLIT // Is there a way to change this to char from scanner?
 %token <string> STRLIT
+//%token <string> LNTLIT
 %token <string> ID
 %token EOF
 
@@ -28,7 +29,7 @@
 %left TIMES DIVIDE //(* Change this order later if necessary \r moved mod up -l.guru*)
 %right NOT
 %right POWER
-%left ACCESS    // Built in access methods 
+%left ACCESS    // Built in access methods
 
 %%
 
@@ -49,7 +50,7 @@ fdecl:
    typ ID LPAREN params_opt RPAREN LBRACE seq_stmts RBRACE
      { { typ = $1;
          name = $2;
-         params = List.rev $4; 
+         params = List.rev $4;
          locals = List.rev (fst $7);
          body = List.rev (snd $7) (* Might have to split this for hello world *)
         } }
@@ -66,24 +67,28 @@ params_list:
 // Fill in the following types when we need them after Hello world
 typ:
     INT   { Int }
-  //| LINT  {  }
+  | LINT  { Lint }
   //| POLY  {  }
-  //| POINT {  }
+    | POINT { Point }
   //| RING  {  }
   //| CHAR  {  }
-  //| STRING { String }
+  | STRING { String }
+
+vars:
+  /* nothing */ { [] }
+  | vars declare_init  { $2 :: $1 }
 
 declare_init:
   typ declarator SEMI { ($1, $2) }
 
 declarator:
     ID { $1 }
-  //| ID ASSIGN expr {} // Allow assignment
-  //| ID LPAREN params_opt RPAREN {} // Points
+  | ID ASSIGN expr {$1} // Allow assignment
+  //| ID LBRACK expr RBRACK { $1 } // Points
   //| ID LBRACK expr RBRACK {} // Rings
 
 seq_stmts:
-    declare_init stmt_list { ([$1], $2) }
+    vars stmt_list { ($1, $2) }
 
 stmt_list:
     /* nothing */  { [] }
@@ -108,6 +113,8 @@ expr:
   | LITERAL          { Lit($1) }
   //| CHARLIT          {  }
   | STRLIT           { Strlit($1) }
+  //| LNTLIT           {}
+  | LBRACK expr COMMA expr RBRACK { Ptlit ($2, $4) }
   //| expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr { Binop($1, Mod, $3) }
   | expr POWER  expr { Binop($1, Pow, $3) }
@@ -125,10 +132,10 @@ expr:
   //| expr OR     expr {  }
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
   | NOT expr         { Unop(Not, $2)      }
-  //| ID ASSIGN expr   {   }
-  //| ID LBRACK expr RBRACK ASSIGN expr {}
+  | ID ASSIGN expr   { Assign($1, $3)     }
+  | ID LBRACK LITERAL RBRACK  {Access($1, $3)}
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
-  //| LBRACK args_list RBRACK    {   }    // Point initialisation 
+  // | LBRACK args_list RBRACK    { Ptlit($1, $2, $3)  }    // Point initialisation
   | LPAREN expr RPAREN {  $2  }
 
 args_opt:

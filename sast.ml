@@ -5,9 +5,12 @@ type sexpr = typ * sx
 and sx =
     SLit of int
   | SStrlit of string
+  | SPtlit of sexpr * sexpr
+  | SAccess of string * int
   | SId of string
   | SBinop of sexpr * operator * sexpr
   | SUnop of uoperator * sexpr
+  | SAssign of string * sexpr
   | SCall of string * sexpr list
   | SNoexpr
 
@@ -33,11 +36,17 @@ type sprogram = bind list * sfunc_decl list
 
 let rec string_of_sexpr (t, e) =
   "(" ^ string_of_typ t ^ " : " ^ (match e with
-  SStrlit(l)-> "\"" ^ l ^ "\""
+  SStrlit(l) -> "\"" ^ l ^ "\""
+  | SPtlit(i, j) -> "[" ^ string_of_sexpr i ^ "," ^ string_of_sexpr j ^ "]"
+  | SAccess(s, i) ->s ^"[" ^ string_of_int i ^ "]"
   | SLit(l) -> string_of_int l
   | SId(s) -> s
+  | SBinop(e1, o, e2) ->
+          string_of_sexpr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_sexpr e2
+  | SUnop(o, e) -> string_of_uop o ^ string_of_sexpr e
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
+  | SAssign(v, e) -> v ^ " = " ^ string_of_sexpr e
   | SNoexpr -> ""
 				  ) ^ ")"
 

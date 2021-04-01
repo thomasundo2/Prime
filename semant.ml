@@ -35,7 +35,11 @@ let built_in_decls =
     params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map
-  in List.fold_left add_bind StringMap.empty [ ("print", Int); ("prints", String) ]  (* "Only print string for now" *)
+  in List.fold_left add_bind StringMap.empty [ ("print", Int);
+                                               ("prints", String);
+                                               ("printl", Lint);
+                                               ("printpt", Point) ]
+  (* Add calls to built-in gmp methods here *)
 in
 
 (* Now keep track of these named built-in funcs in the top-level symbol table *)
@@ -46,7 +50,7 @@ let add_func map fd =
   and make_err er = raise (Failure er) (* Helper to throw error with msg = er *)
   and n = fd.name
   in match fd with
-    | _ when StringMap.mem n built_in_decls -> make_err built_in_err
+      _ when StringMap.mem n built_in_decls -> make_err built_in_err
     | _ when StringMap.mem n map -> make_err dup_err
     | _ -> StringMap.add n fd map
 in
@@ -69,13 +73,19 @@ let check_function func =
   (* All TODO: *)
   (* check type and identifiers in formal parameters and local vars *)
   (* check all assignments are valid types. Should we co-erce? *)
-  let check_assign lvaltype rvaltype err =  (* used for now in function params *)
-    if lvaltype = rvaltype then lvaltype else raise (Failure err)
+  let check_assign lvaltype rvaltype err =
+    (* print_string ("param: " ^ (string_of_typ lvaltype) ^ " actual: " ^ (string_of_typ rvaltype) ^ "\n"); *)
+    match lvaltype with
+    Lint ->
+        if rvaltype = String || rvaltype = Lint then lvaltype else raise (Failure err)
+    | _ -> if lvaltype = rvaltype then lvaltype else raise (Failure err)
+    (* if lvaltype is lint and rvaltype is string then lvaltype else raise failure*)
   in
   (* make local symbol table and functions to use it*)
 
   (* Build local symbol table of variables for this function *)
-  let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m) StringMap.empty (globals @ func.params @ func.params )
+  let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
+                       StringMap.empty (globals @ func.params @ func.locals )
   in
 
   (* Return a variable from our local symbol table *)
@@ -90,6 +100,17 @@ let check_function func =
     | Id s -> (type_of_identifier s, SId s)
     | Strlit l -> (String, SStrlit l) (* String literals *)
     | Noexpr   -> (Void, SNoexpr)
+    | Assign(var, e) as ex ->
+            let lt = type_of_identifier var
+            and (rt, e') = expr e in
+            let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
+              string_of_typ rt ^ " in " ^ string_of_expr ex
+            in (check_assign lt rt err, SAssign(var, (rt, e')))
+    | Ptlit(e1, e2) ->
+	    let e1' = expr e1
+ 	    and e2' = expr e2 in
+	    (Point, SPtlit(e1', e2'))
+	| Access(s, i) -> (Int, SAccess(s, i))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in
             let ty = match op with
@@ -107,6 +128,7 @@ let check_function func =
             (* Determine expression type based on operator and operand types *)
             let ty = match op with
               Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
+            | Add                               when same && t1 = Lint -> Lint
             | _ -> raise (
                 Failure ("illegal binary operator " ^
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
@@ -120,7 +142,8 @@ let check_function func =
                           " arguments in " ^ name))
         else let check_call (param_typ, _) e = (* validate call *)
           let (et, e') = expr e in (* recursively semantic check expr *)
-          let err = "illegal argument"
+          let err = "illegal argument " ^ string_of_typ et ^
+          " expected " ^ string_of_typ param_typ ^ " in " ^ string_of_expr e
           in (check_assign param_typ et err, e')
         in
         let args' = List.map2 check_call fd.params args
