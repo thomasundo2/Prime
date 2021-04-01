@@ -35,10 +35,10 @@ let built_in_decls =
     params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map
-  in List.fold_left add_bind StringMap.empty [ ("print", Int); 
+  in List.fold_left add_bind StringMap.empty [ ("print", Int);
                                                ("prints", String);
                                                ("printl", Lint);
-                                               ("printpt", Point) ] 
+                                               ("printpt", Point) ]
   (* Add calls to built-in gmp methods here *)
 in
 
@@ -73,7 +73,7 @@ let check_function func =
   (* All TODO: *)
   (* check type and identifiers in formal parameters and local vars *)
   (* check all assignments are valid types. Should we co-erce? *)
-  let check_assign lvaltype rvaltype err =  
+  let check_assign lvaltype rvaltype err =
     (* print_string ("param: " ^ (string_of_typ lvaltype) ^ " actual: " ^ (string_of_typ rvaltype) ^ "\n"); *)
     match lvaltype with
     Lint ->
@@ -84,7 +84,7 @@ let check_function func =
   (* make local symbol table and functions to use it*)
 
   (* Build local symbol table of variables for this function *)
-  let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m) 
+  let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
                        StringMap.empty (globals @ func.params @ func.locals )
   in
 
@@ -106,10 +106,11 @@ let check_function func =
             let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
               string_of_typ rt ^ " in " ^ string_of_expr ex
             in (check_assign lt rt err, SAssign(var, (rt, e')))
-    | Ptlit(e1, e2) -> 
-	    let e1' = expr e1 
- 	    and e2' = expr e2 in 
+    | Ptlit(e1, e2) ->
+	    let e1' = expr e1
+ 	    and e2' = expr e2 in
 	    (Point, SPtlit(e1', e2'))
+	| Access(s, i) -> (Int, SAccess(s, i))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in
             let ty = match op with
