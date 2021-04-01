@@ -1,6 +1,7 @@
 int main()
 {
         int test;
-        print((5+25)*3%4);
+        test = 5;
+        print(test);
         return 0;
 }

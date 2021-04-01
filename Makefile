@@ -3,21 +3,26 @@ test : all hello_world.sh
 	./hello_world.sh
 
 .PHONY : all
-all : clean prime.native
+all : clean gmp prime.native
+
+# this will serve to install the GNU multiple precision library onto our system
+.PHONY : gmp
+gmp: 
+	apt install -y libgmp-dev
 
 # We will now make the compiler
-prime.native : 
+prime.native : codegen.ml sast.ml ast.ml semant.ml scanner.mll parser.mly
 	opam config exec -- \
 	ocamlbuild -use-ocamlfind prime.native
 
+# Test the GMP calls we build
+gmpfunc: gmpfunc.c
+	cc -o gmpfunc -DBUILD_TEST gmpfunc.c -lgmp
 
-##############################
-#
-# Prime Makefile 1.0
-#
+gmpfunc.o: gmpfunc.c
+	cc -c gmpfunc.c
 
-# "ocamlbuild prime.native" will also build
-
+# Some old stuff:
 prime : parser.cmo scanner.cmo prime.cmo
 	ocamlc -o prime $^
 
@@ -56,5 +61,6 @@ scanner.cmx : parser.cmx
 .PHONY : clean
 clean :
 	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml prime.out prime
+	rm -rf *.exe *.ll *.s *.test a.out gmpfunc gmpfunc.o
 	opam config exec -- \
 	ocamlbuild -clean

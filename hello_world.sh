@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # time limit on operations
 ulimit -t 30
 logfile=tests.log
@@ -8,9 +8,11 @@ exitcode=0
 
 IsError() {
     if [ $error -eq 0 ] ; then
-    echo "Fail"
+    echo "FAILED"
     error=1
     fi
+    # print out what we failed
+    echo " $1"
 }
 
 Difference() {
@@ -24,10 +26,11 @@ Difference() {
 Run() {
     echo $* 1>&2
     eval $* || {
-        IsError "$1 Failed"
+        IsError "$1 Failed (cmd: $*)"
         return 1
     }
 }
+
 
 Test() {
     error=0
@@ -43,7 +46,7 @@ Test() {
     # Run the various compilation parts
     Run "./prime.native" "$1" ">" "$filename.ll" &&
     Run "llc" "-relocation-model=pic" "$filename.ll" ">" "$filename.s" &&
-    Run "cc" "-o" "$filename.exe" "$filename.s" &&
+    Run "cc" "-o" "$filename.exe" "$filename.s" "gmpfunc.o" "-lgmp" &&
     Run "./$filename.exe" > "$filename.test" &&
     Difference $filename.test ./tests/$filename.out
 
@@ -66,14 +69,37 @@ else
     files="tests/*.pr"
 fi
 
-# run tests
+# run positive tests for now
 # for file in $files
 # do
-#     Test $file
+#     if [[ $file != *fail.pr ]] ;
+#     then
+#         Test $file 2>> $logfile
+#     fi
 # done
 
-Test tests/test_hello.pr 2>> $logfile
+# Compile/link in gmpfunc file
+cc -c gmpfunc.c
 
-# clean up
+# Tests we want to do for now
+if [ $# -ge 1 ]
+then
+    for file in $files
+    do
+        Test $file 2>> $logfile
+    done
+else
+    Test tests/test_hello.pr 2>> $logfile
+    Test tests/test_add.pr 2>> $logfile
+    Test tests/test_mod.pr 2>> $logfile
+    Test tests/test_neg.pr 2>> $logfile
+    Test tests/test_print.pr 2>> $logfile
+    # Test tests/test_var1_fail.pr 2>> $logfile
+fi
+
+# clean up ()
 # rm -rf *.exe *.test *.ll *.s
+
+# print out so we can see return at the end
+cat $logfile
 exit $exitcode

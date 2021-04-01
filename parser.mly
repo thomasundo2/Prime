@@ -9,6 +9,7 @@
 %token <int> LITERAL
 %token <string> CHARLIT // Is there a way to change this to char from scanner?
 %token <string> STRLIT
+//%token <string> LNTLIT
 %token <string> ID
 %token EOF
 
@@ -66,24 +67,28 @@ params_list:
 // Fill in the following types when we need them after Hello world
 typ:
     INT   { Int }
-  //| LINT  {  }
+  | LINT  { Lint }
   //| POLY  {  }
     | POINT { Point }
   //| RING  {  }
   //| CHAR  {  }
-  //| STRING { String } delete? strings implemented without typ STRING
+  | STRING { String }
+
+vars:
+  /* nothing */ { [] }
+  | vars declare_init  { $2 :: $1 }
 
 declare_init:
   typ declarator SEMI { ($1, $2) }
 
 declarator:
     ID { $1 }
-  //| ID ASSIGN expr {} // Allow assignment
+  | ID ASSIGN expr {$1} // Allow assignment
   //| ID LPAREN params_opt RPAREN {} // Points
   //| ID LBRACK expr RBRACK {} // Rings
 
 seq_stmts:
-    declare_init stmt_list { ([$1], $2) }
+    vars stmt_list { ($1, $2) }
 
 stmt_list:
     /* nothing */  { [] }
@@ -108,7 +113,7 @@ expr:
   | LITERAL          { Lit($1) }
   //| CHARLIT          {  }
   | STRLIT           { Strlit($1) }
-  //  | PTLIT   	     { Ptlit($1, $2, $3) }
+  //| LNTLIT           {}
   | LBRACK expr COMMA expr RBRACK { Ptlit ($2, $4) }
   //| expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr { Binop($1, Mod, $3) }
@@ -127,7 +132,7 @@ expr:
   //| expr OR     expr {  }
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
   | NOT expr         { Unop(Not, $2)      }
-  //| ID ASSIGN expr   {   }
+  | ID ASSIGN expr   { Assign($1, $3)     }
   //| ID LBRACK expr RBRACK ASSIGN expr {}
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
   // | LBRACK args_list RBRACK    { Ptlit($1, $2, $3)  }    // Point initialisation

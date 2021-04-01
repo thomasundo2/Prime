@@ -1,7 +1,7 @@
 (* Create a new operator for assignment and create a new expression*)
 (* sequences of expressions *)
 
-type operator = Add | Sub | Mul | Div | Mod | Pow | Semi
+type operator = Add | Sub | Mul | Div | Mod | Pow
 type eqsign = Eq
 type uoperator = Neg | Not
 
@@ -15,6 +15,7 @@ type expr =
   | Id of string
   | Binop of expr * operator * expr
   | Unop of uoperator * expr
+  | Assign of string * expr
   | Call of string * expr list
   | Noexpr
 
@@ -46,24 +47,23 @@ let string_of_op = function
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "^"
-  | _ -> "op PP not implemented"
 
 let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
-  | _ -> "op PP not implemented"
 
 let rec string_of_expr = function
   Strlit(l) -> "\"" ^ l ^ "\""
+  | Id(s)   -> s
   | Lit(l) -> string_of_int l
   | Ptlit(i, j) -> "[" ^ string_of_expr i ^ "," ^ string_of_expr j ^ "]"
   | Binop(e1, o, e2) ->
           string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
+  | Assign(v, e) -> v ^ " = " ^ string_of_expr e 
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
-  | _ -> "expr PP not implemented"
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -81,8 +81,9 @@ let rec string_of_stmt = function
 
 let string_of_typ = function
     Int -> "int"
+  | String -> "string"
+  | Lint -> "lint"
   | Point -> "Point"
-  | String -> "String"
   | Void -> "void"
   | _ -> "typ PP not implemented"
 
