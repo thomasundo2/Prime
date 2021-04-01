@@ -57,10 +57,15 @@ let translate (globals, functions) =
       L.declare_function "printf" printf_t the_module in
 
   (* Declare our external functions here*)
+  (* LINTS *)
   let ladd_t : L.lltype =
       L.function_type string_t [| string_t; string_t |] in
   let ladd_func : L.llvalue =
       L.declare_function "add" ladd_t the_module in
+  let lpow_t : L.lltype = 
+      L.function_type string_t [| string_t; i32_t |] in
+  let lpow_func : L.llvalue = 
+      L.declare_function "power" lpow_t the_module in
 
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
@@ -121,6 +126,7 @@ let translate (globals, functions) =
               and e2' = expr builder e2 in
               (match operator with
               | A.Add     -> L.build_call ladd_func [| e1'; e2' |] "add" builder
+              | A.Pow     -> L.build_call lpow_func [| e1'; e2' |] "power" builder
               | _         -> raise (Failure "Operator not implemented for Lint")
               ) 
       | SBinop (e1, operator, e2) ->
