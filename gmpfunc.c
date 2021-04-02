@@ -81,6 +81,31 @@ char *add(char *left, char *right)
     return ret_str;
 }
 
+char *sub(char *left, char *right)
+{
+    mpt_t n1;
+    mpz_t n2;
+    mpz_init(n1);
+    mpz_init(n2);
+    if (mpz_set_str(n1, left, 10) != 0){
+        printf("Failed to assign number");
+        mpz_clear(n1);
+        mpz_clear(n2);
+        exit(1);
+    }
+    if (mpz_set_str(n2, right, 10) != 0) {
+        printf("Failed to assign number");
+        mpz_clear(n1);
+        mpz_clear(n2);
+        exit(1);
+    }
+    mpz_sub(n1, n1, n2);
+    char *ret_str = mpz_get_str(NULL, 10, n1);
+    mpz_clear(n1);
+    mpz_clear(n2);
+    return ret_str;
+}
+
 #ifdef BUILD_TEST
 int main()
 {
