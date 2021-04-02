@@ -32,12 +32,14 @@ let translate (globals, functions) =
   let i32_t      = L.i32_type    context
   and i8_t       = L.i8_type     context
   and string_t   = L.pointer_type (L.i8_type context)
+  and point_t    = L.pointer_type (L.i8_type context)
   and void_t     = L.void_type   context in
 
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
       A.String   -> string_t
     | A.Lint     -> string_t
+    |  A.Point -> point_t 
     | A.Int      -> i32_t
     | A.Void     -> void_t
     | _ -> void_t
@@ -57,10 +59,15 @@ let translate (globals, functions) =
       L.declare_function "printf" printf_t the_module in
 
   (* Declare our external functions here*)
+  (* LINTS *)
   let ladd_t : L.lltype =
       L.function_type string_t [| string_t; string_t |] in
   let ladd_func : L.llvalue =
       L.declare_function "add" ladd_t the_module in
+  let lpow_t : L.lltype = 
+      L.function_type string_t [| string_t; i32_t |] in
+  let lpow_func : L.llvalue = 
+      L.declare_function "power" lpow_t the_module in
 
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
@@ -79,7 +86,9 @@ let translate (globals, functions) =
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
-    and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
+    and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder 
+    and point_format_str = L.build_global_stringptr "%s\n" "fmt" builder
+    in
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
@@ -112,6 +121,7 @@ let translate (globals, functions) =
     let rec expr builder ((_, e) : sexpr) = match e with
         SStrlit i  ->  L.build_global_stringptr i "string" builder
       | SLit i  -> L.const_int i32_t i
+      | SPtlit (i, j) -> L.const_array point_t [| expr builder i ; expr builder j|]
       | SNoexpr    -> L.const_int i32_t 0
       | SId s       -> L.build_load (lookup s) s builder
       | SAssign (s, e) -> let e' = expr builder e in
@@ -121,6 +131,7 @@ let translate (globals, functions) =
               and e2' = expr builder e2 in
               (match operator with
               | A.Add     -> L.build_call ladd_func [| e1'; e2' |] "add" builder
+              | A.Pow     -> L.build_call lpow_func [| e1'; e2' |] "power" builder
               | _         -> raise (Failure "Operator not implemented for Lint")
               ) 
       | SBinop (e1, operator, e2) ->
@@ -148,6 +159,9 @@ let translate (globals, functions) =
       | SCall ("printl", [e]) ->
           L.build_call printf_func [| string_format_str ; (expr builder e) |]
           "printf" builder
+	  | SCall ("printpt", [e]) ->
+	  L.build_call printf_func [| point_format_str ; (expr builder e) |]
+                "printf" builder
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in

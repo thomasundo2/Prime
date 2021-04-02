@@ -94,6 +94,7 @@ else
     Test tests/test_mod.pr 2>> $logfile
     Test tests/test_neg.pr 2>> $logfile
     Test tests/test_print.pr 2>> $logfile
+    Test tests/test_lint.pr 2>> $logfile
     # Test tests/test_var1_fail.pr 2>> $logfile
 fi
 
