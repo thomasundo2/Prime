@@ -72,6 +72,12 @@ let translate (globals, functions) =
      L.function_type string_t [| point_t |] in
   let printpt_func : L.llvalue =
      L.declare_function "printpt" printpt_t the_module in
+
+  let ptadd_t : L.lltype =
+      L.function_type point_t [| point_t; point_t |] in
+  let ptadd_func : L.llvalue =
+     L.declare_function "ptadd" ptadd_t the_module in
+
   (*lint operators*)
   let ladd_t : L.lltype =
       L.function_type string_t [| string_t; string_t |] in
@@ -143,6 +149,13 @@ let translate (globals, functions) =
               (match operator with
               | A.Add     -> L.build_call ladd_func [| e1'; e2' |] "add" builder
               | _         -> raise (Failure "Operator not implemented for Lint")
+              )
+      | SBinop ((A.Point, _) as e1, operator, e2) ->
+              let e1' = expr builder e1
+              and e2' = expr builder e2 in
+              (match operator with
+              | A.Add     -> L.build_call ptadd_func [| e1'; e2' |] "ptadd" builder
+              | _         -> raise (Failure "Operator not implemented for Point")
               )
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1

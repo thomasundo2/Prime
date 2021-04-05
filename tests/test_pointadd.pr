@@ -1,0 +1,15 @@
+int main()
+{
+    pt x;
+    pt y;
+    pt z;
+
+
+
+    x = [1, 2];
+    y = [10, 20];
+
+    z = x + y;
+    printpt(z);
+    return 0;
+}
