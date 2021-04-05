@@ -151,6 +151,12 @@ let check_function func =
         in (fd.typ, SCall(name, args'))
   in
 
+  let check_int_expr e = 
+      let (t', e') = expr e
+      and err = "expected integer expression in " ^ string_of_expr e
+      in if t' != Int then raise (Failure err) else (t', e') 
+    in
+
   (* Here is where we check statements (only expr and Block for now)*)
   let rec check_stmt = function
       Expr e -> SExpr (expr e) (* recursive check *)
@@ -162,6 +168,11 @@ let check_function func =
           | s :: ss -> check_stmt s :: check_stmt_list ss (* one statement at a time *)
           | []      -> [] (* done *)
         in SBlock(check_stmt_list sl)
+    | If(p, b1, b2) -> SIf(check_int_expr p, check_stmt b1, check_stmt b2)
+    | For(e1, e2, e3, st) ->
+	SFor(expr e1, check_int_expr e2, expr e3, check_stmt st)
+    | While(p, s) -> SWhile(check_int_expr p, check_stmt s)
+
     | _   -> raise (Failure "stmt type not implemented")
   in
   { styp = func.typ;

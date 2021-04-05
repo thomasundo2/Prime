@@ -16,11 +16,17 @@ prime.native : codegen.ml sast.ml ast.ml semant.ml scanner.mll parser.mly
 	ocamlbuild -use-ocamlfind prime.native
 
 # Test the GMP calls we build
-gmpfunc: gmpfunc.c
+gmpfunc: gmpfunc.c 
 	cc -o gmpfunc -DBUILD_TEST gmpfunc.c -lgmp
 
 gmpfunc.o: gmpfunc.c
 	cc -c gmpfunc.c
+
+structs: structs.c
+	cc -o structs -DBUILD_TEST structs.c -lgmp 
+
+structs.o: structs.c
+	cc -c structs.c
 
 # Some old stuff:
 prime : parser.cmo scanner.cmo prime.cmo
@@ -61,6 +67,6 @@ scanner.cmx : parser.cmx
 .PHONY : clean
 clean :
 	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml prime.out prime
-	rm -rf *.exe *.ll *.s *.test a.out gmpfunc gmpfunc.o
+	rm -rf *.exe *.ll *.s *.test a.out gmpfunc gmpfunc.o structs structs.o
 	opam config exec -- \
 	ocamlbuild -clean
