@@ -38,7 +38,7 @@ let built_in_decls =
   in List.fold_left add_bind StringMap.empty [ ("print", Int); 
                                                ("prints", String);
                                                ("printl", Lint);
-                                               ("printpt", Point) ] 
+                                               ("printpt", Point); ] 
   (* Add calls to built-in gmp methods here *)
 in
 
@@ -76,9 +76,8 @@ let check_function func =
   let check_assign lvaltype rvaltype err =  
     (* print_string ("param: " ^ (string_of_typ lvaltype) ^ " actual: " ^ (string_of_typ rvaltype) ^ "\n"); *)
     match lvaltype with
-    Lint ->
-        if rvaltype = String || rvaltype = Lint then lvaltype else raise (Failure err)
-    | _ -> if lvaltype = rvaltype then lvaltype else raise (Failure err)
+      (* Lint -> if rvaltype = String || rvaltype = Lint then lvaltype else raise (Failure err) *)
+    | _    -> if lvaltype = rvaltype then lvaltype else raise (Failure err)
     (* if lvaltype is lint and rvaltype is string then lvaltype else raise failure*)
   in
   (* make local symbol table and functions to use it*)
@@ -96,72 +95,75 @@ let check_function func =
 
   (* semantic expression checking *)
   let rec expr = function
-      Lit l -> (Int, SLit l)
-    | Id s -> (type_of_identifier s, SId s)
-    | Strlit l -> (String, SStrlit l) (* String literals *)
-    | Noexpr   -> (Void, SNoexpr)
-    | Assign(var, e) as ex ->
-            let lt = type_of_identifier var
-            and (rt, e') = expr e in
-            let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
-              string_of_typ rt ^ " in " ^ string_of_expr ex
-            in (check_assign lt rt err, SAssign(var, (rt, e')))
-    | Ptlit(e1, e2) -> 
-	    let e1' = expr e1 
- 	    and e2' = expr e2 in 
-	    (Point, SPtlit(e1', e2'))
-    | Unop(op, e) as ex ->
-            let (t, e') = expr e in
-            let ty = match op with
-              Neg when t = Int -> Int
-            | Not when t = Int -> Int
-            | _ -> raise (Failure ("illegal unary operator " ^
-                                   string_of_uop op ^ string_of_typ t ^
-                                   " in " ^ string_of_expr ex))
-            in (ty, SUnop(op, (t, e')))
-    | Binop(e1, op, e2) as e ->
-            let (t1, e1') = expr e1
-            and (t2, e2') = expr e2 in
-            (* All binary operators require operands of the same type *)
-            let same = t1 = t2 in
-            (* Determine expression type based on operator and operand types *)
-            let ty = match op with
-              Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
-            | Add                               when same && t1 = Lint -> Lint
-            | Pow                               when t1 = Lint && t2 = Int -> Lint
-            | _ -> raise (
-                Failure ("illegal binary operator " ^
-                        string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
-                        string_of_typ t2 ^ " in " ^ string_of_expr e))
-            in (ty, SBinop((t1, e1'), op, (t2, e2')))
-    | Call(name, args) (* as call *) ->
-        let fd = find_func name in
-        let param_length = List.length fd.params in
-        if List.length args != param_length then
-          raise (Failure ("expecting " ^ string_of_int param_length ^
-                          " arguments in " ^ name))
-        else let check_call (param_typ, _) e = (* validate call *)
-          let (et, e') = expr e in (* recursively semantic check expr *)
-          let err = "illegal argument " ^ string_of_typ et ^
-          " expected " ^ string_of_typ param_typ ^ " in " ^ string_of_expr e
-          in (check_assign param_typ et err, e')
-        in
-        let args' = List.map2 check_call fd.params args
-        in (fd.typ, SCall(name, args'))
+    Lit l -> (Int, SLit l)
+  | Id s -> (type_of_identifier s, SId s)
+  | Strlit l -> (String, SStrlit l) (* String literals *)
+  | Lintlit l -> (Lint, SLintlit l)
+  | Noexpr   -> (Void, SNoexpr)
+  | Assign(var, e) as ex ->
+          let lt = type_of_identifier var
+          and (rt, e') = expr e in
+          let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
+            string_of_typ rt ^ " in " ^ string_of_expr ex
+          in (check_assign lt rt err, SAssign(var, (rt, e')))
+  | Ptlit(e1, e2) -> 
+    let e1' = expr e1 
+    and e2' = expr e2 in 
+    (Point, SPtlit(e1', e2'))
+  | Unop(op, e) as ex ->
+          let (t, e') = expr e in
+          let ty = match op with
+            Neg when t = Int -> Int
+          | Not when t = Int -> Int
+          | _ -> raise (Failure ("illegal unary operator " ^
+                                  string_of_uop op ^ string_of_typ t ^
+                                  " in " ^ string_of_expr ex))
+          in (ty, SUnop(op, (t, e')))
+  | Binop(e1, op, e2) as e ->
+          let (t1, e1') = expr e1
+          and (t2, e2') = expr e2 in
+          (* All binary operators require operands of the same type *)
+          let same = t1 = t2 in
+          (* Determine expression type based on operator and operand types *)
+          let ty = match op with
+            Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
+          | Add                               when same && t1 = Lint -> Lint
+          | Pow                               when t1 = Lint && t2 = Int -> Lint
+          | _ -> raise (
+              Failure ("illegal binary operator " ^
+                      string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+                      string_of_typ t2 ^ " in " ^ string_of_expr e))
+          in (ty, SBinop((t1, e1'), op, (t2, e2')))
+  | Call(name, args) (* as call *) ->
+      let fd = find_func name in
+      let param_length = List.length fd.params in
+      if List.length args != param_length then
+        raise (Failure ("expecting " ^ string_of_int param_length ^
+                        " arguments in " ^ name))
+      else let check_call (param_typ, _) e = (* validate call *)
+        let (et, e') = expr e in (* recursively semantic check expr *)
+        let err = "illegal argument " ^ string_of_typ et ^
+        " expected " ^ string_of_typ param_typ ^ " in " ^ string_of_expr e
+        in (check_assign param_typ et err, e')
+      in
+      let args' = List.map2 check_call fd.params args
+      in (fd.typ, SCall(name, args'))
   in
 
   (* Here is where we check statements (only expr and Block for now)*)
   let rec check_stmt = function
-      Expr e -> SExpr (expr e) (* recursive check *)
-    | Return e -> let (t, e') = expr e in
-        if t = func.typ then SReturn (t, e') (* Correct return type for function *)
-        else raise (Failure "wrong return type")
-    | Block sl ->
-        let rec check_stmt_list = function (* Maybe add other return checks here *)
-          | s :: ss -> check_stmt s :: check_stmt_list ss (* one statement at a time *)
-          | []      -> [] (* done *)
-        in SBlock(check_stmt_list sl)
-    | _   -> raise (Failure "stmt type not implemented")
+    Expr e -> SExpr (expr e) (* recursive check *)
+  | Return e -> let (t, e') = expr e in
+      if t = func.typ then SReturn (t, e') (* Correct return type for function *)
+      else raise (Failure "wrong return type")
+  | Block sl ->
+      let rec check_stmt_list = function (* Maybe add other return checks here *)
+        [Return _ as s] -> [check_stmt s]
+      | Return _ :: _   -> raise (Failure "nothing may follow a return")
+      | Block sl :: ss  -> check_stmt_list (sl @ ss) (* Flatten blocks *)| s :: ss -> check_stmt s :: check_stmt_list ss (* one statement at a time *)
+      | []      -> [] (* done *)
+      in SBlock(check_stmt_list sl)
+  | _   -> raise (Failure "stmt type not implemented")
   in
   { styp = func.typ;
     sname = func.name;

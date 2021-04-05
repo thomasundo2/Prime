@@ -100,7 +100,7 @@ char *add(char *left, char *right)
 
 char *sub(char *left, char *right)
 {
-    mpt_t n1;
+    mpz_t n1;
     mpz_t n2;
     mpz_init(n1);
     mpz_init(n2);
