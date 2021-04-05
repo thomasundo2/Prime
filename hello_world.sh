@@ -96,6 +96,7 @@ else
     Test tests/test_print.pr 2>> $logfile
     Test tests/test_ass.pr 2>> $logfile
     Test tests/test_point.pr 2>> $logfile
+    Test tests/test_pointadd.pr 2>> $logfile
     # Test tests/test_var1_fail.pr 2>> $logfile
 fi
 

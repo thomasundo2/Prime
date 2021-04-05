@@ -6,3 +6,4 @@ prime.native
 *.s
 *.ll
 *.log
+*.o

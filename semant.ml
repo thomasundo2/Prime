@@ -129,6 +129,7 @@ let check_function func =
             let ty = match op with
               Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
             | Add                               when same && t1 = Lint -> Lint
+            | Add                               when same && t1 = Point -> Point
             | _ -> raise (
                 Failure ("illegal binary operator " ^
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
