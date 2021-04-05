@@ -1,5 +1,6 @@
 struct point
 {
-		int x;
+		int i;
 		int y;
+		int j;
 };

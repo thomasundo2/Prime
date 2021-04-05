@@ -72,6 +72,7 @@ let translate (globals, functions) =
      L.function_type string_t [| point_t |] in
   let printpt_func : L.llvalue =
      L.declare_function "printpt" printpt_t the_module in
+  (*lint operators*)
   let ladd_t : L.lltype =
       L.function_type string_t [| string_t; string_t |] in
   let ladd_func : L.llvalue =

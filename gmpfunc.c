@@ -6,24 +6,20 @@
 
 // TODO: move to its own file
 #include"structs.h"
-struct point Point(int x, int y)
+struct point Point(int i, int j)
 {
 		struct point p;
-		p.x = x;
-		p.y = y;
-		printf("%d\n", p.x);
-        printf("%d\n", p.y);
-        printf("--------");
+		p.i = i;
+		p.j = j;
 		return p;
 }
 char *printpt(struct point p){
-    char x_str[20];
-    char y_str[20];
-    printf("%d\n", p.x);
-    printf("%d\n", p.y);
-    sprintf(x_str, "%d", p.x);
-    sprintf(y_str, "%d", p.y);
-    char *ret = x_str;
+    char i_str[20];
+    char j_str[20];
+
+    sprintf(i_str, "%d", p.i);
+    sprintf(j_str, "%d", p.j);
+    char *ret = strcat(i_str, j_str);
     return ret;
 }
 
