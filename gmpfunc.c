@@ -10,14 +10,21 @@ struct point Point(int x, int y)
 {
 		struct point p;
 		p.x = x;
+		p.y = y;
+		printf("%d\n", p.x);
+        printf("%d\n", p.y);
+        printf("--------");
 		return p;
 }
-int pointAccess(struct point p, int index){
-    if(index == 0){
-        return p.x;
-    }else{
-        return p.y;
-    }
+char *printpt(struct point p){
+    char x_str[20];
+    char y_str[20];
+    printf("%d\n", p.x);
+    printf("%d\n", p.y);
+    sprintf(x_str, "%d", p.x);
+    sprintf(y_str, "%d", p.y);
+    char *ret = x_str;
+    return ret;
 }
 
 // Don't need assign here. Keep as string until necessary

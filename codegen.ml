@@ -68,10 +68,10 @@ let translate (globals, functions) =
      L.function_type point_t [| i32_t; i32_t |] in
   let init_point_func : L.llvalue =
      L.declare_function "Point" init_point_t the_module in
-  let printpt_func : L.lltype =
-     L.function_type point_t [| point_t |] in
-  let init_point_func : L.llvalue =
-     L.declare_function "Point" init_point_t the_module in
+  let printpt_t : L.lltype =
+     L.function_type string_t [| point_t |] in
+  let printpt_func : L.llvalue =
+     L.declare_function "printpt" printpt_t the_module in
   let ladd_t : L.lltype =
       L.function_type string_t [| string_t; string_t |] in
   let ladd_func : L.llvalue =
@@ -128,7 +128,7 @@ let translate (globals, functions) =
     let rec expr builder ((_, e) : sexpr) = match e with
         SStrlit i  ->  L.build_global_stringptr i "string" builder
       | SLit i  -> L.const_int i32_t i
-      | SPtlit (i, j) -> (*using heckell*)
+      | SPtlit (i, j) ->
               let e1' = expr builder i
               and e2' = expr builder j in
               L.build_call init_point_func [| e1' ; e2' |] "Point" builder
@@ -169,9 +169,8 @@ let translate (globals, functions) =
           L.build_call printf_func [| string_format_str ; (expr builder e) |]
           "printl" builder
 	  | SCall ("printpt", [e]) ->
-          let ptStr = L.build_call printp_func [|(expr builder e)|] "printpt" builder in
-          L.build_call printf_func [| string_format_str ; (expr builder ptStr) |]
-          "printl" builder
+          let ptStr = L.build_call printpt_func [|expr builder e|] "printpt" builder in
+          L.build_call printf_func [| string_format_str ; ptStr |] "prints" builder
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in
