@@ -25,8 +25,20 @@ char *printpt(struct point p){
 
 struct point ptadd(struct point p1, struct point p2)
 {
-    int i = p1.i + p2.i;
-    int j = p1.j + p2.j;
+
+    int i, j;
+    int m;
+    int b = 1;
+
+    if(p1.i == p2.i && p1.j == p2.j){
+	m = (3*(p1.i)^2 + b)/(2*p1.j);
+    }
+    else{
+	m = (p2.j-p1.j)/(p2.i-p1.i);
+    }
+
+    i = m^2 - p1.i - p2.i;
+    j = m*(p1.i - i) - p1.j;
 
     return Point(i, j);
 }
