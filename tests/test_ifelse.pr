@@ -1,0 +1,11 @@
+int main()
+{
+    int test = 0;
+    if(test){
+	prints("1");
+    }
+    else{
+	prints("0");
+    }
+    return 0;
+}
