@@ -4,6 +4,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+// TODO: move to its own file
+#include"structs.h"
+struct point Point(int x, int y)
+{
+		struct point p;
+		p.x = x;
+		return p;
+}
+int pointAccess(struct point p, int index){
+    if(index == 0){
+        return p.x;
+    }else{
+        return p.y;
+    }
+}
+
 // Don't need assign here. Keep as string until necessary
 
 void printl(char *num)
@@ -70,7 +86,7 @@ char *add(char *left, char *right)
     if (mpz_set_str(n2, right, 10) != 0) {
         printf("Failed to assign number");
         mpz_clear(n1);
-        mpz_clear(n2);   
+        mpz_clear(n2);
         exit(1);
     }
     mpz_add(n1, n1, n2);
