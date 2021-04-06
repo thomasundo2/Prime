@@ -28,6 +28,7 @@ void init(mpz_t *n)
 void printl(mpz_t n)
 {
     mpz_out_str(stdout, 10, n);
+    printf("\n");
 }
 
 // raise to power. returns string so that we can store in symbol table

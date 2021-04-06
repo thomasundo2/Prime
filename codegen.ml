@@ -70,9 +70,9 @@ let translate (globals, functions) =
   let linit_func : L.llvalue =
       L.declare_function "__gmpz_init_set_str" linit_t the_module in
   let lclear_t : L.lltype =
-      L.function_type i32_t [| mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t |] in
   let lclear_func : L.llvalue =
-      L.declare_function "clear" lclear_t the_module in
+      L.declare_function "__gmpz_clear" lclear_t the_module in
   (* We don't use the mpz_out_str because FILE* is a pain *)
   let lprint_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t |] in
@@ -107,6 +107,7 @@ let translate (globals, functions) =
     and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder 
     and point_format_str = L.build_global_stringptr "%s\n" "fmt" builder
     in
+
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
@@ -135,7 +136,16 @@ let translate (globals, functions) =
                    with Not_found -> StringMap.find n global_vars
     in
 
-    let lint_helper func args name = L.build_call func args name builder
+    (* Helper function to deal with unassigned lint lits 
+       Returns: Array with mpz_t pointer to be used for function args *)
+    let llit_helper i = 
+      let lstr = L.build_global_stringptr i "string" builder
+      and space = L.build_alloca (ltype_of_typ A.Lint) "" builder in 
+      let calls = ignore(L.build_call linit_func 
+        [| L.build_in_bounds_gep space [| L.const_int i32_t 0 |] "" builder; lstr; L.const_int i32_t 10 |] 
+        "__gmpz_init_set_str" builder);
+        [| L.build_in_bounds_gep space [| L.const_int i32_t 0 |] "" builder |]
+      in calls
     in
 
     (* Construct code for an expression; return its value *)
@@ -189,6 +199,7 @@ let translate (globals, functions) =
           L.build_call lprint_func 
           (match e with
             SId s -> [| (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 0 |] "" builder) |] 
+          | SLintlit i -> llit_helper i
           | _     -> raise (Failure("printl param not yet allowed"))) "printl" builder
       | SCall ("printpt", [e]) ->
       L.build_call printf_func [| point_format_str ; (expr builder e) |]
@@ -230,10 +241,15 @@ let translate (globals, functions) =
     (* Build the code for each statement in the function *)
     let builder = stmt builder (SBlock fdecl.sbody) in
 
+    (*#TODO:  We need some code to clear our lints so free all at the end of this function 
+       We will iterate through our locals map and add clears at the end of each of 
+       them *)
+
     (* Add a return if the last block falls off the end *)
     add_terminal builder (match fdecl.styp with
         A.Void -> L.build_ret_void
       | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
+
   in
 
   List.iter build_function_body functions;
