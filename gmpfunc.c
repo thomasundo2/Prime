@@ -6,20 +6,29 @@
 
 // Don't need assign here. Keep as string until necessary
 
-void printl(char *num)
+// void printl(char *num)
+// {
+//     mpz_t n;
+//     mpz_init(n);
+//     mpz_set_ui(n, 0);
+//     if (mpz_set_str(n, num, 10) != 0) {
+//         printf("Failed to assign number");
+//         mpz_clear(n);
+//         exit(1);
+//     }
+//     mpz_out_str(stdout, 10, n);
+//     mpz_clear(n);
+// }
+
+void init(mpz_t *n)
 {
-    mpz_t n;
-    mpz_init(n);
-    mpz_set_ui(n, 0);
-    if (mpz_set_str(n, num, 10) != 0) {
-        printf("Failed to assign number");
-        mpz_clear(n);
-        exit(1);
-    }
-    mpz_out_str(stdout, 10, n);
-    mpz_clear(n);
+    return;
 }
 
+void printl(mpz_t n)
+{
+    mpz_out_str(stdout, 10, n);
+}
 
 // raise to power. returns string so that we can store in symbol table
 // Q: How to return without leaking memory
@@ -126,26 +135,27 @@ char *sub(char *left, char *right)
 #ifdef BUILD_TEST
 int main()
 {
+
     // Create a lint through assignment to an id
-    char *id1 = "1934759237458927349587234858395728";
-    printf("n = ");
-    printl(id1);
-    printf("\n");
+    // char *id1 = "1934759237458927349587234858395728";
+    // printf("n = ");
+    // printl(id1);
+    // printf("\n");
     
-    // Do some operation(s) on lint
-    printf("Squaring:\n");
-    char *fun = pow(id1, 2);
-    printf("%s", fun);
-    printf("\n");
+    // // Do some operation(s) on lint
+    // printf("Squaring:\n");
+    // char *fun = pow(id1, 2);
+    // printf("%s", fun);
+    // printf("\n");
 
-    printf("Adding\n");
-    char *added = add("4035273409750284735027430528934750", "139487619823469187364916398427");
-    printf("%s", added);
-    printf("\n");
+    // printf("Adding\n");
+    // char *added = add("4035273409750284735027430528934750", "139487619823469187364916398427");
+    // printf("%s", added);
+    // printf("\n");
 
-    // clean up
-    free(fun);
-    free(added);
+    // // clean up
+    // free(fun);
+    // free(added);
     return 0;
 }
 #endif

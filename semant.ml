@@ -39,7 +39,7 @@ let built_in_decls =
                                                ("prints", String);
                                                ("printl", Lint);
                                                ("printpt", Point); ] 
-  (* Add calls to built-in gmp methods here *)
+  (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 
 (* Now keep track of these named built-in funcs in the top-level symbol table *)
@@ -70,7 +70,7 @@ in
 
 (* check function bodies *)
 let check_function func =
-  (* All TODO: *)
+  (* All #TODO: *)
   (* check type and identifiers in formal parameters and local vars *)
   (* check all assignments are valid types. Should we co-erce? *)
   let check_assign lvaltype rvaltype err =  

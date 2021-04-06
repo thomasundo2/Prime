@@ -33,16 +33,21 @@ let translate (globals, functions) =
   and i8_t       = L.i8_type     context
   and string_t   = L.pointer_type (L.i8_type context)
   and point_t    = L.pointer_type (L.i8_type context)
-  and void_t     = L.void_type   context in
+  and void_t     = L.void_type   context
+  (* and mpz_t      = L.struct_type context [| (L.i32_type context); (L.i32_type context); (L.pointer_type (L.i64_type context)) |] *)
+(* in *)
+  and mpz_t      = L.named_struct_type context "mpz_t" 
+    in let mpz_t = L.struct_set_body mpz_t [| (L.i32_type context); (L.i32_type context); L.pointer_type (L.i64_type context) |] false; mpz_t
+  in
 
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
-      A.String   -> string_t
-    | A.Lint     -> string_t
-    |  A.Point -> point_t 
-    | A.Int      -> i32_t
-    | A.Void     -> void_t
-    | _ -> void_t
+    A.String   -> string_t
+  | A.Lint     -> mpz_t
+  | A.Point    -> point_t 
+  | A.Int      -> i32_t
+  | A.Void     -> void_t
+  | _          -> void_t
   in
 
   (* Create a map of global variables after creating each *)
@@ -60,6 +65,19 @@ let translate (globals, functions) =
 
   (* Declare our external functions here*)
   (* LINTS *)
+  let linit_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; string_t; i32_t |] in
+  let linit_func : L.llvalue =
+      L.declare_function "__gmpz_init_set_str" linit_t the_module in
+  let lclear_t : L.lltype =
+      L.function_type i32_t [| mpz_t |] in
+  let lclear_func : L.llvalue =
+      L.declare_function "clear" lclear_t the_module in
+  (* We don't use the mpz_out_str because FILE* is a pain *)
+  let lprint_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t |] in
+  let lprint_func : L.llvalue =
+      L.declare_function "printl" lprint_t the_module in
   let ladd_t : L.lltype =
       L.function_type string_t [| string_t; string_t |] in
   let ladd_func : L.llvalue =
@@ -95,9 +113,9 @@ let translate (globals, functions) =
     let local_vars =
       let add_formal m (t, n) p =
         L.set_value_name n p;
-	let local = L.build_alloca (ltype_of_typ t) n builder in
-        ignore (L.build_store p local builder);
-	StringMap.add n local m
+      let local = L.build_alloca (ltype_of_typ t) n builder in
+            ignore (L.build_store p local builder);
+      StringMap.add n local m
 
       (* Allocate space for any locally declared variables and add the
        * resulting registers to our map *)
@@ -117,13 +135,21 @@ let translate (globals, functions) =
                    with Not_found -> StringMap.find n global_vars
     in
 
+    let lint_helper func args name = L.build_call func args name builder
+    in
+
     (* Construct code for an expression; return its value *)
     let rec expr builder ((_, e) : sexpr) = match e with
-        SStrlit i  ->  L.build_global_stringptr i "string" builder
-      | SLit i  -> L.const_int i32_t i
+        SStrlit i     -> L.build_global_stringptr i "string" builder
+      | SLintlit i    -> L.build_global_stringptr i "string" builder
+      | SLit i        -> L.const_int i32_t i
       | SPtlit (i, j) -> L.const_array point_t [| expr builder i ; expr builder j|]
-      | SNoexpr    -> L.const_int i32_t 0
-      | SId s       -> L.build_load (lookup s) s builder
+      | SNoexpr       -> L.const_int i32_t 0
+      | SId s         -> L.build_load (lookup s) s builder
+      | SAssign (s, ((A.Lint, _) as e1)) -> let string_val = expr builder e1 and zero = L.const_int i32_t 0 in
+        L.build_call linit_func 
+        [| L.build_in_bounds_gep (lookup s) [| zero |] "" builder;
+        string_val; L.const_int i32_t 10 |] "__gmpz_init_set_str" builder 
       | SAssign (s, e) -> let e' = expr builder e in
                            ignore(L.build_store e' (lookup s) builder); e' 
       | SBinop ((A.Lint, _) as e1, operator, e2) ->
@@ -156,12 +182,17 @@ let translate (globals, functions) =
       | SCall ("prints", [e]) -> (*print string*)
           L.build_call printf_func [| string_format_str ; (expr builder e) |]
           "printf" builder
-      | SCall ("printl", [e]) ->
-          L.build_call printf_func [| string_format_str ; (expr builder e) |]
-          "printf" builder
-	  | SCall ("printpt", [e]) ->
-	  L.build_call printf_func [| point_format_str ; (expr builder e) |]
-                "printf" builder
+      | SCall ("printl", [(_, e)]) ->
+          (* print_string "Printing lint"; *)
+          (* L.build_call printf_func [| string_format_str ; (expr builder e) |]
+          "printf" builder *)
+          L.build_call lprint_func 
+          (match e with
+            SId s -> [| (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 0 |] "" builder) |] 
+          | _     -> raise (Failure("printl param not yet allowed"))) "printl" builder
+      | SCall ("printpt", [e]) ->
+      L.build_call printf_func [| point_format_str ; (expr builder e) |]
+                  "printf" builder
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in
