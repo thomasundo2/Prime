@@ -110,7 +110,6 @@ let check_function func =
 	    let e1' = expr e1
  	    and e2' = expr e2 in
 	    (Point, SPtlit(e1', e2'))
-	| Access(s, i) -> (Int, SAccess(s, i))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in
             let ty = match op with
