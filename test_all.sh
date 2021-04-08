@@ -79,9 +79,8 @@ fi
 # done
 
 # Compile/link in gmpfunc file
-cc -c gmpfunc.c 
+cc -c gmpfunc.c
 cc -c structs.c
-
 # Tests we want to do for now
 if [ $# -ge 1 ]
 then
@@ -98,6 +97,7 @@ else
     Test tests/test_ass.pr 2>> $logfile
     Test tests/test_point.pr 2>> $logfile
     Test tests/test_pointadd.pr 2>> $logfile
+    Test tests/test_lint.pr 2>> $logfile
     # Test tests/test_var1_fail.pr 2>> $logfile
 fi
 
