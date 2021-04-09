@@ -4,26 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Don't need assign here. Keep as string until necessary
-
-// void printl(char *num)
-// {
-//     mpz_t n;
-//     mpz_init(n);
-//     mpz_set_ui(n, 0);
-//     if (mpz_set_str(n, num, 10) != 0) {
-//         printf("Failed to assign number");
-//         mpz_clear(n);
-//         exit(1);
-//     }
-//     mpz_out_str(stdout, 10, n);
-//     mpz_clear(n);
-// }
-
-void init(mpz_t *n)
-{
-    return;
-}
 
 void printl(mpz_t n)
 {
@@ -81,33 +61,6 @@ char *power(char *base, unsigned long int exp)
 }
 
 
-// for lint addition
-// char *add(char *left, char *right)
-// {
-//     mpz_t n1;
-//     mpz_t n2;
-//     mpz_init(n1);
-//     mpz_init(n2);
-//     if (mpz_set_str(n1, left, 10) != 0) {
-//         printf("Failed to assign number");
-//         mpz_clear(n1);
-//         mpz_clear(n2);
-//         exit(1);
-//     }
-//     if (mpz_set_str(n2, right, 10) != 0) {
-//         printf("Failed to assign number");
-//         mpz_clear(n1);
-//         mpz_clear(n2);   
-//         exit(1);
-//     }
-//     mpz_add(n1, n1, n2);
-//     // mpz_out_str(stdout, 10, n1);
-//     char *ret_str = mpz_get_str(NULL, 10, n1);
-//     mpz_clear(n1);
-//     mpz_clear(n2);
-//     return ret_str;
-// }
-
 // char *sub(char *left, char *right)
 // {
 //     mpz_t n1;
@@ -133,10 +86,6 @@ char *power(char *base, unsigned long int exp)
 //     return ret_str;
 // }
 
-mpz_t add(mpz_t left, mpz_t right)
-{
-    
-}
 
 #ifdef BUILD_TEST
 int main()

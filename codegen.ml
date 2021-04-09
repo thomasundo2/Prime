@@ -141,30 +141,36 @@ let translate (globals, functions) =
     in
 
     (* Helper function to deal with unassigned lint lits 
-       Returns: Array with mpz_t pointer to be used for function args *)
+       Returns: mpz_t pointer to be used for function args *)
     let llit_helper i = 
       let lstr = L.build_global_stringptr i "string" builder
       and space = L.build_alloca (ltype_of_typ A.Lint) "" builder in 
       let calls = ignore(L.build_call linit_func 
         [| L.build_in_bounds_gep space [| L.const_int i32_t 0 |] "" builder; lstr; L.const_int i32_t 10 |] 
         "__gmpz_init_set_str" builder);
-        [| L.build_in_bounds_gep space [| L.const_int i32_t 0 |] "" builder |]
+        L.build_in_bounds_gep space [| L.const_int i32_t 0 |] "" builder
       in calls
       (* how to free after done using *)
     in
 
+    (* Helpful when writing geps *)
+    let zero = L.const_int i32_t 0
+    in
+
     (* Construct code for an expression; return its value *)
-    let rec expr builder ((_, e) : sexpr) = match e with
+    let rec expr builder ((stype, e) : sexpr) = match e with
         SStrlit i     -> L.build_global_stringptr i "string" builder
-      | SLintlit i    -> L.build_global_stringptr i "string" builder
+      | SLintlit i    -> llit_helper i (* Pointer to new mpz*)
       | SLit i        -> L.const_int i32_t i
       | SPtlit (i, j) -> L.const_array point_t [| expr builder i ; expr builder j|]
       | SNoexpr       -> L.const_int i32_t 0
-      | SId s         -> L.build_load (lookup s) s builder
-      | SAssign (s, ((A.Lint, _) as e1)) -> let string_val = expr builder e1 and zero = L.const_int i32_t 0 in
-        L.build_call linit_func 
-        [| L.build_in_bounds_gep (lookup s) [| zero |] "" builder;
-        string_val; L.const_int i32_t 10 |] "__gmpz_init_set_str" builder 
+      | SId s         -> (match stype with 
+                          A.Lint -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
+                        | _      -> L.build_load (lookup s) s builder)
+      | SAssign (s, ((A.Lint, _) as e1)) -> let e1' = expr builder e1 in
+                (* Here we have a pointer to mpz val *)
+                ignore(L.build_call linitdup_func 
+                [| L.build_in_bounds_gep (lookup s) [| zero |] s builder; e1' |] "" builder); e1'
       | SAssign (s, e) -> let e' = expr builder e in
                            ignore(L.build_store e' (lookup s) builder); e' 
       | SBinop ((A.Lint, _) as e1, operator, e2) ->
@@ -173,26 +179,11 @@ let translate (globals, functions) =
        * If its lintlit use helper function to make new mpz_t and get pointer to it 
        * Helper function will return a 1d array. Concat 2 1elt array. call OCaml array.append
        * Pass this to Add *)
-              let e1' = snd e1
-              and e2' = snd e2 in
+              let e1' = expr builder e1
+              and e2' = expr builder e2 in
               (match operator with
-              | A.Add       -> (*L.build_call ladd_func [| e1'; e2' |] "add" builder*)
-                      let tmp = llit_helper "0" in 
-                      let res = ignore(
-                      L.build_call ladd_func (Array.concat
-                      [ tmp; (*alloca, initalize to 0, return a pointer to it *) 
-                      (match e1' with
-                      SId s -> [| (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 0 |] 
-                                s builder) |]
-                      (*| SLintlit i -> llit_helper i*)
-                      | _          -> raise (Failure (string_of_sexpr (A.Lint, e1')))
-                      );
-                      (match e2' with
-                      SId s -> [| (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 0 |]  
-                                s builder) |]
-                      (*| SLintlit i -> llit_helper i*)
-                      | _          -> raise (Failure (string_of_sexpr (A.Lint, e2')))
-                      )]) "__gmpz_add" builder); tmp.(0) in res
+              | A.Add       -> let tmp = llit_helper "0" in 
+                let res = ignore(L.build_call ladd_func [| tmp; e1'; e2' |] "__gmpz_add" builder); tmp in res
               (*| A.Pow     -> L.build_call lpow_func [| e1'; e2' |] "power" builder*)
               | _         -> raise (Failure "Operator not implemented for Lint")
               ) 
@@ -226,7 +217,7 @@ let translate (globals, functions) =
           (match e with
             SId s -> [| (L.build_in_bounds_gep (lookup s) 
                         [| L.const_int i32_t 0 |] "" builder) |] 
-          | SLintlit i -> llit_helper i
+          | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) (*raise (Failure("printl param not yet allowed")))*) "printl" builder
       | SCall ("printpt", [e]) ->
       L.build_call printf_func [| point_format_str ; (expr builder e) |]
