@@ -146,6 +146,7 @@ let translate (globals, functions) =
         "__gmpz_init_set_str" builder);
         [| L.build_in_bounds_gep space [| L.const_int i32_t 0 |] "" builder |]
       in calls
+      (* how to free after done using *)
     in
 
     (* Construct code for an expression; return its value *)
@@ -162,12 +163,31 @@ let translate (globals, functions) =
         string_val; L.const_int i32_t 10 |] "__gmpz_init_set_str" builder 
       | SAssign (s, e) -> let e' = expr builder e in
                            ignore(L.build_store e' (lookup s) builder); e' 
-      | SBinop ((A.Lint, _) as e1, operator, e2) ->
-              let e1' = expr builder e1
-              and e2' = expr builder e2 in
+      | SBinop ((A.Lint, _) as [(_, e1)], operator, [(_, e2)] ->
+      (* for e1, e2 take second argument of the tuple (A.Lint, _) and do what printl does. 
+       * See if its an id or lintlit. If id get inbounds elt pointer to struct. 
+       * If its lintlit use helper function to make new mpz_t and get pointer to it 
+       * Helper function will return a 1d array. Concat 2 1elt array. call OCaml array.append
+       * Pass this to Add *)
+              (*let e1' = expr builder e1
+              and e2' = expr builder e2 in*)
               (match operator with
-              | A.Add     -> L.build_call ladd_func [| e1'; e2' |] "add" builder
-              | A.Pow     -> L.build_call lpow_func [| e1'; e2' |] "power" builder
+              | A.Add       -> (*L.build_call ladd_func [| e1'; e2' |] "add" builder*)
+                      L.build_call ladd_func
+                      (match e1 with
+                      SId s -> [| (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 0 |] 
+                                "" builder) |]
+                      | SLintlit i -> llit_helper i
+                      | _          -> raise (Failure("printl param not yet allowed")) 
+                        "add" builder
+                      )
+                      (match e2 with
+                      SId s -> [| (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 0 |]                                   "" builder) |]
+                      | SLintlit i -> llit_helper i
+                      | _          -> raise (Failure("printl param not yet allowed"))
+                        "add" builder
+                      )
+              | A.Pow     -> L.build_call lpow_func [| e1; e2 |] "power" builder
               | _         -> raise (Failure "Operator not implemented for Lint")
               ) 
       | SBinop (e1, operator, e2) ->
@@ -243,7 +263,12 @@ let translate (globals, functions) =
 
     (*#TODO:  We need some code to clear our lints so free all at the end of this function 
        We will iterate through our locals map and add clears at the end of each of 
-       them *)
+       them
+       have map that contains all the lints (does local vars work for this?) if not
+       we need to make new map.
+       Function called for each lint, check elt match type with A.Lint getelementptr inbounds
+       and pass to lclear_t same way we pass stuff to printl. 
+       *)
 
     (* Add a return if the last block falls off the end *)
     add_terminal builder (match fdecl.styp with
