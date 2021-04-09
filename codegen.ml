@@ -86,10 +86,24 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let ladd_func : L.llvalue =
       L.declare_function "__gmpz_add" ladd_t the_module in
+  let lsub_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let lsub_func : L.llvalue =
+      L.declare_function "__gmpz_sub" lsub_t the_module in
+  let lmul_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let lmul_func : L.llvalue =
+      L.declare_function "__gmpz_mul" lmul_t the_module in
+  let ldiv_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let ldiv_func : L.llvalue =
+      L.declare_function "__gmpz_tdiv_q" ldiv_t the_module in
+  (* This power function will be used to raise to an unsigned int power *)
+  (* #TODO *)
   let lpow_t : L.lltype = 
-      L.function_type string_t [| string_t; i32_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; i32_t |] in
   let lpow_func : L.llvalue = 
-      L.declare_function "power" lpow_t the_module in
+      L.declare_function "__gmpz_pow_ui" lpow_t the_module in
 
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
@@ -180,13 +194,14 @@ let translate (globals, functions) =
        * Helper function will return a 1d array. Concat 2 1elt array. call OCaml array.append
        * Pass this to Add *)
               let e1' = expr builder e1
-              and e2' = expr builder e2 in
-              (match operator with
-              | A.Add       -> let tmp = llit_helper "0" in 
-                let res = ignore(L.build_call ladd_func [| tmp; e1'; e2' |] "__gmpz_add" builder); tmp in res
-              (*| A.Pow     -> L.build_call lpow_func [| e1'; e2' |] "power" builder*)
-              | _         -> raise (Failure "Operator not implemented for Lint")
-              ) 
+              and e2' = expr builder e2 
+              and tmp = llit_helper "0" in
+              ignore((match operator with
+                       A.Add -> L.build_call ladd_func [| tmp; e1'; e2' |] "__gmpz_add" builder
+                     | A.Sub -> L.build_call lsub_func [| tmp; e1'; e2' |] "__gmpz_sub" builder   
+                     | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" builder
+                     | _     -> raise (Failure "Operator not implemented for Lint")
+                     )); tmp
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in

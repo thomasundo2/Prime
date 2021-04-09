@@ -127,7 +127,7 @@ let check_function func =
           (* Determine expression type based on operator and operand types *)
           let ty = match op with
             Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
-          | Add                               when same && t1 = Lint -> Lint
+          | Add | Sub                         when same && t1 = Lint -> Lint
           | Pow                               when t1 = Lint && t2 = Int -> Lint
           | _ -> raise (
               Failure ("illegal binary operator " ^
