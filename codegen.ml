@@ -79,9 +79,9 @@ let translate (globals, functions) =
   let lprint_func : L.llvalue =
       L.declare_function "printl" lprint_t the_module in
   let ladd_t : L.lltype =
-      L.function_type string_t [| string_t; string_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let ladd_func : L.llvalue =
-      L.declare_function "add" ladd_t the_module in
+      L.declare_function "__gmpz_add" ladd_t the_module in
   let lpow_t : L.lltype = 
       L.function_type string_t [| string_t; i32_t |] in
   let lpow_func : L.llvalue = 
@@ -163,31 +163,33 @@ let translate (globals, functions) =
         string_val; L.const_int i32_t 10 |] "__gmpz_init_set_str" builder 
       | SAssign (s, e) -> let e' = expr builder e in
                            ignore(L.build_store e' (lookup s) builder); e' 
-      | SBinop ((A.Lint, _) as [(_, e1)], operator, [(_, e2)] ->
+      | SBinop ((A.Lint, _) as e1, operator, e2) ->
       (* for e1, e2 take second argument of the tuple (A.Lint, _) and do what printl does. 
        * See if its an id or lintlit. If id get inbounds elt pointer to struct. 
        * If its lintlit use helper function to make new mpz_t and get pointer to it 
        * Helper function will return a 1d array. Concat 2 1elt array. call OCaml array.append
        * Pass this to Add *)
-              (*let e1' = expr builder e1
-              and e2' = expr builder e2 in*)
+              let e1' = snd e1
+              and e2' = snd e2 in
               (match operator with
               | A.Add       -> (*L.build_call ladd_func [| e1'; e2' |] "add" builder*)
-                      L.build_call ladd_func
-                      (match e1 with
+                      let tmp = llit_helper "0" in 
+                      let res = ignore(
+                      L.build_call ladd_func (Array.concat
+                      [ tmp; (*alloca, initalize to 0, return a pointer to it *) 
+                      (match e1' with
                       SId s -> [| (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 0 |] 
-                                "" builder) |]
-                      | SLintlit i -> llit_helper i
-                      | _          -> raise (Failure("printl param not yet allowed")) 
-                        "add" builder
-                      )
-                      (match e2 with
-                      SId s -> [| (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 0 |]                                   "" builder) |]
-                      | SLintlit i -> llit_helper i
-                      | _          -> raise (Failure("printl param not yet allowed"))
-                        "add" builder
-                      )
-              | A.Pow     -> L.build_call lpow_func [| e1; e2 |] "power" builder
+                                s builder) |]
+                      (*| SLintlit i -> llit_helper i*)
+                      | _          -> raise (Failure (string_of_sexpr (A.Lint, e1')))
+                      );
+                      (match e2' with
+                      SId s -> [| (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 0 |]  
+                                s builder) |]
+                      (*| SLintlit i -> llit_helper i*)
+                      | _          -> raise (Failure (string_of_sexpr (A.Lint, e2')))
+                      )]) "__gmpz_add" builder); tmp.(0) in res
+              (*| A.Pow     -> L.build_call lpow_func [| e1'; e2' |] "power" builder*)
               | _         -> raise (Failure "Operator not implemented for Lint")
               ) 
       | SBinop (e1, operator, e2) ->
@@ -212,15 +214,16 @@ let translate (globals, functions) =
       | SCall ("prints", [e]) -> (*print string*)
           L.build_call printf_func [| string_format_str ; (expr builder e) |]
           "printf" builder
-      | SCall ("printl", [(_, e)]) ->
+      | SCall ("printl", [(_, e) as ptr]) ->
           (* print_string "Printing lint"; *)
           (* L.build_call printf_func [| string_format_str ; (expr builder e) |]
           "printf" builder *)
           L.build_call lprint_func 
           (match e with
-            SId s -> [| (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 0 |] "" builder) |] 
+            SId s -> [| (L.build_in_bounds_gep (lookup s) 
+                        [| L.const_int i32_t 0 |] "" builder) |] 
           | SLintlit i -> llit_helper i
-          | _     -> raise (Failure("printl param not yet allowed"))) "printl" builder
+          | _     -> [| expr builder ptr |]) (*raise (Failure("printl param not yet allowed")))*) "printl" builder
       | SCall ("printpt", [e]) ->
       L.build_call printf_func [| point_format_str ; (expr builder e) |]
                   "printf" builder
