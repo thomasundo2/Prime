@@ -69,6 +69,10 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; string_t; i32_t |] in
   let linit_func : L.llvalue =
       L.declare_function "__gmpz_init_set_str" linit_t the_module in
+  let linitdup_t : L.lltype = 
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let linitdup_func : L.llvalue = 
+      L.declare_function "__gmpz_init_set" linitdup_t the_module in
   let lclear_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t |] in
   let lclear_func : L.llvalue =
@@ -79,9 +83,9 @@ let translate (globals, functions) =
   let lprint_func : L.llvalue =
       L.declare_function "printl" lprint_t the_module in
   let ladd_t : L.lltype =
-      L.function_type string_t [| string_t; string_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let ladd_func : L.llvalue =
-      L.declare_function "add" ladd_t the_module in
+      L.declare_function "__gmpz_add" ladd_t the_module in
   let lpow_t : L.lltype = 
       L.function_type string_t [| string_t; i32_t |] in
   let lpow_func : L.llvalue = 
@@ -163,11 +167,12 @@ let translate (globals, functions) =
       | SAssign (s, e) -> let e' = expr builder e in
                            ignore(L.build_store e' (lookup s) builder); e' 
       | SBinop ((A.Lint, _) as e1, operator, e2) ->
-              let e1' = expr builder e1
-              and e2' = expr builder e2 in
+              let e1' = snd e1
+              and e2' = snd e2 in
+
               (match operator with
-              | A.Add     -> L.build_call ladd_func [| e1'; e2' |] "add" builder
-              | A.Pow     -> L.build_call lpow_func [| e1'; e2' |] "power" builder
+              | A.Add     -> L.build_call ladd_func [| e1'; e2' |] "__gmpz_add" builder
+              (* | A.Pow     -> L.build_call lpow_func [| e1'; e2' |] "power" builder *)
               | _         -> raise (Failure "Operator not implemented for Lint")
               ) 
       | SBinop (e1, operator, e2) ->

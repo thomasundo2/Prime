@@ -1,9 +1,17 @@
 int main()
 {
     lint test;
-    test = "123412341341231324132132412413241234123";
+    lint test2;
+    test = 123412341341231324132132412413241234123l;
     printl(test);
-    printl(test + test);
-    printl(test ^ 2);
+    printl(123412341341231324132132412413241234123l);
+    /* Now test different combinations of literals and IDs */
+    /* printl(test + test); */
+    /* printl(test + 12l); */
+    /* printl(13l + 12l); */
+    /* printl(test ^ 2); */
+    /* test2 = test1; */
+    /* test2 = test2 - test1; */
+    /* printl(test2); */
     return 0;
 }

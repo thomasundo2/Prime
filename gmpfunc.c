@@ -82,55 +82,60 @@ char *power(char *base, unsigned long int exp)
 
 
 // for lint addition
-char *add(char *left, char *right)
-{
-    mpz_t n1;
-    mpz_t n2;
-    mpz_init(n1);
-    mpz_init(n2);
-    if (mpz_set_str(n1, left, 10) != 0) {
-        printf("Failed to assign number");
-        mpz_clear(n1);
-        mpz_clear(n2);
-        exit(1);
-    }
-    if (mpz_set_str(n2, right, 10) != 0) {
-        printf("Failed to assign number");
-        mpz_clear(n1);
-        mpz_clear(n2);   
-        exit(1);
-    }
-    mpz_add(n1, n1, n2);
-    // mpz_out_str(stdout, 10, n1);
-    char *ret_str = mpz_get_str(NULL, 10, n1);
-    mpz_clear(n1);
-    mpz_clear(n2);
-    return ret_str;
-}
+// char *add(char *left, char *right)
+// {
+//     mpz_t n1;
+//     mpz_t n2;
+//     mpz_init(n1);
+//     mpz_init(n2);
+//     if (mpz_set_str(n1, left, 10) != 0) {
+//         printf("Failed to assign number");
+//         mpz_clear(n1);
+//         mpz_clear(n2);
+//         exit(1);
+//     }
+//     if (mpz_set_str(n2, right, 10) != 0) {
+//         printf("Failed to assign number");
+//         mpz_clear(n1);
+//         mpz_clear(n2);   
+//         exit(1);
+//     }
+//     mpz_add(n1, n1, n2);
+//     // mpz_out_str(stdout, 10, n1);
+//     char *ret_str = mpz_get_str(NULL, 10, n1);
+//     mpz_clear(n1);
+//     mpz_clear(n2);
+//     return ret_str;
+// }
 
-char *sub(char *left, char *right)
+// char *sub(char *left, char *right)
+// {
+//     mpz_t n1;
+//     mpz_t n2;
+//     mpz_init(n1);
+//     mpz_init(n2);
+//     if (mpz_set_str(n1, left, 10) != 0){
+//         printf("Failed to assign number");
+//         mpz_clear(n1);
+//         mpz_clear(n2);
+//         exit(1);
+//     }
+//     if (mpz_set_str(n2, right, 10) != 0) {
+//         printf("Failed to assign number");
+//         mpz_clear(n1);
+//         mpz_clear(n2);
+//         exit(1);
+//     }
+//     mpz_sub(n1, n1, n2);
+//     char *ret_str = mpz_get_str(NULL, 10, n1);
+//     mpz_clear(n1);
+//     mpz_clear(n2);
+//     return ret_str;
+// }
+
+mpz_t add(mpz_t left, mpz_t right)
 {
-    mpz_t n1;
-    mpz_t n2;
-    mpz_init(n1);
-    mpz_init(n2);
-    if (mpz_set_str(n1, left, 10) != 0){
-        printf("Failed to assign number");
-        mpz_clear(n1);
-        mpz_clear(n2);
-        exit(1);
-    }
-    if (mpz_set_str(n2, right, 10) != 0) {
-        printf("Failed to assign number");
-        mpz_clear(n1);
-        mpz_clear(n2);
-        exit(1);
-    }
-    mpz_sub(n1, n1, n2);
-    char *ret_str = mpz_get_str(NULL, 10, n1);
-    mpz_clear(n1);
-    mpz_clear(n2);
-    return ret_str;
+    
 }
 
 #ifdef BUILD_TEST
