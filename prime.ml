@@ -33,4 +33,3 @@ let () = (* don't care about return type *)
         Codegen.translate sast in
           Llvm_analysis.assert_valid_module modu;
           print_string (Llvm.string_of_llmodule modu)
-    | _       -> raise (Failure "invalid option provided")

@@ -7,10 +7,7 @@
 %token ACCESS
 %token RETURN IF ELSE FOR WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
-%token <string> CHARLIT // Is there a way to change this to char from scanner?
-%token <string> STRLIT
-//%token <string> LNTLIT
-%token <string> ID
+%token <string> STRLIT LINTLIT ID
 %token EOF
 
 %start program
@@ -111,9 +108,8 @@ expr_opt:
 expr:
     ID               { Id($1) }
   | LITERAL          { Lit($1) }
-  //| CHARLIT          {  }
   | STRLIT           { Strlit($1) }
-  //| LNTLIT           {}
+  | LINTLIT          { Lintlit($1) }
   | LBRACK expr COMMA expr RBRACK { Ptlit ($2, $4) }
   //| expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr { Binop($1, Mod, $3) }

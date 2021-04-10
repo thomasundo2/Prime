@@ -17,10 +17,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run Hello World Test
+          name: Run Regression Test Suite
           command: |
             make all
-            ./hello_world.sh
+            ./test_all.sh
 workflows:
   version: 2
   Build_Test:

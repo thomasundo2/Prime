@@ -5,6 +5,7 @@ type sexpr = typ * sx
 and sx =
     SLit of int
   | SStrlit of string
+  | SLintlit of string
   | SPtlit of sexpr * sexpr
   | SAccess of string * int
   | SId of string
@@ -36,7 +37,8 @@ type sprogram = bind list * sfunc_decl list
 
 let rec string_of_sexpr (t, e) =
   "(" ^ string_of_typ t ^ " : " ^ (match e with
-  SStrlit(l) -> "\"" ^ l ^ "\""
+    SStrlit(l) -> "\"" ^ l ^ "\""
+  | SLintlit(l) -> l
   | SPtlit(i, j) -> "[" ^ string_of_sexpr i ^ "," ^ string_of_sexpr j ^ "]"
   | SAccess(s, i) ->s ^"[" ^ string_of_int i ^ "]"
   | SLit(l) -> string_of_int l
