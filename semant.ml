@@ -99,6 +99,10 @@ let check_function func =
   | Id s -> (type_of_identifier s, SId s)
   | Strlit l -> (String, SStrlit l) (* String literals *)
   | Lintlit l -> (Lint, SLintlit l)
+  | Ptlit(e1, e2) -> 
+      let e1' = expr e1 
+      and e2' = expr e2 in 
+      (Point, SPtlit(e1', e2'))
   | Noexpr   -> (Void, SNoexpr)
   | Assign(var, e) as ex ->
           let lt = type_of_identifier var
@@ -106,10 +110,7 @@ let check_function func =
           let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
             string_of_typ rt ^ " in " ^ string_of_expr ex
           in (check_assign lt rt err, SAssign(var, (rt, e')))
-  | Ptlit(e1, e2) -> 
-    let e1' = expr e1 
-    and e2' = expr e2 in 
-    (Point, SPtlit(e1', e2'))
+	| Access(s, i) -> (Int, SAccess(s, i))
   | Unop(op, e) as ex ->
           let (t, e') = expr e in
           let ty = match op with

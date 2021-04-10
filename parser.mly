@@ -81,7 +81,7 @@ declare_init:
 declarator:
     ID { $1 }
   | ID ASSIGN expr {$1} // Allow assignment
-  //| ID LPAREN params_opt RPAREN {} // Points
+  //| ID LBRACK expr RBRACK { $1 } // Points
   //| ID LBRACK expr RBRACK {} // Rings
 
 seq_stmts:
@@ -129,7 +129,7 @@ expr:
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
   | NOT expr         { Unop(Not, $2)      }
   | ID ASSIGN expr   { Assign($1, $3)     }
-  //| ID LBRACK expr RBRACK ASSIGN expr {}
+  | ID LBRACK LITERAL RBRACK  {Access($1, $3)}
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
   // | LBRACK args_list RBRACK    { Ptlit($1, $2, $3)  }    // Point initialisation
   | LPAREN expr RPAREN {  $2  }

@@ -14,6 +14,8 @@ http://llvm.moe/ocaml/
 
 *)
 
+(*http://www.cs.columbia.edu/~sedwards/classes/2018/4115-fall/reports/FIRE.pdf*)
+(*Simple Shape Oriented Language*)
 module L = Llvm
 module A = Ast
 open Sast
@@ -34,10 +36,11 @@ let translate (globals, functions) =
   and string_t   = L.pointer_type (L.i8_type context)
   and point_t    = L.pointer_type (L.i8_type context)
   and void_t     = L.void_type   context
-  (* and mpz_t      = L.struct_type context [| (L.i32_type context); (L.i32_type context); (L.pointer_type (L.i64_type context)) |] *)
-(* in *)
   and mpz_t      = L.named_struct_type context "mpz_t" 
     in let mpz_t = L.struct_set_body mpz_t [| (L.i32_type context); (L.i32_type context); L.pointer_type (L.i64_type context) |] false; mpz_t
+  in
+  let point_t    = L.struct_type context [| i32_t ; i32_t |]
+  and string_t   = L.pointer_type (i8_t)
   in
 
   (* Return the LLVM type for a MicroC type *)
@@ -108,6 +111,20 @@ let translate (globals, functions) =
   let lpow_func : L.llvalue = 
       L.declare_function "__gmpz_pow_ui" lpow_t the_module in
 
+  (*points and printing points*)
+  let init_point_t : L.lltype =
+     L.function_type point_t [| i32_t; i32_t |] in
+  let init_point_func : L.llvalue =
+     L.declare_function "Point" init_point_t the_module in
+  let printpt_t : L.lltype =
+     L.function_type string_t [| point_t |] in
+  let printpt_func : L.llvalue =
+     L.declare_function "printpt" printpt_t the_module in
+  (* let ladd_t : L.lltype =
+      L.function_type string_t [| string_t; string_t |] in
+  let ladd_func : L.llvalue =
+      L.declare_function "add" ladd_t the_module in *)
+
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
   let function_decls : (L.llvalue * sfunc_decl) StringMap.t =
@@ -125,8 +142,7 @@ let translate (globals, functions) =
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
-    and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder 
-    and point_format_str = L.build_global_stringptr "%s\n" "fmt" builder
+    and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder
     in
 
     (* Construct the function's "locals": formal arguments and locally
@@ -179,7 +195,10 @@ let translate (globals, functions) =
         SStrlit i     -> L.build_global_stringptr i "string" builder
       | SLintlit i    -> llit_helper i (* Pointer to new mpz*)
       | SLit i        -> L.const_int i32_t i
-      | SPtlit (i, j) -> L.const_array point_t [| expr builder i ; expr builder j|]
+      | SPtlit (i, j) ->
+              let e1' = expr builder i
+              and e2' = expr builder j in
+              L.build_call init_point_func [| e1' ; e2' |] "Point" builder
       | SNoexpr       -> L.const_int i32_t 0
       | SId s         -> (match stype with 
                           A.Lint -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
@@ -211,7 +230,7 @@ let translate (globals, functions) =
               let e1' = expr builder e1
               and e2' = expr builder e2 in
               (match operator with
-                A.Add     -> L.build_add 
+                A.Add     -> L.build_add
               | A.Sub     -> L.build_sub
               | A.Mul     -> L.build_mul
               | A.Div     -> L.build_sdiv
@@ -221,8 +240,8 @@ let translate (globals, functions) =
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
               (match op with
-                A.Neg     -> L.build_neg
-              | A.Not     -> L.build_not) e' "tmp" builder
+                A.Neg     -> L.build_neg e' "tmp" builder
+              | A.Not     -> L.const_int i32_t (if e' = (L.const_int i32_t 0) then 1 else 0))
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	        "printf" builder
@@ -237,8 +256,8 @@ let translate (globals, functions) =
           | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) "printl" builder
       | SCall ("printpt", [e]) ->
-      L.build_call printf_func [| point_format_str ; (expr builder e) |]
-                  "printf" builder
+            let ptStr = L.build_call printpt_func [|expr builder e|] "printpt" builder in
+            L.build_call printf_func [| string_format_str ; ptStr |] "prints" builder
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in
