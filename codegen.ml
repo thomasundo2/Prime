@@ -98,8 +98,11 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let ldiv_func : L.llvalue =
       L.declare_function "__gmpz_tdiv_q" ldiv_t the_module in
+  let lmod_t : L.lltype = 
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let lmod_func : L.llvalue =
+      L.declare_function "__gmpz_tdiv_r" lmod_t the_module in
   (* This power function will be used to raise to an unsigned int power *)
-  (* #TODO *)
   let lpow_t : L.lltype = 
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; i32_t |] in
   let lpow_func : L.llvalue = 
@@ -199,8 +202,10 @@ let translate (globals, functions) =
               ignore((match operator with
                        A.Add -> L.build_call ladd_func [| tmp; e1'; e2' |] "__gmpz_add" builder
                      | A.Sub -> L.build_call lsub_func [| tmp; e1'; e2' |] "__gmpz_sub" builder   
+                     | A.Mul -> L.build_call lmul_func [| tmp; e1'; e2' |] "__gmpz_mul" builder   
+                     | A.Div -> L.build_call ldiv_func [| tmp; e1'; e2' |] "__gmpz_tdiv_q" builder   
+                     | A.Mod -> L.build_call lmod_func [| tmp; e1'; e2' |] "__gmpz_tdiv_r" builder   
                      | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" builder
-                     | _     -> raise (Failure "Operator not implemented for Lint")
                      )); tmp
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
@@ -225,15 +230,12 @@ let translate (globals, functions) =
           L.build_call printf_func [| string_format_str ; (expr builder e) |]
           "printf" builder
       | SCall ("printl", [(_, e) as ptr]) ->
-          (* print_string "Printing lint"; *)
-          (* L.build_call printf_func [| string_format_str ; (expr builder e) |]
-          "printf" builder *)
           L.build_call lprint_func 
           (match e with
             SId s -> [| (L.build_in_bounds_gep (lookup s) 
                         [| L.const_int i32_t 0 |] "" builder) |] 
           | SLintlit i -> [| llit_helper i |]
-          | _     -> [| expr builder ptr |]) (*raise (Failure("printl param not yet allowed")))*) "printl" builder
+          | _     -> [| expr builder ptr |]) "printl" builder
       | SCall ("printpt", [e]) ->
       L.build_call printf_func [| point_format_str ; (expr builder e) |]
                   "printf" builder
@@ -244,7 +246,7 @@ let translate (globals, functions) =
                         A.Void -> ""
                       | _ -> f ^ "_result") in
          L.build_call fdef (Array.of_list llargs) result builder
-      | _ -> L.const_int i32_t 0
+      (* | _ -> L.const_int i32_t 0 unused *)
     in
 
     (* LLVM insists each basic block end with exactly one "terminator"
