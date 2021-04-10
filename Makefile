@@ -1,13 +1,13 @@
 .PHONY : test
-test : all hello_world.sh
-	./hello_world.sh
+test : all test_all.sh
+	./test_all.sh
 
 .PHONY : all
-all : clean gmp prime.native gmpfunc.o
+all : clean gmp prime.native gmpfunc.o structs.o
 
 # this will serve to install the GNU multiple precision library onto our system
 .PHONY : gmp
-gmp: 
+gmp:
 	apt install -y libgmp-dev
 
 # We will now make the compiler
@@ -21,6 +21,13 @@ gmpfunc: gmp gmpfunc.c
 
 gmpfunc.o: gmp gmpfunc.c
 	cc -c gmpfunc.c
+
+structs: structs.c
+	cc -o structs -DBUILD_TEST structs.c -lgmp
+
+structs.o: structs.c
+	cc -c structs.c
+
 
 # Some old stuff:
 prime : parser.cmo scanner.cmo prime.cmo
@@ -61,6 +68,6 @@ scanner.cmx : parser.cmx
 .PHONY : clean
 clean :
 	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml prime.out prime
-	rm -rf *.exe *.ll *.s *.test a.out gmpfunc gmpfunc.o
+	rm -rf *.exe *.ll *.s *.test a.out gmpfunc gmpfunc.o structs structs.o
 	opam config exec -- \
 	ocamlbuild -clean

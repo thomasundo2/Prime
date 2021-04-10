@@ -83,7 +83,7 @@ let check_function func =
   (* make local symbol table and functions to use it*)
 
   (* Build local symbol table of variables for this function *)
-  let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m) 
+  let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
                        StringMap.empty (globals @ func.params @ func.locals )
   in
 
@@ -99,10 +99,6 @@ let check_function func =
   | Id s -> (type_of_identifier s, SId s)
   | Strlit l -> (String, SStrlit l) (* String literals *)
   | Lintlit l -> (Lint, SLintlit l)
-  | Ptlit(e1, e2) -> 
-      let e1' = expr e1 
-      and e2' = expr e2 in 
-      (Point, SPtlit(e1', e2'))
   | Noexpr   -> (Void, SNoexpr)
   | Assign(var, e) as ex ->
           let lt = type_of_identifier var
@@ -110,7 +106,10 @@ let check_function func =
           let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
             string_of_typ rt ^ " in " ^ string_of_expr ex
           in (check_assign lt rt err, SAssign(var, (rt, e')))
-	| Access(s, i) -> (Int, SAccess(s, i))
+  | Ptlit(e1, e2) ->
+	    let e1' = expr e1
+ 	    and e2' = expr e2 in
+	    (Point, SPtlit(e1', e2'))
   | Unop(op, e) as ex ->
           let (t, e') = expr e in
           let ty = match op with
@@ -129,6 +128,7 @@ let check_function func =
           let ty = match op with
             Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
           | Add | Sub | Mul | Div | Mod       when same && t1 = Lint -> Lint
+          | Add                               when same && t1 = Point -> Point
           | Pow                               when t1 = Lint && t2 = Int -> Lint
           | _ -> raise (
               Failure ("illegal binary operator " ^
@@ -151,6 +151,12 @@ let check_function func =
       in (fd.typ, SCall(name, args'))
   in
 
+  let check_int_expr e =
+      let (t', e') = expr e
+      and err = "expected integer expression in " ^ string_of_expr e
+      in if t' != Int then raise (Failure err) else (t', e')
+    in
+
   (* Here is where we check statements (only expr and Block for now)*)
   let rec check_stmt = function
     Expr e -> SExpr (expr e) (* recursive check *)
@@ -164,6 +170,10 @@ let check_function func =
       | Block sl :: ss  -> check_stmt_list (sl @ ss) (* Flatten blocks *)| s :: ss -> check_stmt s :: check_stmt_list ss (* one statement at a time *)
       | []      -> [] (* done *)
       in SBlock(check_stmt_list sl)
+  | If(p, b1, b2) -> SIf(check_int_expr p, check_stmt b1, check_stmt b2)
+  | For(e1, e2, e3, st) ->
+	SFor(expr e1, check_int_expr e2, expr e3, check_stmt st)
+  | While(p, s) -> SWhile(check_int_expr p, check_stmt s)
   | _   -> raise (Failure "stmt type not implemented")
   in
   { styp = func.typ;

@@ -94,6 +94,14 @@ stmt_list:
 stmt:
     expr_opt SEMI                           { Expr $1 } //(* Expr-stmt *)
   | RETURN expr_opt SEMI                    { Return $2 } //(* Return stmt *)
+  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
+  | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7)        }
+  | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
+                                            { For($3, $5, $7, $9)   }
+  | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
+
+
+
   //| LBRACE seq_stmts RBRACE                 {  } //(* Seq stmts (nested?) *)
   //| IF LPAREN expr RPAREN stmt %prec NOELSE {  } //(* If dangling *)
   //| IF LPAREN expr RPAREN stmt ELSE stmt    {  } //(* If no dangle *)
@@ -129,7 +137,6 @@ expr:
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
   | NOT expr         { Unop(Not, $2)      }
   | ID ASSIGN expr   { Assign($1, $3)     }
-  | ID LBRACK LITERAL RBRACK  {Access($1, $3)}
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
   // | LBRACK args_list RBRACK    { Ptlit($1, $2, $3)  }    // Point initialisation
   | LPAREN expr RPAREN {  $2  }
