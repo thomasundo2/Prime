@@ -12,19 +12,6 @@ void printl(mpz_t n)
     printf("\n");
 }
 
-char *printpt(struct point p){
-    char x_str[20];
-    char y_str[20];
-    printf("%d\n", p.x);
-    printf("%d\n", p.y);
-    sprintf(x_str, "%d", p.x);
-    sprintf(y_str, "%d", p.y);
-    char *ret = x_str;
-    return ret;
-}
-
-
-
 char *sub(char *left, char *right)
 {
     mpz_t n1;
@@ -59,7 +46,7 @@ int main()
     // printf("n = ");
     // printl(id1);
     // printf("\n");
-    
+
     // // Do some operation(s) on lint
     // printf("Squaring:\n");
     // char *fun = pow(id1, 2);

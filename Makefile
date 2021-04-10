@@ -3,7 +3,7 @@ test : all test_all.sh
 	./test_all.sh
 
 .PHONY : all
-all : clean gmp prime.native gmpfunc.o
+all : clean gmp prime.native gmpfunc.o structs.o
 
 # this will serve to install the GNU multiple precision library onto our system
 .PHONY : gmp

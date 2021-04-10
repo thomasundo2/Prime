@@ -117,6 +117,7 @@ done
 
 # Compile/link in gmpfunc file
 cc -c gmpfunc.c
+cc -c structs.c
 
 # all tests
 
