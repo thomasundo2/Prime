@@ -12,17 +12,6 @@ void printl(mpz_t n)
     printf("\n");
 }
 
-// TODO: move to its own file
-struct point Point(int x, int y)
-{
-		struct point p;
-		p.x = x;
-		p.y = y;
-		printf("%d\n", p.x);
-        printf("%d\n", p.y);
-        printf("--------");
-		return p;
-}
 char *printpt(struct point p){
     char x_str[20];
     char y_str[20];
@@ -34,6 +23,32 @@ char *printpt(struct point p){
     return ret;
 }
 
+
+
+char *sub(char *left, char *right)
+{
+    mpz_t n1;
+    mpz_t n2;
+    mpz_init(n1);
+    mpz_init(n2);
+    if (mpz_set_str(n1, left, 10) != 0){
+        printf("Failed to assign number");
+        mpz_clear(n1);
+        mpz_clear(n2);
+        exit(1);
+    }
+    if (mpz_set_str(n2, right, 10) != 0) {
+        printf("Failed to assign number");
+        mpz_clear(n1);
+        mpz_clear(n2);
+        exit(1);
+    }
+    mpz_sub(n1, n1, n2);
+    char *ret_str = mpz_get_str(NULL, 10, n1);
+    mpz_clear(n1);
+    mpz_clear(n2);
+    return ret_str;
+}
 
 #ifdef BUILD_TEST
 int main()
@@ -50,6 +65,7 @@ int main()
     // char *fun = pow(id1, 2);
     // printf("%s", fun);
     // printf("\n");
+
 
     // printf("Adding\n");
     // char *added = add("4035273409750284735027430528934750", "139487619823469187364916398427");

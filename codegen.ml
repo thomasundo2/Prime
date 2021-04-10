@@ -2,20 +2,13 @@
 
 (* Code generation: translate takes a semantically checked AST and
 produces LLVM IR
-
 LLVM tutorial: Make sure to read the OCaml version of the tutorial
-
 http://llvm.org/docs/tutorial/index.html
-
 Detailed documentation on the OCaml LLVM library:
-
 http://llvm.moe/
 http://llvm.moe/ocaml/
-
 *)
 
-(*http://www.cs.columbia.edu/~sedwards/classes/2018/4115-fall/reports/FIRE.pdf*)
-(*Simple Shape Oriented Language*)
 module L = Llvm
 module A = Ast
 open Sast
@@ -35,19 +28,20 @@ let translate (globals, functions) =
   and i8_t       = L.i8_type     context
   and string_t   = L.pointer_type (L.i8_type context)
   and point_t    = L.pointer_type (L.i8_type context)
-  and void_t     = L.void_type   context
-  and mpz_t      = L.named_struct_type context "mpz_t" 
-    in let mpz_t = L.struct_set_body mpz_t [| (L.i32_type context); (L.i32_type context); L.pointer_type (L.i64_type context) |] false; mpz_t
-  in
+  and void_t     = L.void_type   context in
   let point_t    = L.struct_type context [| i32_t ; i32_t |]
   and string_t   = L.pointer_type (i8_t)
+  (* and mpz_t      = L.struct_type context [| (L.i32_type context); (L.i32_type context); (L.pointer_type (L.i64_type context)) |] *)
+(* in *)
+  and mpz_t      = L.named_struct_type context "mpz_t"
+    in let mpz_t = L.struct_set_body mpz_t [| (L.i32_type context); (L.i32_type context); L.pointer_type (L.i64_type context) |] false; mpz_t
   in
 
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
     A.String   -> string_t
   | A.Lint     -> mpz_t
-  | A.Point    -> point_t 
+  | A.Point    -> point_t
   | A.Int      -> i32_t
   | A.Void     -> void_t
   | _          -> void_t
@@ -67,6 +61,7 @@ let translate (globals, functions) =
       L.declare_function "printf" printf_t the_module in
 
   (* Declare our external functions here*)
+
   (* LINTS *)
   let linit_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; string_t; i32_t |] in
@@ -111,6 +106,7 @@ let translate (globals, functions) =
   let lpow_func : L.llvalue = 
       L.declare_function "__gmpz_pow_ui" lpow_t the_module in
 
+
   (*points and printing points*)
   let init_point_t : L.lltype =
      L.function_type point_t [| i32_t; i32_t |] in
@@ -120,10 +116,6 @@ let translate (globals, functions) =
      L.function_type string_t [| point_t |] in
   let printpt_func : L.llvalue =
      L.declare_function "printpt" printpt_t the_module in
-  (* let ladd_t : L.lltype =
-      L.function_type string_t [| string_t; string_t |] in
-  let ladd_func : L.llvalue =
-      L.declare_function "add" ladd_t the_module in *)
 
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
@@ -143,6 +135,7 @@ let translate (globals, functions) =
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
     and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder
+    and point_format_str = L.build_global_stringptr "%s\n" "fmt" builder
     in
 
     (* Construct the function's "locals": formal arguments and locally
@@ -226,6 +219,13 @@ let translate (globals, functions) =
                      | A.Mod -> L.build_call lmod_func [| tmp; e1'; e2' |] "__gmpz_tdiv_r" builder   
                      | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" builder
                      )); tmp
+      | SBinop ((A.Point, _) as e1, operator, e2) ->
+              let e1' = expr builder e1
+              and e2' = expr builder e2 in
+              (match operator with
+              | A.Add     -> L.build_call ptadd_func [| e1'; e2' |] "ptadd" builder
+              | _         -> raise (Failure "Operator not implemented for Point")
+              )
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in
@@ -240,8 +240,8 @@ let translate (globals, functions) =
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
               (match op with
-                A.Neg     -> L.build_neg e' "tmp" builder
-              | A.Not     -> L.const_int i32_t (if e' = (L.const_int i32_t 0) then 1 else 0))
+                A.Neg     -> L.build_neg
+              | A.Not     -> L.build_not) e' "tmp" builder
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	        "printf" builder
@@ -256,8 +256,8 @@ let translate (globals, functions) =
           | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) "printl" builder
       | SCall ("printpt", [e]) ->
-            let ptStr = L.build_call printpt_func [|expr builder e|] "printpt" builder in
-            L.build_call printf_func [| string_format_str ; ptStr |] "prints" builder
+          let ptStr = L.build_call printpt_func [|expr builder e|] "printpt" builder in
+          L.build_call printf_func [| string_format_str ; ptStr |] "prints" builder
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in
