@@ -35,10 +35,10 @@ let built_in_decls =
     params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map
-  in List.fold_left add_bind StringMap.empty [ ("print", Int);
+  in List.fold_left add_bind StringMap.empty [ ("print", Int); 
                                                ("prints", String);
                                                ("printl", Lint);
-                                               ("printpt", Point); ]
+                                               ("printpt", Point); ] 
   (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 
@@ -73,8 +73,7 @@ let check_function func =
   (* All #TODO: *)
   (* check type and identifiers in formal parameters and local vars *)
   (* check all assignments are valid types. Should we co-erce? *)
-
-  let check_assign lvaltype rvaltype err =
+  let check_assign lvaltype rvaltype err =  
     (* print_string ("param: " ^ (string_of_typ lvaltype) ^ " actual: " ^ (string_of_typ rvaltype) ^ "\n"); *)
     match lvaltype with
       (* Lint -> if rvaltype = String || rvaltype = Lint then lvaltype else raise (Failure err) *)
@@ -84,7 +83,6 @@ let check_function func =
   (* make local symbol table and functions to use it*)
 
   (* Build local symbol table of variables for this function *)
-
   let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
                        StringMap.empty (globals @ func.params @ func.locals )
   in
@@ -129,7 +127,7 @@ let check_function func =
           (* Determine expression type based on operator and operand types *)
           let ty = match op with
             Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
-          | Add                               when same && t1 = Lint -> Lint
+          | Add | Sub | Mul | Div | Mod       when same && t1 = Lint -> Lint
           | Add                               when same && t1 = Point -> Point
           | Pow                               when t1 = Lint && t2 = Int -> Lint
           | _ -> raise (

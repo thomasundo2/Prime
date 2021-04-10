@@ -16,10 +16,10 @@ prime.native : codegen.ml sast.ml ast.ml semant.ml scanner.mll parser.mly
 	ocamlbuild -use-ocamlfind prime.native
 
 # Test the GMP calls we build
-gmpfunc: gmpfunc.c
+gmpfunc: gmp gmpfunc.c
 	cc -o gmpfunc -DBUILD_TEST gmpfunc.c -lgmp
 
-gmpfunc.o: gmpfunc.c
+gmpfunc.o: gmp gmpfunc.c
 	cc -c gmpfunc.c
 
 structs: structs.c
