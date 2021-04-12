@@ -32,7 +32,7 @@ rule token = parse
 | '.'      { ACCESS }
 (* | ':'      { OVERLOAD } Not included in this part*)
 | "=="     { BEQ }   (* Relational Ops (which ones of these do we want?)*)
-| "!="     { NEQ }
+| "!="     { BNEQ }
 | '<'      { LTH }
 | "<="     { LEQ }
 | ">"      { GTH }

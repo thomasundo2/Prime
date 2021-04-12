@@ -3,7 +3,7 @@
 // We have made alterations and additions for our language's functionality
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
-%token EQ BEQ BNEQ LTH LEQ GTH GEQ AND OR NOT
+%token BEQ BNEQ LTH GTH GEQ LEQ AND OR NOT 
 %token ACCESS
 %token RETURN IF ELSE FOR WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
@@ -22,8 +22,8 @@
 %right ASSIGN
 %left OR
 %left AND
-%left EQ NEQ
-%left LT GT LEQ GEQ
+%left BEQ BNEQ
+%left LTH GTH LEQ GEQ
 %left MOD //(* mod takes precedence below all arithmetic operators - l.guru approves*)
 %left PLUS MINUS
 %left TIMES DIVIDE //(* Change this order later if necessary \r moved mod up -l.guru*)

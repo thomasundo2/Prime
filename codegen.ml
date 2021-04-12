@@ -167,7 +167,10 @@ let translate (globals, functions) =
               | A.Div     -> L.build_sdiv
               | A.Mod     -> L.build_srem
               | A.Pow     -> L.build_mul
+	      | A.And     -> L.build_and
+	      | A.Or      -> L.build_or
 	      | A.Beq   -> L.build_icmp L.Icmp.Eq
+	      | A.Bneq     -> L.build_icmp L.Icmp.Ne
 	      | A.Lth    -> L.build_icmp L.Icmp.Slt
 	      | A.Leq     -> L.build_icmp L.Icmp.Sle
 	      | A.Gth -> L.build_icmp L.Icmp.Sgt
