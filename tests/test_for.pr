@@ -1,0 +1,9 @@
+int main()
+{
+    int test = 0;
+    for(int a = 0; a < 5; a = a + 1){
+	test = test + 1;
+    }
+    print(test);
+    return 0;
+}

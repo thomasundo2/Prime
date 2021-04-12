@@ -1,7 +1,7 @@
 (* Create a new operator for assignment and create a new expression*)
 (* sequences of expressions *)
 
-type operator = Add | Sub | Mul | Div | Mod | Pow
+type operator = Add | Sub | Mul | Div | Mod | Pow | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or
 type eqsign = Eq
 type uoperator = Neg | Not
 
@@ -48,6 +48,14 @@ let string_of_op = function
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "^"
+  | Beq -> "=="
+  | Bneq -> "!="
+  | Leq -> "<=" 
+  | Geq -> ">="
+  | Lth -> "<"
+  | Gth -> ">"
+  | And -> "&&"
+  | Or -> "||"
 
 let string_of_uop = function
     Neg -> "-"

@@ -31,11 +31,11 @@ rule token = parse
 | '%'      { MOD }
 | '.'      { ACCESS }
 (* | ':'      { OVERLOAD } Not included in this part*)
-| "=="     { EQ }   (* Relational Ops (which ones of these do we want?)*)
-| "!="     { NEQ }
-| '<'      { LT }
+| "=="     { BEQ }   (* Relational Ops (which ones of these do we want?)*)
+| "!="     { BNEQ }
+| '<'      { LTH }
 | "<="     { LEQ }
-| ">"      { GT }
+| ">"      { GTH }
 | ">="     { GEQ }
 | "&&"     { AND }
 | "||"     { OR }
