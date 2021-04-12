@@ -223,7 +223,7 @@ let translate (globals, functions) =
                               (* Special "return nothing" instr *)
                               A.Void -> L.build_ret_void builder
                               (* Build return statement *)
-  (*  | SIf (predicate, then_stmt, else_stmt) ->
+      | SIf (predicate, then_stmt, else_stmt) ->
          let bool_val = expr builder predicate in
 	 let merge_bb = L.append_block context "merge" the_function in
          let build_br_merge = L.build_br merge_bb in (* partial function *)
@@ -256,7 +256,7 @@ let translate (globals, functions) =
 
       (* Implement for loops as while loops *)
       | SFor (e1, e2, e3, body) -> stmt builder
-	    ( SBlock [SExpr e1 ; SWhile (e2, SBlock [body ; SExpr e3]) ] ) *)
+	    ( SBlock [SExpr e1 ; SWhile (e2, SBlock [body ; SExpr e3]) ] ) 
       | _ -> L.build_ret (expr builder e) builder );
       builder
     in
