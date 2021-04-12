@@ -49,10 +49,13 @@ let string_of_op = function
   | Mod -> "%"
   | Pow -> "^"
   | Beq -> "=="
+  | Nbeq -> "!="
   | Leq -> "<=" 
   | Geq -> ">="
   | Lth -> "<"
   | Gth -> ">"
+  | And -> "&&"
+  | Or -> "||"
 
 let string_of_uop = function
     Neg -> "-"
