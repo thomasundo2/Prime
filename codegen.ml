@@ -167,11 +167,11 @@ let translate (globals, functions) =
               | A.Div     -> L.build_sdiv
               | A.Mod     -> L.build_srem
               | A.Pow     -> L.build_mul
-	      | A.Beq     -> L.build_beq
-	      | A.Leq     -> L.build_leq
-              | A.Geq     -> L.build_geq
-              | A.Lth     -> L.build_lth
-              | A.Gth     -> L.build_gth
+	      | A.Beq   -> L.build_icmp L.Icmp.Eq
+	      | A.Lth    -> L.build_icmp L.Icmp.Slt
+	      | A.Leq     -> L.build_icmp L.Icmp.Sle
+	      | A.Gth -> L.build_icmp L.Icmp.Sgt
+	      | A.Geq     -> L.build_icmp L.Icmp.Sge
               ) e1' e2' "tmp" builder
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in

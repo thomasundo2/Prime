@@ -3,7 +3,7 @@
 // We have made alterations and additions for our language's functionality
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
-%token EQ NEQ LT LEQ GT GEQ AND OR NOT
+%token EQ BEQ NEQ LTH LEQ GTH GEQ AND OR NOT
 %token ACCESS
 %token RETURN IF ELSE FOR WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
@@ -130,12 +130,12 @@ expr:
   | expr MINUS  expr { Binop($1, Sub, $3) }
   | expr TIMES  expr { Binop($1, Mul, $3) }
   | expr DIVIDE expr { Binop($1, Div, $3) }
-  //| expr EQ     expr {  }
-  //| expr NEQ    expr {  }
-  //| expr LT     expr {  }
-  //| expr LEQ    expr {  }
-  //| expr GT     expr {  }
-  //| expr GEQ    expr {  }
+  | expr BEQ    expr { Binop($1, Beq, $3) }
+  //| expr NEQ    expr { Binop($1, Neq, $3) }
+  | expr LTH    expr { Binop($1, Lth, $3) }
+  | expr LEQ    expr { Binop($1, Leq, $3) }
+  | expr GTH    expr { Binop($1, Gth, $3) }
+  | expr GEQ    expr { Binop($1, Geq, $3) }
   //| expr AND    expr {  }
   //| expr OR     expr {  }
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
