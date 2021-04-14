@@ -1,6 +1,6 @@
 struct point
 {
-		int i;
-		int ignore;
-		int j;
+		mpz_t i;
+		mpz_t ignore;
+		mpz_t j;
 };

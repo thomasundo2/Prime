@@ -1,9 +1,6 @@
 int main()
 {
     pt x;
-    int i;
-    int j;
-    x = [99, 22];
-    printpt(x);
+    x = [99l, 22l];
     return 0;
 }

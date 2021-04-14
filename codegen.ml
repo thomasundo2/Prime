@@ -27,14 +27,14 @@ let translate (globals, functions) =
   let i32_t      = L.i32_type    context
   and i8_t       = L.i8_type     context
   and string_t   = L.pointer_type (L.i8_type context)
-  and point_t    = L.pointer_type (L.i8_type context)
   and void_t     = L.void_type   context in
-  let point_t    = L.struct_type context [| i32_t ; i32_t |]
-  and string_t   = L.pointer_type (i8_t)
+  let string_t   = L.pointer_type (i8_t)
   (* and mpz_t      = L.struct_type context [| (L.i32_type context); (L.i32_type context); (L.pointer_type (L.i64_type context)) |] *)
 (* in *)
   and mpz_t      = L.named_struct_type context "mpz_t"
     in let mpz_t = L.struct_set_body mpz_t [| (L.i32_type context); (L.i32_type context); L.pointer_type (L.i64_type context) |] false; mpz_t
+  in
+  let point_t    = L.struct_type context [| L.pointer_type mpz_t ; L.pointer_type mpz_t |]
   in
 
   (* Return the LLVM type for a MicroC type *)
@@ -108,19 +108,11 @@ let translate (globals, functions) =
 
 
   (*points and printing points*)
-  let init_point_t : L.lltype =
-     L.function_type point_t [| i32_t; i32_t |] in
+  let init_lintpoint_t : L.lltype =
+     L.function_type point_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t |] in
   let init_point_func : L.llvalue =
-     L.declare_function "Point" init_point_t the_module in
-  let printpt_t : L.lltype =
-     L.function_type string_t [| point_t |] in
-  let printpt_func : L.llvalue =
-     L.declare_function "printpt" printpt_t the_module in
-  (*point operators*)
-  let ptadd_t : L.lltype =
-      L.function_type point_t [| point_t; point_t |] in
-  let ptadd_func : L.llvalue =
-     L.declare_function "ptadd" ptadd_t the_module in
+     L.declare_function "Point" init_lintpoint_t the_module in
+
 
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
@@ -188,12 +180,14 @@ let translate (globals, functions) =
     let zero = L.const_int i32_t 0
     in
 
+
+
     (* Construct code for an expression; return its value *)
     let rec expr builder ((stype, e) : sexpr) = match e with
         SStrlit i     -> L.build_global_stringptr i "string" builder
       | SLintlit i    -> llit_helper i (* Pointer to new mpz*)
       | SLit i        -> L.const_int i32_t i
-      | SPtlit (i, j) ->
+      | SPtlit (((A.Lint, _) as i), ((A.Lint, _) as j)) ->
               let e1' = expr builder i
               and e2' = expr builder j in
               L.build_call init_point_func [| e1' ; e2' |] "Point" builder
@@ -224,13 +218,13 @@ let translate (globals, functions) =
                      | A.Mod -> L.build_call lmod_func [| tmp; e1'; e2' |] "__gmpz_tdiv_r" builder
                      | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" builder
                      )); tmp
-      | SBinop ((A.Point, _) as e1, operator, e2) ->
+      (*| SBinop ((A.Point, _) as e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in
               (match operator with
               | A.Add     -> L.build_call ptadd_func [| e1'; e2' |] "ptadd" builder
               | _         -> raise (Failure "Operator not implemented for Point")
-              )
+              )*)
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in
@@ -260,9 +254,7 @@ let translate (globals, functions) =
                         [| L.const_int i32_t 0 |] "" builder) |]
           | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) "printl" builder
-      | SCall ("printpt", [e]) ->
-          let ptStr = L.build_call printpt_func [|expr builder e|] "printpt" builder in
-          L.build_call printf_func [| string_format_str ; ptStr |] "prints" builder
+
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in

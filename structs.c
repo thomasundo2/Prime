@@ -6,23 +6,31 @@
 
 // TODO: move to its own file
 #include"structs.h"
-struct point Point(int i, int j)
+struct point Point(mpz_t i, mpz_t j)
 {
+
+		printf("testing!\n");
 		struct point p;
-		p.i = i;
-		p.j = j;
+        //mpz_init(p.i);
+       // mpz_set_str(p.i, "123412341341231324132132412413241234123", 10);
+        //mpz_init(p.j);
+        //mpz_set_str(p.j, "123412341341231324132132412413241234123", 10);
+		//mpz_init_set(p.i, i);
+		//mpz_init_set(p.j, j);
 		return p;
 }
+/*
 char *printpt(struct point p){
-    char i_str[20];
-    char j_str[20];
 
-    sprintf(i_str, "[%d,", p.i);
-    sprintf(j_str, "%d]", p.j);
-    char *ret = strcat(i_str, j_str);
-    return ret;
-}
+    printf("[");
+    mpz_out_str(stdout, 10, p.i);
+    printf(",");
+    mpz_out_str(stdout, 10, p.j);
+    printf("]");
+    printf("\n");
+}*/
 
+/*
 struct point ptadd(struct point p1, struct point p2)
 {
 
@@ -41,5 +49,5 @@ struct point ptadd(struct point p1, struct point p2)
     j = m*(p1.i - i) - p1.j;
 
     return Point(i, j);
-}
+}*/
 
