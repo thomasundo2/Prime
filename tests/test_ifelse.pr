@@ -1,11 +1,9 @@
 int main()
 {
-    int test = 0;
-    if(test){
-	prints("1");
-    }
-    else{
-	prints("0");
+    int test;
+    test = 0;
+    if(1) {
+	print(1);
     }
     return 0;
 }
