@@ -1,11 +1,10 @@
 %{ open Ast %}
 // Thank you again to Professor Edwards for the MicroC template.
 // We have made alterations and additions for our language's functionality
-%token FOR
 %token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
 %token BEQ BNEQ LTH GTH GEQ LEQ AND OR NOT
 %token ACCESS
-%token RETURN IF ELSE WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
+%token RETURN IF ELSE WHILE FOR INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
 %token <string> STRLIT LINTLIT ID
 %token EOF
