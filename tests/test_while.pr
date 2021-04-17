@@ -1,7 +1,9 @@
 int main()
 {
-    int test = 0;
-    int a = 0;
+    int test;
+    int a;
+    a = 0;
+    test = 0;
     while (a < 5) {
 	test = test + 1;
         a = a + 1;
