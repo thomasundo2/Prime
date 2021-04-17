@@ -1,0 +1,8 @@
+int main()
+{
+        int test;
+        print(!1);
+        print(!0);
+        print(!5);
+        return 0;
+}

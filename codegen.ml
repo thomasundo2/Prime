@@ -25,6 +25,7 @@ let translate (globals, functions) =
 
   (* Get types from the context *)
   let i32_t      = L.i32_type    context
+  and i1_t       = L.i1_type     context
   and i8_t       = L.i8_type     context
   and string_t   = L.pointer_type (L.i8_type context)
   and point_t    = L.pointer_type (L.i8_type context)
@@ -253,8 +254,8 @@ let translate (globals, functions) =
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
               (match op with
-                A.Neg     -> L.build_neg
-              | A.Not     -> L.build_not) e' "tmp" builder
+                A.Neg     -> L.build_neg  e' "tmp" builder
+              | A.Not -> L.const_int i32_t (if e' = (L.const_int i32_t 0) then 1 else 0))
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	        "printf" builder
@@ -305,6 +306,8 @@ let translate (globals, functions) =
                      builder
       | SIf (predicate, then_stmt, else_stmt) ->
          let bool_val = expr builder predicate in
+         (*let bool_val = L.build_not bool_val "tmp" builder in
+         let bool_val = L.build_not bool_val "tmp" builder in*)
          let merge_bb = L.append_block context "merge" the_function in
              let build_br_merge = L.build_br merge_bb in (* partial function *)
 
