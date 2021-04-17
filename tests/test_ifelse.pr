@@ -2,8 +2,11 @@ int main()
 {
     int test;
     test = 0;
-    if(1) {
+    if(test) {
 	print(1);
+    }
+    else{
+	print(0);
     }
     return 0;
 }
