@@ -35,11 +35,11 @@ let built_in_decls =
     params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map
-  in List.fold_left add_bind StringMap.empty [ ("print", Int);
+  in List.fold_left add_bind StringMap.empty [ ("print", Int); 
                                                ("prints", String);
                                                ("printl", Lint);
-                                               ("printpt", Point) ]
-  (* Add calls to built-in gmp methods here *)
+                                               ("printpt", Point); ] 
+  (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 
 (* Now keep track of these named built-in funcs in the top-level symbol table *)
@@ -70,15 +70,14 @@ in
 
 (* check function bodies *)
 let check_function func =
-  (* All TODO: *)
+  (* All #TODO: *)
   (* check type and identifiers in formal parameters and local vars *)
   (* check all assignments are valid types. Should we co-erce? *)
-  let check_assign lvaltype rvaltype err =
+  let check_assign lvaltype rvaltype err =  
     (* print_string ("param: " ^ (string_of_typ lvaltype) ^ " actual: " ^ (string_of_typ rvaltype) ^ "\n"); *)
     match lvaltype with
-    Lint ->
-        if rvaltype = String || rvaltype = Lint then lvaltype else raise (Failure err)
-    | _ -> if lvaltype = rvaltype then lvaltype else raise (Failure err)
+      (* Lint -> if rvaltype = String || rvaltype = Lint then lvaltype else raise (Failure err) *)
+    | _    -> if lvaltype = rvaltype then lvaltype else raise (Failure err)
     (* if lvaltype is lint and rvaltype is string then lvaltype else raise failure*)
   in
   (* make local symbol table and functions to use it*)
@@ -96,21 +95,25 @@ let check_function func =
 
   (* semantic expression checking *)
   let rec expr = function
-      Lit l -> (Int, SLit l)
-    | Id s -> (type_of_identifier s, SId s)
-    | Strlit l -> (String, SStrlit l) (* String literals *)
-    | Noexpr   -> (Void, SNoexpr)
-    | Assign(var, e) as ex ->
-            let lt = type_of_identifier var
-            and (rt, e') = expr e in
-            let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
-              string_of_typ rt ^ " in " ^ string_of_expr ex
-            in (check_assign lt rt err, SAssign(var, (rt, e')))
-    | Ptlit(e1, e2) ->
-	    let e1' = expr e1
- 	    and e2' = expr e2 in
-	    (Point, SPtlit(e1', e2'))
-	| Access(s, i) -> (Int, SAccess(s, i))
+    Lit l -> (Int, SLit l)
+  | Id s -> (type_of_identifier s, SId s)
+  | Strlit l -> (String, SStrlit l) (* String literals *)
+  | Lintlit l -> (Lint, SLintlit l)
+  | Noexpr   -> (Void, SNoexpr)
+  | Assign(var, e) as ex ->
+          let lt = type_of_identifier var
+          and (rt, e') = expr e in
+          let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
+            string_of_typ rt ^ " in " ^ string_of_expr ex
+          in (check_assign lt rt err, SAssign(var, (rt, e')))
+  | Ptlit(e1, e2) ->
+	    let (t1, e1') = expr e1 
+ 	    and (t2, e2') = expr e2 in
+	    let ty = match t1, t2 with
+	    Lint, Lint -> Point
+	    | Int, Int -> Point
+	    | _ -> raise (Failure ("points must have Lint coordinates"))
+            in (ty, SPtlit((t1, e1'), (t2, e2')))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in
             let ty = match op with
@@ -128,8 +131,9 @@ let check_function func =
             (* Determine expression type based on operator and operand types *)
             let ty = match op with
               Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
-            | Add                               when same && t1 = Lint -> Lint
+            | Add | Sub | Mul | Div | Mod       when same && t1 = Lint -> Lint
             | Add                               when same && t1 = Point -> Point
+	    | Pow                               when t1 = Lint && t2 = Int -> Lint
 	    | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
             | _ -> raise (
                 Failure ("illegal binary operator " ^
@@ -152,29 +156,30 @@ let check_function func =
         in (fd.typ, SCall(name, args'))
   in
 
-  let check_int_expr e = 
+  let check_int_expr e =
       let (t', e') = expr e
       and err = "expected integer expression in " ^ string_of_expr e
-      in if t' != Int then raise (Failure err) else (t', e') 
+      in if t' != Int then raise (Failure err) else (t', e')
     in
 
   (* Here is where we check statements (only expr and Block for now)*)
   let rec check_stmt = function
-      Expr e -> SExpr (expr e) (* recursive check *)
-    | Return e -> let (t, e') = expr e in
-        if t = func.typ then SReturn (t, e') (* Correct return type for function *)
-        else raise (Failure "wrong return type")
-    | Block sl ->
-        let rec check_stmt_list = function (* Maybe add other return checks here *)
-          | s :: ss -> check_stmt s :: check_stmt_list ss (* one statement at a time *)
-          | []      -> [] (* done *)
-        in SBlock(check_stmt_list sl)
-    | If(p, b1, b2) -> SIf(check_int_expr p, check_stmt b1, check_stmt b2)
-    | For(e1, e2, e3, st) ->
+    Expr e -> SExpr (expr e) (* recursive check *)
+  | Return e -> let (t, e') = expr e in
+      if t = func.typ then SReturn (t, e') (* Correct return type for function *)
+      else raise (Failure "wrong return type")
+  | Block sl ->
+      let rec check_stmt_list = function (* Maybe add other return checks here *)
+        [Return _ as s] -> [check_stmt s]
+      | Return _ :: _   -> raise (Failure "nothing may follow a return")
+      | Block sl :: ss  -> check_stmt_list (sl @ ss) (* Flatten blocks *)| s :: ss -> check_stmt s :: check_stmt_list ss (* one statement at a time *)
+      | []      -> [] (* done *)
+      in SBlock(check_stmt_list sl)
+  | If(p, b1, b2) -> SIf(check_int_expr p, check_stmt b1, check_stmt b2)
+  | For(e1, e2, e3, st) ->
 	SFor(expr e1, check_int_expr e2, expr e3, check_stmt st)
-    | While(p, s) -> SWhile(check_int_expr p, check_stmt s)
-
-    | _   -> raise (Failure "stmt type not implemented")
+  | While(p, s) -> SWhile(check_int_expr p, check_stmt s)
+  | _   -> raise (Failure "stmt type not implemented")
   in
   { styp = func.typ;
     sname = func.name;

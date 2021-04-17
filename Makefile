@@ -1,13 +1,13 @@
 .PHONY : test
-test : all hello_world.sh
-	./hello_world.sh
+test : all test_all.sh
+	./test_all.sh
 
 .PHONY : all
-all : clean gmp prime.native
+all : clean gmp prime.native gmpfunc.o structs.o
 
 # this will serve to install the GNU multiple precision library onto our system
 .PHONY : gmp
-gmp: 
+gmp:
 	apt install -y libgmp-dev
 
 # We will now make the compiler
@@ -16,17 +16,18 @@ prime.native : codegen.ml sast.ml ast.ml semant.ml scanner.mll parser.mly
 	ocamlbuild -use-ocamlfind prime.native
 
 # Test the GMP calls we build
-gmpfunc: gmpfunc.c 
+gmpfunc: gmp gmpfunc.c
 	cc -o gmpfunc -DBUILD_TEST gmpfunc.c -lgmp
 
-gmpfunc.o: gmpfunc.c
+gmpfunc.o: gmp gmpfunc.c
 	cc -c gmpfunc.c
 
 structs: structs.c
-	cc -o structs -DBUILD_TEST structs.c -lgmp 
+	cc -o structs -DBUILD_TEST structs.c -lgmp
 
 structs.o: structs.c
 	cc -c structs.c
+
 
 # Some old stuff:
 prime : parser.cmo scanner.cmo prime.cmo
