@@ -1,11 +1,11 @@
 %{ open Ast %}
 // Thank you again to Professor Edwards for the MicroC template.
 // We have made alterations and additions for our language's functionality
-
+%token FOR
 %token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
-%token BEQ BNEQ LTH GTH GEQ LEQ AND OR NOT 
+%token BEQ BNEQ LTH GTH GEQ LEQ AND OR NOT
 %token ACCESS
-%token RETURN IF ELSE FOR WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
+%token RETURN IF ELSE WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
 %token <string> STRLIT LINTLIT ID
 %token EOF
@@ -94,20 +94,12 @@ stmt_list:
 stmt:
     expr_opt SEMI                           { Expr $1 } //(* Expr-stmt *)
   | RETURN expr_opt SEMI                    { Return $2 } //(* Return stmt *)
+  | LBRACE stmt_list RBRACE                 { Block(List.rev $2)    }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7)        }
-  | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
+  | FOR LPAREN expr SEMI expr SEMI expr_opt RPAREN stmt
                                             { For($3, $5, $7, $9)   }
   | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
-
-
-
-  //| LBRACE seq_stmts RBRACE                 {  } //(* Seq stmts (nested?) *)
-  //| IF LPAREN expr RPAREN stmt %prec NOELSE {  } //(* If dangling *)
-  //| IF LPAREN expr RPAREN stmt ELSE stmt    {  } //(* If no dangle *)
-  //| FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
-  //                                          {  } //(* Loops no infinite FOR *)
-  //| WHILE LPAREN expr RPAREN stmt           {  }
 
 expr_opt:
     /* nothing */ { Noexpr }
@@ -119,7 +111,6 @@ expr:
   | STRLIT           { Strlit($1) }
   | LINTLIT          { Lintlit($1) }
   | LBRACK expr COMMA expr RBRACK { Ptlit ($2, $4) }
-  //| expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr { Binop($1, Mod, $3) }
   | expr POWER  expr { Binop($1, Pow, $3) }
   | expr PLUS   expr { Binop($1, Add, $3) }
