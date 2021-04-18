@@ -1,6 +1,9 @@
+#ifndef STRUCTS_H
+#define STRUCTS_H
 struct point
 {
-		mpz_t i;
-		mpz_t ignore;
-		mpz_t j;
+	mpz_t i;
+	mpz_t j;
 };
+
+#endif

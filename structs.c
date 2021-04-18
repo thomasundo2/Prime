@@ -8,17 +8,22 @@
 #include"structs.h"
 struct point Point(mpz_t i, mpz_t j)
 {
-
-		printf("testing!\n");
+		// printf("testing!\n");
 		struct point p;
-        //mpz_init(p.i);
-       // mpz_set_str(p.i, "123412341341231324132132412413241234123", 10);
-        //mpz_init(p.j);
-        //mpz_set_str(p.j, "123412341341231324132132412413241234123", 10);
-		//mpz_init_set(p.i, i);
-		//mpz_init_set(p.j, j);
+		mpz_init_set(p.i, i);
+		mpz_init_set(p.j, j);
 		return p;
 }
+
+void printpt(struct point *p)
+{
+    printf("[");
+    mpz_out_str(stdout, 10, p->i);
+    printf(",");
+    mpz_out_str(stdout, 10, p->j);
+    printf("]\n");
+}
+
 /*
 char *printpt(struct point p){
 

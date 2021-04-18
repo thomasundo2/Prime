@@ -33,8 +33,8 @@ let translate (globals, functions) =
 (* in *)
   and mpz_t      = L.named_struct_type context "mpz_t"
     in let mpz_t = L.struct_set_body mpz_t [| (L.i32_type context); (L.i32_type context); L.pointer_type (L.i64_type context) |] false; mpz_t
-  in
-  let point_t    = L.struct_type context [| L.pointer_type mpz_t ; L.pointer_type mpz_t |]
+  in let point_t    = L.named_struct_type context "point"
+    in let point_t = L.struct_set_body point_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t |] false; point_t
   in
 
   (* Return the LLVM type for a MicroC type *)
@@ -109,9 +109,13 @@ let translate (globals, functions) =
 
   (*points and printing points*)
   let init_lintpoint_t : L.lltype =
-     L.function_type point_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type mpz_t ; L.pointer_type mpz_t |] in
   let init_point_func : L.llvalue =
-     L.declare_function "Point" init_lintpoint_t the_module in
+      L.declare_function "Point" init_lintpoint_t the_module in
+  let print_point_t : L.lltype = 
+      L.function_type i32_t [| L.pointer_type point_t (*L.pointer_type mpz_t; L.pointer_type mpz_t*) |] in
+  let print_point_func : L.llvalue =
+      L.declare_function "printpt" print_point_t the_module in
 
 
   (* Define each function (arguments and return type) so we can
@@ -132,7 +136,7 @@ let translate (globals, functions) =
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
     and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder
-    and point_format_str = L.build_global_stringptr "%s\n" "fmt" builder
+    (* and point_format_str = L.build_global_stringptr "[%\n" "fmt" builder *)
     in
 
     (* Construct the function's "locals": formal arguments and locally
@@ -176,29 +180,44 @@ let translate (globals, functions) =
       (* how to free after done using *)
     in
 
+    (* helper to get us a point. returns pointer to the memory *)
+    (* let point_helper i j = 
+      let space = L.build_alloca (ltype_of_typ A.Point) "" builder
+      and store el loc = L.build_store el loc builder
+      and load l = L.build_load l "" builder in
+      (* we need to now get the pointers, load them and store the values *)
+      let calls idx = load (L.build_in_bounds_gep space [| L.const_int i32_t 0; L.const_int i32_t idx |] "" builder) *)
+
+
     (* Helpful when writing geps *)
     let zero = L.const_int i32_t 0
     in
-
-
 
     (* Construct code for an expression; return its value *)
     let rec expr builder ((stype, e) : sexpr) = match e with
         SStrlit i     -> L.build_global_stringptr i "string" builder
       | SLintlit i    -> llit_helper i (* Pointer to new mpz*)
       | SLit i        -> L.const_int i32_t i
-      | SPtlit (((A.Lint, _) as i), ((A.Lint, _) as j)) ->
-              let e1' = expr builder i
-              and e2' = expr builder j in
-              L.build_call init_point_func [| e1' ; e2' |] "Point" builder
+      | SPtlit (i, j) -> (* call our struct initialiser passing in loc of initialisation *)
+          let e1' = expr builder i
+          and e2' = expr builder j
+          and space = L.build_alloca point_t "tmp_pt" builder
+          in ignore(L.build_call init_point_func [| space; e1' ; e2' |] "Point" builder); space
       | SNoexpr       -> L.const_int i32_t 0
-      | SId s         -> (match stype with
-                          A.Lint -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
-                        | _      -> L.build_load (lookup s) s builder)
+      | SId s         -> (match stype with (* Might be better just to have StructType adt? *)
+                          A.Lint  -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
+                        | A.Point -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
+                        | _       -> L.build_load (lookup s) s builder)
       | SAssign (s, ((A.Lint, _) as e1)) -> let e1' = expr builder e1 in
                 (* Here we have a pointer to mpz val *)
                 ignore(L.build_call linitdup_func
                 [| L.build_in_bounds_gep (lookup s) [| zero |] s builder; e1' |] "" builder); e1'
+      | SAssign (s, ((A.Point, e) as e1))  -> 
+          (* For point lits that already have stack allocated, we get element pointer then store *)
+          let e1' = expr builder e1 in
+          let val_ptr = L.build_in_bounds_gep e1' [| zero |] "" builder in
+          let loaded = L.build_load val_ptr "" builder in
+          ignore(L.build_store loaded (lookup s) builder); e1'
       | SAssign (s, e) -> let e' = expr builder e in
                            ignore(L.build_store e' (lookup s) builder); e'
       | SBinop ((A.Lint, _) as e1, operator, e2) ->
@@ -247,6 +266,15 @@ let translate (globals, functions) =
       | SCall ("prints", [e]) -> (*print string*)
           L.build_call printf_func [| string_format_str ; (expr builder e) |]
           "printf" builder
+      | SCall ("printpt", [(_, e) as e1]) -> (* print pt *)
+          let e1' = expr builder e1 in
+          L.build_call print_point_func [| e1' |] "printpt" builder
+          (* L.build_call print_point_func
+          (match e with
+            SId s -> [| (L.build_in_bounds_gep (lookup s) [| zero |] "" builder); 
+              (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 1 |] "" builder) |]
+          | SPtlit (i, j) -> [| expr builder i; expr builder j |]) "printpt" builder *)
+          (* According to semant we should not have anything else *)
       | SCall ("printl", [(_, e) as ptr]) ->
           L.build_call lprint_func
           (match e with
@@ -254,7 +282,6 @@ let translate (globals, functions) =
                         [| L.const_int i32_t 0 |] "" builder) |]
           | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) "printl" builder
-
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in
