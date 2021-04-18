@@ -318,13 +318,13 @@ let translate (globals, functions) =
                      builder
       | SIf (predicate, then_stmt, else_stmt) ->
          let int_val = expr builder predicate in
-         let bool_val = L.const_int i1_t (* (if int_val = (L.const_int i32_t 0) then 0 else 1)*)
+         let bool_val = L.build_icmp L.Icmp.Ne int_val (L.const_int i32_t 0) "tmp" builder in
+         (*L.const_int i1_t (* (if int_val = (L.const_int i32_t 0) then 0 else 1)*)
          ignore(match int_val with
            (L.const_int i32_t 0) -> 0
          | (L.const_int i32_t _) -> 1
          | _ -> raise(Failure "case")
-         )
-         in
+         )*)
          let merge_bb = L.append_block context "merge" the_function in
              let build_br_merge = L.build_br merge_bb in (* partial function *)
 
