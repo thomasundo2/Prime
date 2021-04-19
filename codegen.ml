@@ -244,36 +244,18 @@ let translate (globals, functions) =
               | A.Pow     -> L.build_mul e1' e2' "tmp" builder
 	      | A.And     -> L.build_and e1' e2' "tmp" builder
 	      | A.Or      -> L.build_or e1' e2' "tmp" builder
-	      | A.Beq     -> L.build_intcast (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder) i32_t
+	      | A.Beq     -> L.build_zext (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder) 
+                             i32_t "tmp" builder
+	      | A.Bneq    -> L.build_zext (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder) i32_t
                              "tmp" builder
-                             (*L.const_int i32_t 
-                             (if L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder = 
-                             (L.const_int i1_t 0) then 0 else 1)*)
-	      | A.Bneq    -> L.build_intcast (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder) i32_t
+	      | A.Lth     -> L.build_zext (L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder) i32_t
                              "tmp" builder
-                             (*L.const_int i32_t
-                             (if L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder =
-                             (L.const_int i1_t 0) then 0 else 1)*)
-	      | A.Lth     -> L.build_intcast (L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder) i32_t
+	      | A.Leq     -> L.build_zext (L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder) i32_t
                              "tmp" builder
-                             (*L.const_int i32_t
-                             (if L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder =
-                             (L.const_int i1_t 0) then 0 else 1)*)
-	      | A.Leq     -> L.build_intcast (L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder) i32_t
+	      | A.Gth     -> L.build_zext (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder) i32_t
                              "tmp" builder
-                             (*L.const_int i32_t
-                             (if L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder =
-                             (L.const_int i1_t 0) then 0 else 1)*)
-	      | A.Gth     -> L.build_intcast (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder) i32_t
+	      | A.Geq     -> L.build_zext (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
                              "tmp" builder
-                             (*(L.const_int i32_t
-                             (if (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder) =
-                             (L.const_int i1_t 0) then 0 else 1)*)
-	      | A.Geq     -> L.build_intcast (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
-                             "tmp" builder
-                             (*L.const_int i32_t
-                             (if L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder =
-                             (L.const_int i1_t 0) then 0 else 1)*)
               ) (*e1' e2' "tmp" builder*)
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
