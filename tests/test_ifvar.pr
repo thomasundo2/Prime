@@ -1,0 +1,16 @@
+int main(){
+    int test;
+    test = 5;
+    if(test == 5){
+        print(1);
+    } else {
+        print(0);
+    }
+    if(test == 6){
+        print(1);
+    }
+    else{
+        print(0);
+    }
+    return 0;
+}
