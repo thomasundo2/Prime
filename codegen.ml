@@ -106,7 +106,31 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; i32_t |] in
   let lpow_func : L.llvalue =
       L.declare_function "__gmpz_pow_ui" lpow_t the_module in
-
+  (* comparator operators *)
+  let l_eq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_eq_func : L.llvalue =
+      L.declare_function "eq_func" l_eq_t the_module in
+  let l_neq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_neq_func : L.llvalue =    
+      L.declare_function "neq_func" l_neq_t the_module in
+  let l_lth_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_lth_func : L.llvalue =
+      L.declare_function "lth_func" l_lth_t the_module in
+  let l_gth_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_gth_func : L.llvalue =
+      L.declare_function "gth_func" l_gth_t the_module in
+  let l_leq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_leq_func : L.llvalue =
+      L.declare_function "leq_func" l_leq_t the_module in
+  let l_geq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_geq_func : L.llvalue = 
+      L.declare_function "geq_func" l_geq_t the_module in
 
   (*points and printing points*)
   let init_point_t : L.lltype =
@@ -224,7 +248,13 @@ let translate (globals, functions) =
                      | A.Div -> L.build_call ldiv_func [| tmp; e1'; e2' |] "__gmpz_tdiv_q" builder
                      | A.Mod -> L.build_call lmod_func [| tmp; e1'; e2' |] "__gmpz_tdiv_r" builder
                      | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" builder
-                     )); tmp
+                     | A.Beq -> L.build_call l_eq_func [| tmp; e1'; e2' |] "eq_func" builder
+                     | A.Bneq -> L.build_call l_neq_func [| tmp; e1'; e2' |] "neq_func" builder
+                     | A.Lth -> L.build_call l_lth_func [| tmp; e1'; e2' |] "lth_func" builder
+                     | A.Gth -> L.build_call l_gth_func [| tmp; e1'; e2' |] "gth_func" builder
+                     | A.Leq -> L.build_call l_leq_func [| tmp; e1'; e2' |] "leq_func" builder
+                     | A.Geq -> L.build_call l_geq_func [| tmp; e1'; e2' |] "geq_func" builder
+                    )); tmp
       | SBinop ((A.Point, _) as e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in

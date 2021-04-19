@@ -135,6 +135,7 @@ let check_function func =
             | Add                               when same && t1 = Point -> Point
 	    | Pow                               when t1 = Lint && t2 = Int -> Lint
 	    | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
+            | Beq                               when same && t1 = Lint -> Int
             | _ -> raise (
                 Failure ("illegal binary operator " ^
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^

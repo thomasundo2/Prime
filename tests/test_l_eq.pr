@@ -1,0 +1,6 @@
+int main()
+{
+    print(1l == 1l);
+    print(10l == 1l);
+    return 0;
+}
