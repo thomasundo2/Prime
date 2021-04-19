@@ -141,6 +141,18 @@ let check_function func =
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
                         string_of_typ t2 ^ " in " ^ string_of_expr e))
             in (ty, SBinop((t1, e1'), op, (t2, e2')))
+    | Relop(e1, op, e2) as e ->
+            let (t1, e1') = expr e1
+            and (t2, e2') = expr e2 in
+            let same = t1 = t2 in
+            let ty = match op with
+            | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
+            | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int 
+            | _ -> raise (
+                Failure ("illegal relational operator " ^
+                        string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+                        string_of_typ t2 ^ " in " ^ string_of_expr e))
+            in (ty, SRelop((t1, e1'), op, (t2, e2')))
     | Call(name, args) (* as call *) ->
         let fd = find_func name in
         let param_length = List.length fd.params in

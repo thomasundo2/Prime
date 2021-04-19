@@ -108,27 +108,27 @@ let translate (globals, functions) =
       L.declare_function "__gmpz_pow_ui" lpow_t the_module in
   (* comparator operators *)
   let l_eq_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_eq_func : L.llvalue =
       L.declare_function "eq_func" l_eq_t the_module in
   let l_neq_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_neq_func : L.llvalue =    
       L.declare_function "neq_func" l_neq_t the_module in
   let l_lth_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_lth_func : L.llvalue =
       L.declare_function "lth_func" l_lth_t the_module in
   let l_gth_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_gth_func : L.llvalue =
       L.declare_function "gth_func" l_gth_t the_module in
   let l_leq_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_leq_func : L.llvalue =
       L.declare_function "leq_func" l_leq_t the_module in
   let l_geq_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_geq_func : L.llvalue = 
       L.declare_function "geq_func" l_geq_t the_module in
 
@@ -248,13 +248,53 @@ let translate (globals, functions) =
                      | A.Div -> L.build_call ldiv_func [| tmp; e1'; e2' |] "__gmpz_tdiv_q" builder
                      | A.Mod -> L.build_call lmod_func [| tmp; e1'; e2' |] "__gmpz_tdiv_r" builder
                      | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" builder
-                     | A.Beq -> L.build_call l_eq_func [| tmp; e1'; e2' |] "eq_func" builder
-                     | A.Bneq -> L.build_call l_neq_func [| tmp; e1'; e2' |] "neq_func" builder
-                     | A.Lth -> L.build_call l_lth_func [| tmp; e1'; e2' |] "lth_func" builder
-                     | A.Gth -> L.build_call l_gth_func [| tmp; e1'; e2' |] "gth_func" builder
-                     | A.Leq -> L.build_call l_leq_func [| tmp; e1'; e2' |] "leq_func" builder
-                     | A.Geq -> L.build_call l_geq_func [| tmp; e1'; e2' |] "geq_func" builder
-                    )); tmp
+                )); tmp
+      | SRelop ((A.Lint, _) as e1, operator, e2) ->
+               let e1' = expr builder e1
+               and e2' = expr builder e2 in (match operator with
+                     A.Beq -> L.build_call l_eq_func [| e1'; e2' |] "eq_func" builder
+                     | A.Bneq -> L.build_call l_neq_func [| e1'; e2' |] "neq_func" builder
+                     | A.Lth -> L.build_call l_lth_func [| e1'; e2' |] "lth_func" builder
+                     | A.Gth -> L.build_call l_gth_func [| e1'; e2' |] "gth_func" builder
+                     | A.Leq -> L.build_call l_leq_func [| e1'; e2' |] "leq_func" builder
+                     | A.Geq -> L.build_call l_geq_func [| e1'; e2' |] "geq_func" builder)
+      | SRelop (e1, operator, e2) -> 
+              let e1' = expr builder e1   
+              and e2' = expr builder e2 in
+              (match operator with
+               A.Beq     -> L.build_intcast (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder) i32_t
+                              "tmp" builder
+                              (*L.const_int i32_t 
+                              (if L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder = 
+                              (L.const_int i1_t 0) then 0 else 1)*)
+               | A.Bneq    -> L.build_intcast (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder) i32_t
+                              "tmp" builder
+                              (*L.const_int i32_t
+                              (if L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder =
+                              (L.const_int i1_t 0) then 0 else 1)*)
+               | A.Lth     -> L.build_intcast (L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder) i32_t
+                              "tmp" builder
+                              (*L.const_int i32_t
+                              (if L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder =
+                              (L.const_int i1_t 0) then 0 else 1)*)
+               | A.Leq     -> L.build_intcast (L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder) i32_t
+                              "tmp" builder
+                              (*L.const_int i32_t
+                              (if L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder =
+                              (L.const_int i1_t 0) then 0 else 1)*)
+               | A.Gth     -> L.build_intcast (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder) i32_t
+                              "tmp" builder
+                              (*(L.const_int i32_t
+                              (if (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder) =
+                              (L.const_int i1_t 0) then 0 else 1)*)
+               | A.Geq     -> L.build_intcast (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
+                              "tmp" builder
+                              (*L.const_int i32_t
+                              (if L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder =
+                              (L.const_int i1_t 0) then 0 else 1)*)
+               | A.And     -> L.build_and e1' e2' "tmp" builder
+               | A.Or      -> L.build_or e1' e2' "tmp" builder                
+            ) 
       | SBinop ((A.Point, _) as e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in
@@ -272,39 +312,7 @@ let translate (globals, functions) =
               | A.Div     -> L.build_sdiv e1' e2' "tmp" builder
               | A.Mod     -> L.build_srem e1' e2' "tmp" builder
               | A.Pow     -> L.build_mul e1' e2' "tmp" builder
-	      | A.And     -> L.build_and e1' e2' "tmp" builder
-	      | A.Or      -> L.build_or e1' e2' "tmp" builder
-	      | A.Beq     -> L.build_intcast (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder) i32_t
-                             "tmp" builder
-                             (*L.const_int i32_t 
-                             (if L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder = 
-                             (L.const_int i1_t 0) then 0 else 1)*)
-	      | A.Bneq    -> L.build_intcast (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder) i32_t
-                             "tmp" builder
-                             (*L.const_int i32_t
-                             (if L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder =
-                             (L.const_int i1_t 0) then 0 else 1)*)
-	      | A.Lth     -> L.build_intcast (L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder) i32_t
-                             "tmp" builder
-                             (*L.const_int i32_t
-                             (if L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder =
-                             (L.const_int i1_t 0) then 0 else 1)*)
-	      | A.Leq     -> L.build_intcast (L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder) i32_t
-                             "tmp" builder
-                             (*L.const_int i32_t
-                             (if L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder =
-                             (L.const_int i1_t 0) then 0 else 1)*)
-	      | A.Gth     -> L.build_intcast (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder) i32_t
-                             "tmp" builder
-                             (*(L.const_int i32_t
-                             (if (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder) =
-                             (L.const_int i1_t 0) then 0 else 1)*)
-	      | A.Geq     -> L.build_intcast (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
-                             "tmp" builder
-                             (*L.const_int i32_t
-                             (if L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder =
-                             (L.const_int i1_t 0) then 0 else 1)*)
-              ) (*e1' e2' "tmp" builder*)
+              ) 
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
               (match op with
