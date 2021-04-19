@@ -38,7 +38,8 @@ let built_in_decls =
   in List.fold_left add_bind StringMap.empty [ ("print", Int);
                                                ("prints", String);
                                                ("printl", Lint);
-                                               ("printpt", Point); ]
+                                               ("printpt", Point);
+                                               ("printpoly", Poly)]
   (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 
@@ -113,6 +114,14 @@ let check_function func =
 	    Lint, Lint -> Point
 	    | _ -> raise (Failure ("points must have Lint coordinates"))
             in (ty, SPtlit((t1, e1'), (t2, e2')))
+  | Polylit(e1, e2, e3) ->
+	    let (t1, e1') = expr e1
+ 	    and (t2, e2') = expr e2
+ 	    and (t3, e3') = expr e3 in
+	    let ty = match t1, t2, t3 with
+	    Lint, Lint, Lint -> Poly
+	    | _ -> raise (Failure ("points must have Lint coordinates"))
+            in (ty, SPolylit((t1, e1'), (t2, e2'), (t3, e3')))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in
             let ty = match op with

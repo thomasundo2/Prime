@@ -95,6 +95,7 @@ let string_of_typ = function
   | String -> "string"
   | Lint -> "lint"
   | Point -> "Point"
+  | Poly -> "poly"
   | Void -> "void"
   | _ -> "typ PP not implemented"
 
