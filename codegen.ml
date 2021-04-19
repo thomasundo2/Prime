@@ -269,7 +269,9 @@ let translate (globals, functions) =
               let e' = expr builder e in
               (match op with
                 A.Neg     -> L.build_neg  e' "tmp" builder
-              | A.Not -> L.const_int i32_t (if e' = (L.const_int i32_t 0) then 1 else 0))
+              | A.Not     -> (L.build_zext
+                             (L.build_icmp L.Icmp.Eq e' (L.const_int i32_t 0) "tmp" builder)
+                             i32_t "tmp" builder))
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	        "printf" builder
