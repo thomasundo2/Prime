@@ -4,25 +4,43 @@
 #include <stdlib.h>
 #include <string.h>
 
-// TODO: move to its own file
 #include"structs.h"
-struct point Point(int i, int j)
+struct point Point(mpz_t i, mpz_t j)
 {
-		struct point p;
-		p.i = i;
-		p.j = j;
-		return p;
+    // printf("testing!\n");
+    struct point p;
+    mpz_init_set(p.i, i);
+    mpz_init_set(p.j, j);
+    return p;
 }
+
+// void Point(struct point *p, mpz_t i, mpz_t j)
+// {
+//     mpz_init_set(p->i, i);
+//     mpz_init_set(p->j, j);
+// }
+
+void printpt(struct point *p)
+{
+    printf("[");
+    mpz_out_str(stdout, 10, p->i);
+    printf(",");
+    mpz_out_str(stdout, 10, p->j);
+    printf("]\n");
+}
+
+/*
 char *printpt(struct point p){
-    char i_str[20];
-    char j_str[20];
 
-    sprintf(i_str, "[%d,", p.i);
-    sprintf(j_str, "%d]", p.j);
-    char *ret = strcat(i_str, j_str);
-    return ret;
-}
+    printf("[");
+    mpz_out_str(stdout, 10, p.i);
+    printf(",");
+    mpz_out_str(stdout, 10, p.j);
+    printf("]");
+    printf("\n");
+}*/
 
+/*
 struct point ptadd(struct point p1, struct point p2)
 {
 
@@ -41,5 +59,5 @@ struct point ptadd(struct point p1, struct point p2)
     j = m*(p1.i - i) - p1.j;
 
     return Point(i, j);
-}
+}*/
 

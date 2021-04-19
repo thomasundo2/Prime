@@ -1,9 +1,12 @@
 int main()
 {
+    /* creation and assignment */
     pt x;
-    int i;
-    int j;
-    x = [99, 22];
+    printpt([1l, 2l]);
+    x = [99l, 22l];
     printpt(x);
+
+    /* ops: add, multiply, subtract */
+    /* printpt([1l, 2l] + [1l, 2l]); */
     return 0;
 }
