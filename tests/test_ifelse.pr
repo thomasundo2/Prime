@@ -1,0 +1,50 @@
+int main()
+{
+    int test;
+    int test2;
+    test2 = 2;
+    test = 0;
+    if(test) {
+	print(1);
+    }
+    else{
+	print(0);
+    }
+    if(test2){
+        print(1);
+    }
+    else{
+        print(0);
+    }
+    if(test2 < 0){
+        print(1);
+    }
+    else{
+        print(0);
+    }
+    if(test2 > 0){
+        print(1);
+    }
+    else{
+        print(0);
+    }
+    if(0 > test2){
+        print(1);
+    }
+    else{
+        print(0);
+    }
+    if(test != test2){
+        print(1);
+    }
+    else{
+        print(0);
+    }
+    if(test == test2){
+        print(1);
+    }
+    else{
+        print(0);
+    }
+    return 0;
+}

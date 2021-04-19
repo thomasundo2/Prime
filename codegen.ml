@@ -25,6 +25,7 @@ let translate (globals, functions) =
 
   (* Get types from the context *)
   let i32_t      = L.i32_type    context
+  and i1_t       = L.i1_type     context
   and i8_t       = L.i8_type     context
   and string_t   = L.pointer_type (L.i8_type context)
   and point_t    = L.pointer_type (L.i8_type context)
@@ -235,26 +236,42 @@ let translate (globals, functions) =
               let e1' = expr builder e1
               and e2' = expr builder e2 in
               (match operator with
-                A.Add     -> L.build_add
-              | A.Sub     -> L.build_sub
-              | A.Mul     -> L.build_mul
-              | A.Div     -> L.build_sdiv
-              | A.Mod     -> L.build_srem
-              | A.Pow     -> L.build_mul
-	      | A.And     -> L.build_and
-	      | A.Or      -> L.build_or
-	      | A.Beq     -> L.build_icmp L.Icmp.Eq
-	      | A.Bneq    -> L.build_icmp L.Icmp.Ne
-	      | A.Lth     -> L.build_icmp L.Icmp.Slt
-	      | A.Leq     -> L.build_icmp L.Icmp.Sle
-	      | A.Gth     -> L.build_icmp L.Icmp.Sgt
-	      | A.Geq     -> L.build_icmp L.Icmp.Sge
-              ) e1' e2' "tmp" builder
+                A.Add     -> L.build_add e1' e2' "tmp" builder
+              | A.Sub     -> L.build_sub e1' e2' "tmp" builder
+              | A.Mul     -> L.build_mul e1' e2' "tmp" builder
+              | A.Div     -> L.build_sdiv e1' e2' "tmp" builder
+              | A.Mod     -> L.build_srem e1' e2' "tmp" builder
+              | A.Pow     -> L.build_mul e1' e2' "tmp" builder
+	      | A.And     -> L.build_zext
+                             (L.build_and
+                             (L.build_icmp L.Icmp.Ne e1' (L.const_int i32_t 0) "tmp" builder)
+                             (L.build_icmp L.Icmp.Ne e2' (L.const_int i32_t 0) "tmp" builder)
+                             "tmp" builder) i32_t "tmp" builder
+	      | A.Or      -> L.build_zext
+                             (L.build_or 
+                             (L.build_icmp L.Icmp.Ne e1' (L.const_int i32_t 0) "tmp" builder) 
+                             (L.build_icmp L.Icmp.Ne e2' (L.const_int i32_t 0) "tmp" builder)
+                             "tmp" builder) i32_t "tmp" builder
+	      | A.Beq     -> L.build_zext (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder) 
+                             i32_t "tmp" builder
+	      | A.Bneq    -> L.build_zext (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder) i32_t
+                             "tmp" builder
+	      | A.Lth     -> L.build_zext (L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder) i32_t
+                             "tmp" builder
+	      | A.Leq     -> L.build_zext (L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder) i32_t
+                             "tmp" builder
+	      | A.Gth     -> L.build_zext (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder) i32_t
+                             "tmp" builder
+	      | A.Geq     -> L.build_zext (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
+                             "tmp" builder
+              ) (*e1' e2' "tmp" builder*)
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
               (match op with
-                A.Neg     -> L.build_neg
-              | A.Not     -> L.build_not) e' "tmp" builder
+                A.Neg     -> L.build_neg  e' "tmp" builder
+              | A.Not     -> (L.build_zext
+                             (L.build_icmp L.Icmp.Eq e' (L.const_int i32_t 0) "tmp" builder)
+                             i32_t "tmp" builder))
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	        "printf" builder
@@ -304,7 +321,14 @@ let translate (globals, functions) =
                               | _ -> L.build_ret (expr builder e) builder );
                      builder
       | SIf (predicate, then_stmt, else_stmt) ->
-         let bool_val = expr builder predicate in
+         let int_val = expr builder predicate in
+         let bool_val = L.build_icmp L.Icmp.Ne int_val (L.const_int i32_t 0) "tmp" builder in
+         (*L.const_int i1_t (* (if int_val = (L.const_int i32_t 0) then 0 else 1)*)
+         ignore(match int_val with
+           (L.const_int i32_t 0) -> 0
+         | (L.const_int i32_t _) -> 1
+         | _ -> raise(Failure "case")
+         )*)
          let merge_bb = L.append_block context "merge" the_function in
              let build_br_merge = L.build_br merge_bb in (* partial function *)
 
@@ -328,8 +352,9 @@ let translate (globals, functions) =
 	    (L.build_br pred_bb);
 
 	  let pred_builder = L.builder_at_end context pred_bb in
-	  let bool_val = expr pred_builder predicate in
-
+          let int_val = expr pred_builder predicate in
+	  let bool_val = (L.build_icmp L.Icmp.Ne int_val (L.const_int i32_t 0)) "tmp" pred_builder in
+          
 	  let merge_bb = L.append_block context "merge" the_function in
 	  ignore(L.build_cond_br bool_val body_bb merge_bb pred_builder);
 	  L.builder_at_end context merge_bb
