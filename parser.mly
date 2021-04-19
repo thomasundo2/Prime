@@ -117,7 +117,7 @@ expr:
   | expr TIMES  expr { Binop($1, Mul, $3) }
   | expr DIVIDE expr { Binop($1, Div, $3) }
   | expr BEQ    expr { Binop($1, Beq, $3) }
-  | expr BNEQ    expr { Binop($1, Bneq, $3) }
+  | expr BNEQ   expr { Binop($1, Bneq, $3) }
   | expr LTH    expr { Binop($1, Lth, $3) }
   | expr LEQ    expr { Binop($1, Leq, $3) }
   | expr GTH    expr { Binop($1, Gth, $3) }
