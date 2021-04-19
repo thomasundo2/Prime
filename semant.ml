@@ -110,6 +110,16 @@ let check_function func =
 	    let e1' = expr e1
  	    and e2' = expr e2 in
 	    (Point, SPtlit(e1', e2'))
+  | Access(var, e2) as ex -> (* Will give us the right index for gep from string *)
+      let lt = type_of_identifier var in
+      (match lt with
+        Point -> (match e2 with
+                    "x" -> (Lint, SAccess(var, 0))
+                  | "y" -> (Lint, SAccess(var, 1))
+                  | _   -> raise (Failure ("invalid access element " ^ e2 ^ " in "
+                                           ^ string_of_expr ex)))
+      | _     -> raise (Failure ("cannot access type: " ^ string_of_typ lt
+                                 ^ " in " ^ string_of_expr ex)))
   | Unop(op, e) as ex ->
           let (t, e') = expr e in
           let ty = match op with

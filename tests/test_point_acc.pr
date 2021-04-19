@@ -1,0 +1,8 @@
+int main()
+{
+    pt a;
+    a = [1l, 2l];
+    printl(a.x);
+    printl(a.y);
+    /* Will add the poly element soon */
+}

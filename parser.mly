@@ -119,7 +119,6 @@ expr:
   | STRLIT           { Strlit($1) }
   | LINTLIT          { Lintlit($1) }
   | LBRACK expr COMMA expr RBRACK { Ptlit ($2, $4) }
-  //| expr ACCESS expr {  } // will be used for accessor methods
   | expr MOD    expr { Binop($1, Mod, $3) }
   | expr POWER  expr { Binop($1, Pow, $3) }
   | expr PLUS   expr { Binop($1, Add, $3) }
@@ -137,6 +136,7 @@ expr:
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
   | NOT expr         { Unop(Not, $2)      }
   | ID ASSIGN expr   { Assign($1, $3)     }
+  | ID ACCESS ID     { Access($1, $3) } // will be used for accessor methods
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
   // | LBRACK args_list RBRACK    { Ptlit($1, $2, $3)  }    // Point initialisation
   | LPAREN expr RPAREN {  $2  }

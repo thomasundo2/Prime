@@ -33,7 +33,7 @@ let translate (globals, functions) =
   and mpz_t      = L.named_struct_type context "mpz_t"
     in let mpz_t = L.struct_set_body mpz_t [| (L.i32_type context); (L.i32_type context); L.pointer_type (L.i64_type context) |] false; mpz_t
   in let point_t    = L.named_struct_type context "point"
-    in let point_t = L.struct_set_body point_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t |] false; point_t
+    in let point_t = L.struct_set_body point_t [| mpz_t ; mpz_t |] false; point_t
   in
 
   (* Return the LLVM type for a MicroC type *)
@@ -112,7 +112,7 @@ let translate (globals, functions) =
   let init_point_func : L.llvalue =
       L.declare_function "Point" init_lintpoint_t the_module in
   let print_point_t : L.lltype = 
-      L.function_type i32_t [| L.pointer_type point_t (*L.pointer_type mpz_t; L.pointer_type mpz_t*) |] in
+      L.function_type i32_t [| L.pointer_type point_t |] in
   let print_point_func : L.llvalue =
       L.declare_function "printpt" print_point_t the_module in
 
@@ -179,15 +179,6 @@ let translate (globals, functions) =
       (* how to free after done using *)
     in
 
-    (* helper to get us a point. returns pointer to the memory *)
-    (* let point_helper i j = 
-      let space = L.build_alloca (ltype_of_typ A.Point) "" builder
-      and store el loc = L.build_store el loc builder
-      and load l = L.build_load l "" builder in
-      (* we need to now get the pointers, load them and store the values *)
-      let calls idx = load (L.build_in_bounds_gep space [| L.const_int i32_t 0; L.const_int i32_t idx |] "" builder) *)
-
-
     (* Helpful when writing geps *)
     let zero = L.const_int i32_t 0
     in
@@ -219,6 +210,11 @@ let translate (globals, functions) =
           ignore(L.build_store loaded (lookup s) builder); e1'
       | SAssign (s, e) -> let e' = expr builder e in
                            ignore(L.build_store e' (lookup s) builder); e'
+        (* Will need to separate out the access into one for the different types *)
+      | SAccess (s, idx) -> 
+          let outer_ptr = L.build_in_bounds_gep (lookup s) [| zero; L.const_int i32_t idx |] "outer" builder 
+          in
+          L.build_in_bounds_gep outer_ptr [| zero |] "inner" builder
       | SBinop ((A.Lint, _) as e1, operator, e2) ->
       (* for e1, e2 take second argument of the tuple (A.Lint, _) and do what printl does.
        * See if its an id or lintlit. If id get inbounds elt pointer to struct.
