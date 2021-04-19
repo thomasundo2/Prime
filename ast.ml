@@ -15,6 +15,7 @@ type expr =
   | Ptlit of expr * expr
   | Id of string
   | Binop of expr * operator * expr
+  | Relop of expr * operator * expr
   | Unop of uoperator * expr
   | Assign of string * expr
   | Call of string * expr list
@@ -68,6 +69,8 @@ let rec string_of_expr = function
   | Lintlit(l) -> l
   | Ptlit(i, j) -> "[" ^ string_of_expr i ^ "," ^ string_of_expr j ^ "]"
   | Binop(e1, o, e2) ->
+          string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
+  | Relop(e1, o, e2) ->
           string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e

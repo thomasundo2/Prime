@@ -116,14 +116,14 @@ expr:
   | expr MINUS  expr { Binop($1, Sub, $3) }
   | expr TIMES  expr { Binop($1, Mul, $3) }
   | expr DIVIDE expr { Binop($1, Div, $3) }
-  | expr BEQ    expr { Binop($1, Beq, $3) }
-  | expr BNEQ    expr { Binop($1, Bneq, $3) }
-  | expr LTH    expr { Binop($1, Lth, $3) }
-  | expr LEQ    expr { Binop($1, Leq, $3) }
-  | expr GTH    expr { Binop($1, Gth, $3) }
-  | expr GEQ    expr { Binop($1, Geq, $3) }
-  | expr AND    expr { Binop($1, And, $3) }
-  | expr OR     expr { Binop($1, Or, $3)  }
+  | expr BEQ    expr { Relop($1, Beq, $3) }
+  | expr BNEQ   expr { Relop($1, Bneq, $3) }
+  | expr LTH    expr { Relop($1, Lth, $3) }
+  | expr LEQ    expr { Relop($1, Leq, $3) }
+  | expr GTH    expr { Relop($1, Gth, $3) }
+  | expr GEQ    expr { Relop($1, Geq, $3) }
+  | expr AND    expr { Relop($1, And, $3) }
+  | expr OR     expr { Relop($1, Or, $3)  }
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
   | NOT expr         { Unop(Not, $2)      }
   | ID ASSIGN expr   { Assign($1, $3)     }

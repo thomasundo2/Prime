@@ -1,0 +1,10 @@
+int main()
+{
+    print(2l > 1l);
+    print(1l >= 1l);
+    print(2l == 2l);
+    print(2l != 1l);
+    print(1l < 2l);
+    print(1l <= 1l);
+    return 0;
+}

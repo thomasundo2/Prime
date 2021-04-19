@@ -3,7 +3,7 @@
 #include <gmp.h>
 #include <stdlib.h>
 #include <string.h>
-#include"structs.h"
+#include "structs.h"
 
 
 void printl(mpz_t n)
@@ -35,6 +35,60 @@ char *sub(char *left, char *right)
     mpz_clear(n1);
     mpz_clear(n2);
     return ret_str;
+}
+
+int eq_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) == 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int neq_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) == 0){
+        return 0;
+    }
+    else{
+        return 1;
+    }
+}
+
+int lth_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) < 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int gth_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) > 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int leq_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) <= 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int geq_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) >= 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
 }
 
 #ifdef BUILD_TEST
