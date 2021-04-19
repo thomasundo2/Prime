@@ -7,6 +7,9 @@ A programming language designed for cryptography.
 - Thomas (Architect)
 - Pedro (Tester)
 
+## Lint Stage
+At this point, we have implemented basic arithmetic operator for integers and large intergers. Assignment operators are functional for intergers, large integers, and strings.
+
 ## Hello World Stage
 At this point, we have decided to limit our program to printing integers and strings. 
 Return statements are also included.
