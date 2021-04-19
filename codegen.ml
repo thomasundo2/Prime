@@ -36,7 +36,7 @@ let translate (globals, functions) =
   in let point_t    = L.named_struct_type context "point"
     in let point_t = L.struct_set_body point_t [| mpz_t ; mpz_t |] false; point_t
   in let poly_t = L.named_struct_type context "poly"
-    in let poly_t = L.struct_set_body poly_t [| L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type mpz_t |] false; poly_t
+    in let poly_t = L.struct_set_body poly_t [| mpz_t ; mpz_t; mpz_t |] false; poly_t
   in
 
   (* Return the LLVM type for a MicroC type *)
@@ -126,7 +126,7 @@ let translate (globals, functions) =
   let init_poly_func : L.llvalue =
       L.declare_function "Poly" init_poly_t the_module in
   let print_poly_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type poly_t (*L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t*) |] in
+      L.function_type i32_t [| L.pointer_type poly_t |] in
   let print_poly_func : L.llvalue =
       L.declare_function "printpoly" print_poly_t the_module in
 
