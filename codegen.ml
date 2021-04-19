@@ -242,8 +242,16 @@ let translate (globals, functions) =
               | A.Div     -> L.build_sdiv e1' e2' "tmp" builder
               | A.Mod     -> L.build_srem e1' e2' "tmp" builder
               | A.Pow     -> L.build_mul e1' e2' "tmp" builder
-	      | A.And     -> L.build_and e1' e2' "tmp" builder
-	      | A.Or      -> L.build_or e1' e2' "tmp" builder
+	      | A.And     -> L.build_zext
+                             (L.build_and
+                             (L.build_icmp L.Icmp.Ne e1' (L.const_int i32_t 0) "tmp" builder)
+                             (L.build_icmp L.Icmp.Ne e2' (L.const_int i32_t 0) "tmp" builder)
+                             "tmp" builder) i32_t "tmp" builder
+	      | A.Or      -> L.build_zext
+                             (L.build_or 
+                             (L.build_icmp L.Icmp.Ne e1' (L.const_int i32_t 0) "tmp" builder) 
+                             (L.build_icmp L.Icmp.Ne e2' (L.const_int i32_t 0) "tmp" builder)
+                             "tmp" builder) i32_t "tmp" builder
 	      | A.Beq     -> L.build_zext (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder) 
                              i32_t "tmp" builder
 	      | A.Bneq    -> L.build_zext (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder) i32_t

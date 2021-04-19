@@ -1,0 +1,12 @@
+int main(){
+    int i;
+    int j;
+    i = 1;
+    j = 0;
+    print(i && j);
+    print(i || j);
+    print(0 || j);
+    print(i && 1);
+    print(i && 0);
+    return 0;
+}
