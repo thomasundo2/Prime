@@ -29,6 +29,27 @@ void printpt(struct point *p)
     printf("]\n");
 }
 
+// POLYS
+void Poly(struct poly *p, mpz_t x_coeff, mpz_t c, mpz_t mod)
+{
+    mpz_init_set(p->x_coeff, x_coeff);
+    mpz_init_set(p->c, c);
+    mpz_init_set(p->mod, mod);
+}
+void printpoly(struct poly *p)
+{
+    printf("[(");
+    mpz_out_str(stdout, 10, p->x_coeff);
+    printf(",");
+    mpz_out_str(stdout, 10, p->c);
+    printf(") : ");
+    mpz_out_str(stdout, 10, p->mod);
+    printf("]\n");
+}
+
+
+
+
 /*
 char *printpt(struct point p){
 

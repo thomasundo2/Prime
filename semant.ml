@@ -39,7 +39,7 @@ let built_in_decls =
                                                ("prints", String);
                                                ("printl", Lint);
                                                ("printpt", Point);
-                                               ("printpoly", Poly)]
+                                               ("printpoly", Poly);]
   (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 

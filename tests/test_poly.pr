@@ -1,10 +1,7 @@
 int main()
 {
     poly x;
-    printpoly([(1l, 2l) : 3l]);
-
     x = [(1l, 2l) : 3l];
     printpoly(x);
-
     return 0;
 }

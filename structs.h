@@ -6,4 +6,10 @@ struct point
 	mpz_t j;
 };
 
+struct poly {
+    mpz_t x_coeff;
+    mpz_t c;
+    mpz_t mod;
+};
+
 #endif
