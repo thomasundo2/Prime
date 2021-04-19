@@ -7,6 +7,7 @@ and sx =
   | SStrlit of string
   | SLintlit of string
   | SPtlit of sexpr * sexpr
+  | SPolylit of sexpr * sexpr * sexpr
   | SAccess of string * int
   | SId of string
   | SBinop of sexpr * operator * sexpr
@@ -40,6 +41,7 @@ let rec string_of_sexpr (t, e) =
     SStrlit(l) -> "\"" ^ l ^ "\""
   | SLintlit(l) -> l
   | SPtlit(i, j) -> "[" ^ string_of_sexpr i ^ "," ^ string_of_sexpr j ^ "]"
+  | SPolylit(i, j) -> -> "[(" ^ string_of_sexpr i ^ "," ^ string_of_sexpr j^ ") : " ^string_of_sexpr m ^ "]"
   | SAccess(s, i) ->s ^"[" ^ string_of_int i ^ "]"
   | SLit(l) -> string_of_int l
   | SId(s) -> s
@@ -57,7 +59,7 @@ let rec string_of_sstmt = function
       "{\n" ^ String.concat "" (List.map string_of_sstmt stmts) ^ "}\n"
   | SExpr(expr) -> string_of_sexpr expr ^ ";\n";
   | SReturn(expr) -> "return " ^ string_of_sexpr expr ^ ";\n";
-  | SIf(e, s, SBlock([])) -> 
+  | SIf(e, s, SBlock([])) ->
       "if (" ^ string_of_sexpr e ^ ")\n" ^ string_of_sstmt s
   | SIf(e, s1, s2) ->  "if (" ^ string_of_sexpr e ^ ")\n" ^
       string_of_sstmt s1 ^ "else\n" ^ string_of_sstmt s2

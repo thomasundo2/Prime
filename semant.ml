@@ -35,10 +35,10 @@ let built_in_decls =
     params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map
-  in List.fold_left add_bind StringMap.empty [ ("print", Int); 
+  in List.fold_left add_bind StringMap.empty [ ("print", Int);
                                                ("prints", String);
                                                ("printl", Lint);
-                                               ("printpt", Point); ] 
+                                               ("printpt", Point); ]
   (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 
@@ -73,7 +73,7 @@ let check_function func =
   (* All #TODO: *)
   (* check type and identifiers in formal parameters and local vars *)
   (* check all assignments are valid types. Should we co-erce? *)
-  let check_assign lvaltype rvaltype err =  
+  let check_assign lvaltype rvaltype err =
     (* print_string ("param: " ^ (string_of_typ lvaltype) ^ " actual: " ^ (string_of_typ rvaltype) ^ "\n"); *)
     match lvaltype with
       (* Lint -> if rvaltype = String || rvaltype = Lint then lvaltype else raise (Failure err) *)
@@ -107,11 +107,10 @@ let check_function func =
             string_of_typ rt ^ " in " ^ string_of_expr ex
           in (check_assign lt rt err, SAssign(var, (rt, e')))
   | Ptlit(e1, e2) ->
-	    let (t1, e1') = expr e1 
+	    let (t1, e1') = expr e1
  	    and (t2, e2') = expr e2 in
 	    let ty = match t1, t2 with
 	    Lint, Lint -> Point
-	    | Int, Int -> Point
 	    | _ -> raise (Failure ("points must have Lint coordinates"))
             in (ty, SPtlit((t1, e1'), (t2, e2')))
     | Unop(op, e) as ex ->

@@ -13,6 +13,7 @@ type expr =
   | Lit of int
   | Lintlit of string
   | Ptlit of expr * expr
+  | Polylit of expr * expr * expr
   | Id of string
   | Binop of expr * operator * expr
   | Unop of uoperator * expr
@@ -50,7 +51,7 @@ let string_of_op = function
   | Pow -> "^"
   | Beq -> "=="
   | Bneq -> "!="
-  | Leq -> "<=" 
+  | Leq -> "<="
   | Geq -> ">="
   | Lth -> "<"
   | Gth -> ">"
@@ -67,6 +68,7 @@ let rec string_of_expr = function
   | Lit(l) -> string_of_int l
   | Lintlit(l) -> l
   | Ptlit(i, j) -> "[" ^ string_of_expr i ^ "," ^ string_of_expr j ^ "]"
+  | Polylit(i,j, m) -> "[(" ^ string_of_expr i ^ "," ^ string_of_expr j^ ") : " ^string_of_expr m ^ "]"
   | Binop(e1, o, e2) ->
           string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
