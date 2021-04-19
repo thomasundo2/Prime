@@ -360,8 +360,8 @@ let translate (globals, functions) =
 	    (L.build_br pred_bb);
 
 	  let pred_builder = L.builder_at_end context pred_bb in
-          let bool_val = expr pred_builder predicate in
-	  (*let bool_val = L.build_icmp L.Icmp.Ne int_val (L.const_int i32_t 0) "tmp" builder in*)
+          let int_val = expr pred_builder predicate in
+	  let bool_val = (L.build_icmp L.Icmp.Ne int_val (L.const_int i32_t 0)) "tmp" pred_builder in
           
 	  let merge_bb = L.append_block context "merge" the_function in
 	  ignore(L.build_cond_br bool_val body_bb merge_bb pred_builder);
