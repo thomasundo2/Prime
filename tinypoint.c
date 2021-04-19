@@ -16,9 +16,13 @@ void Point(struct point *p, mpz_t left, mpz_t right)
 
 int main() {
     struct point p;
+    struct point p2;
     mpz_t n1, n2;
     mpz_init_set_str(n1, "1", 10);
     mpz_init_set_str(n2, "2", 10);
     Point(&p, n1, n2);
+    p2 = p;
+    mpz_out_str(stdout, 10, p.i);
+    mpz_out_str(stdout, 10, p.j);
     return 0;
 }

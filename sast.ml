@@ -42,7 +42,7 @@ let rec string_of_sexpr (t, e) =
   | SLintlit(l) -> l
   | SPtlit(i, j) -> "[" ^ string_of_sexpr i ^ "," ^ string_of_sexpr j ^ "]"
   | SPolylit(i, j, m) -> "[(" ^ string_of_sexpr i ^ "," ^ string_of_sexpr j^ ") : " ^string_of_sexpr m ^ "]"
-  | SAccess(s, i) ->s ^"[" ^ string_of_int i ^ "]"
+  | SAccess(s, i) ->s ^ "." ^ string_of_int i
   | SLit(l) -> string_of_int l
   | SId(s) -> s
   | SBinop(e1, o, e2) ->

@@ -1,0 +1,6 @@
+int main()
+{
+    pt a;
+    a = [1l, 2l];
+    printl(a.z);
+}
