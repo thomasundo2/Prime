@@ -26,7 +26,6 @@ let translate (globals, functions) =
   (* Get types from the context *)
   let i32_t      = L.i32_type    context
   and i8_t       = L.i8_type     context
-  and string_t   = L.pointer_type (L.i8_type context)
   and void_t     = L.void_type   context in
   let string_t   = L.pointer_type (i8_t)
   (* and mpz_t      = L.struct_type context [| (L.i32_type context); (L.i32_type context); (L.pointer_type (L.i64_type context)) |] *)
@@ -212,7 +211,7 @@ let translate (globals, functions) =
                 (* Here we have a pointer to mpz val *)
                 ignore(L.build_call linitdup_func
                 [| L.build_in_bounds_gep (lookup s) [| zero |] s builder; e1' |] "" builder); e1'
-      | SAssign (s, ((A.Point, e) as e1))  -> 
+      | SAssign (s, ((A.Point, _) as e1))  -> 
           (* For point lits that already have stack allocated, we get element pointer then store *)
           let e1' = expr builder e1 in
           let val_ptr = L.build_in_bounds_gep e1' [| zero |] "" builder in
@@ -268,16 +267,12 @@ let translate (globals, functions) =
           "printf" builder
       | SCall ("printpt", [(_, e) as e1]) -> (* print pt *)
           let e1' = expr builder e1 in
-          L.build_call print_point_func [| e1' |] "printpt" builder
-          (* L.build_call print_point_func
           (match e with
-            SId s -> [| (L.build_in_bounds_gep (lookup s) [| zero |] "" builder); 
-              (L.build_in_bounds_gep (lookup s) [| L.const_int i32_t 1 |] "" builder) |]
-          | SPtlit (i, j) -> [| expr builder i; expr builder j |]) "printpt" builder *)
-          (* According to semant we should not have anything else *)
+            SPtlit _ -> L.build_call print_point_func [| L.build_in_bounds_gep e1' [| zero |] "" builder |] "printpt" builder
+          | _             -> L.build_call print_point_func [| e1' |] "printpt" builder)
       | SCall ("printl", [(_, e) as ptr]) ->
-          L.build_call lprint_func
-          (match e with
+          (* L.build_call lprint_func [| expr builder e |] "printl" builder *)
+          L.build_call lprint_func (match e with
             SId s -> [| (L.build_in_bounds_gep (lookup s)
                         [| L.const_int i32_t 0 |] "" builder) |]
           | SLintlit i -> [| llit_helper i |]
@@ -289,7 +284,7 @@ let translate (globals, functions) =
                         A.Void -> ""
                       | _ -> f ^ "_result") in
          L.build_call fdef (Array.of_list llargs) result builder
-      (* | _ -> L.const_int i32_t 0 unused *)
+      (* | _ -> L.const_int i32_t 0 *)
     in
 
     (* LLVM insists each basic block end with exactly one "terminator"

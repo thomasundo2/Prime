@@ -4,16 +4,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-// TODO: move to its own file
 #include"structs.h"
 struct point Point(mpz_t i, mpz_t j)
 {
-		// printf("testing!\n");
-		struct point p;
-		mpz_init_set(p.i, i);
-		mpz_init_set(p.j, j);
-		return p;
+    // printf("testing!\n");
+    struct point p;
+    mpz_init_set(p.i, i);
+    mpz_init_set(p.j, j);
+    return p;
 }
+
+// void Point(struct point *p, mpz_t i, mpz_t j)
+// {
+//     mpz_init_set(p->i, i);
+//     mpz_init_set(p->j, j);
+// }
 
 void printpt(struct point *p)
 {
