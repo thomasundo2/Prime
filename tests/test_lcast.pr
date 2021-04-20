@@ -8,5 +8,6 @@ int main()
     z = tolint(x);
     printl(y);
     printl(z);
+    printl(tolint(3));
     return 0;
 }
