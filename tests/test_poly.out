@@ -1,4 +1,2 @@
-<(1l, 2l), 3l>
-<(1l, 2l), 3l>
-
-LBRACK LPAREN expr COMMA expr RPAREN COLON expr RBRACK {Polylit($3, $5, $8)}
+[(1,2) : 3]
+[(4,5) : 6]

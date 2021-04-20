@@ -1,0 +1,6 @@
+int main()
+{
+    poly x;
+    x = [(1, 2l) : 3l];
+    return 0;
+}

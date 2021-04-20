@@ -130,7 +130,7 @@ let check_function func =
  	    and (t3, e3') = expr e3 in
 	    let ty = match t1, t2, t3 with
 	    Lint, Lint, Lint -> Poly
-	    | _ -> raise (Failure ("points must have Lint coordinates"))
+	    | _ -> raise (Failure ("Polynomials must have Lint coefficients and a Lint modulus"))
             in (ty, SPolylit((t1, e1'), (t2, e2'), (t3, e3')))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in

@@ -130,7 +130,6 @@ let translate (globals, functions) =
   let print_poly_func : L.llvalue =
       L.declare_function "printpoly" print_poly_t the_module in
 
-
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
   let function_decls : (L.llvalue * sfunc_decl) StringMap.t =
@@ -218,6 +217,7 @@ let translate (globals, functions) =
       | SId s         -> (match stype with (* Might be better just to have StructType adt? *)
                           A.Lint  -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
                         | A.Point -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
+                        | A.Poly -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
                         | _       -> L.build_load (lookup s) s builder)
       | SAssign (s, ((A.Lint, _) as e1)) -> let e1' = expr builder e1 in
                 (* Here we have a pointer to mpz val *)
