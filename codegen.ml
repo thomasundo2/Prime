@@ -33,10 +33,10 @@ let translate (globals, functions) =
 (* in *)
   and mpz_t      = L.named_struct_type context "mpz_t"
     in let mpz_t = L.struct_set_body mpz_t [| (L.i32_type context); (L.i32_type context); L.pointer_type (L.i64_type context) |] false; mpz_t
-  in let point_t    = L.named_struct_type context "point"
-    in let point_t = L.struct_set_body point_t [| mpz_t ; mpz_t |] false; point_t
   in let poly_t = L.named_struct_type context "poly"
     in let poly_t = L.struct_set_body poly_t [| mpz_t ; mpz_t; mpz_t |] false; poly_t
+  in let point_t    = L.named_struct_type context "point"
+    in let point_t = L.struct_set_body point_t [| mpz_t ; mpz_t; poly_t |] false; point_t
   in
 
   (* Return the LLVM type for a MicroC type *)
@@ -112,7 +112,7 @@ let translate (globals, functions) =
 
   (*points and printing points*)
   let init_lintpoint_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type mpz_t ; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type poly_t |] in
   let init_point_func : L.llvalue =
       L.declare_function "Point" init_lintpoint_t the_module in
   let print_point_t : L.lltype =
@@ -202,11 +202,12 @@ let translate (globals, functions) =
         SStrlit i     -> L.build_global_stringptr i "string" builder
       | SLintlit i    -> llit_helper i (* Pointer to new mpz*)
       | SLit i        -> L.const_int i32_t i
-      | SPtlit (i, j) -> (* call our struct initialiser passing in loc of initialisation *)
+      | SPtlit (i, j, p) -> (* call our struct initialiser passing in loc of initialisation *)
           let e1' = expr builder i
           and e2' = expr builder j
+          and e3' = expr builder p
           and space = L.build_alloca point_t "tmp_pt" builder
-          in ignore(L.build_call init_point_func [| space; e1' ; e2' |] "Point" builder); space
+          in ignore(L.build_call init_point_func [| space; e1' ; e2'; e3' |] "Point" builder); space
       | SPolylit (i, j, m) -> (* call our struct initialiser passing in loc of initialisation *)
           let e1' = expr builder i
           and e2' = expr builder j

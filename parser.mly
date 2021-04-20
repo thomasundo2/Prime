@@ -1,7 +1,7 @@
 %{ open Ast %}
 // Thank you again to Professor Edwards for the MicroC template.
 // We have made alterations and additions for our language's functionality
-%token SEMI COLON LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
+%token SEMI COLON AMP LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
 %token BEQ BNEQ LTH GTH GEQ LEQ AND OR NOT
 %token ACCESS
 %token RETURN IF ELSE WHILE FOR INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
@@ -110,7 +110,7 @@ expr:
   | LITERAL          { Lit($1) }
   | STRLIT           { Strlit($1) }
   | LINTLIT          { Lintlit($1) }
-  | LBRACK expr COMMA expr RBRACK { Ptlit ($2, $4) }
+  | LBRACK expr COMMA expr RBRACK AMP expr { Ptlit ($2, $4, $7) }
   | LBRACK LPAREN expr COMMA expr RPAREN COLON expr RBRACK {Polylit($3, $5, $8)}
   | expr MOD    expr { Binop($1, Mod, $3) }
   | expr POWER  expr { Binop($1, Pow, $3) }

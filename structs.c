@@ -14,20 +14,7 @@
 //     return p;
 // }
 
-void Point(struct point *p, mpz_t i, mpz_t j)
-{
-    mpz_init_set(p->i, i);
-    mpz_init_set(p->j, j);
-}
 
-void printpt(struct point *p)
-{
-    printf("[");
-    mpz_out_str(stdout, 10, p->i);
-    printf(",");
-    mpz_out_str(stdout, 10, p->j);
-    printf("]\n");
-}
 
 // POLYS
 void Poly(struct poly *p, mpz_t x_coeff, mpz_t c, mpz_t mod)
@@ -48,7 +35,22 @@ void printpoly(struct poly *p)
 }
 
 
+void Point(struct point *p, mpz_t i, mpz_t j, struct poly *curve)
+{
+    mpz_init_set(p->i, i);
+    mpz_init_set(p->j, j);
+    p->curve = curve;
+}
 
+void printpt(struct point *p)
+{
+    printf("[");
+    mpz_out_str(stdout, 10, p->i);
+    printf(",");
+    mpz_out_str(stdout, 10, p->j);
+    printf("] & ");
+    printpoly(p->curve);
+}
 
 /*
 char *printpt(struct point p){

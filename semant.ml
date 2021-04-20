@@ -107,13 +107,14 @@ let check_function func =
           let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
             string_of_typ rt ^ " in " ^ string_of_expr ex
           in (check_assign lt rt err, SAssign(var, (rt, e')))
-  | Ptlit(e1, e2) ->
+  | Ptlit(e1, e2, e3) ->
 	    let (t1, e1') = expr e1
- 	    and (t2, e2') = expr e2 in
-	    let ty = match t1, t2 with
-	    Lint, Lint -> Point
-	    | _ -> raise (Failure ("points must have Lint coordinates"))
-            in (ty, SPtlit((t1, e1'), (t2, e2')))
+ 	    and (t2, e2') = expr e2
+ 	    and (t3, e3') = expr e3 in
+	    let ty = match t1, t2, t3 with
+	    Lint, Lint, Poly -> Point
+	    | _ -> raise (Failure ("points must have Lint coordinates and be defined under a Poly"))
+            in (ty, SPtlit((t1, e1'), (t2, e2'), (t3, e3')))
   | Access(var, e2) as ex -> (* Will give us the right index for gep from string *)
       let lt = type_of_identifier var in
       (match lt with

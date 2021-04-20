@@ -13,7 +13,7 @@ type expr =
     Strlit of string
   | Lit of int
   | Lintlit of string
-  | Ptlit of expr * expr
+  | Ptlit of expr * expr * expr
   | Polylit of expr * expr * expr
   | Id of string
   | Binop of expr * operator * expr
@@ -69,7 +69,7 @@ let rec string_of_expr = function
   | Id(s)   -> s
   | Lit(l) -> string_of_int l
   | Lintlit(l) -> l
-  | Ptlit(i, j) -> "[" ^ string_of_expr i ^ "," ^ string_of_expr j ^ "]"
+  | Ptlit(i, j, p) -> "[" ^ string_of_expr i ^ "," ^ string_of_expr j ^ "] & "^string_of_expr p
   | Polylit(i,j, m) -> "[(" ^ string_of_expr i ^ "," ^ string_of_expr j^ ") : " ^string_of_expr m ^ "]"
   | Binop(e1, o, e2) ->
           string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2

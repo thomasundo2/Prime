@@ -1,6 +1,6 @@
 int main()
 {
     pt x;
-    printpt(["s",2]);
+    x = ["s", 2l] & [(4l, 5l) : 7l];
     return 0;
 }

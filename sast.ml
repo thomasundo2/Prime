@@ -6,7 +6,7 @@ and sx =
     SLit of int
   | SStrlit of string
   | SLintlit of string
-  | SPtlit of sexpr * sexpr
+  | SPtlit of sexpr * sexpr * sexpr
   | SPolylit of sexpr * sexpr * sexpr
   | SAccess of string * int
   | SId of string
@@ -40,7 +40,7 @@ let rec string_of_sexpr (t, e) =
   "(" ^ string_of_typ t ^ " : " ^ (match e with
     SStrlit(l) -> "\"" ^ l ^ "\""
   | SLintlit(l) -> l
-  | SPtlit(i, j) -> "[" ^ string_of_sexpr i ^ "," ^ string_of_sexpr j ^ "]"
+  | SPtlit(i, j, p) -> "[" ^ string_of_sexpr i ^ "," ^ string_of_sexpr j ^ "] & " ^ string_of_sexpr p
   | SPolylit(i, j, m) -> "[(" ^ string_of_sexpr i ^ "," ^ string_of_sexpr j^ ") : " ^string_of_sexpr m ^ "]"
   | SAccess(s, i) ->s ^ "." ^ string_of_int i
   | SLit(l) -> string_of_int l

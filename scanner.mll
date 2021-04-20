@@ -31,6 +31,7 @@ rule token = parse
 | '^'      { POWER }
 | '%'      { MOD }
 | '.'      { ACCESS }
+| '&'      { AMP }
 (* | ':'      { OVERLOAD } Not included in this part*)
 | "=="     { BEQ }   (* Relational Ops (which ones of these do we want?)*)
 | "!="     { BNEQ }
