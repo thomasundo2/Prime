@@ -1,7 +1,7 @@
 %{ open Ast %}
 // Thank you again to Professor Edwards for the MicroC template.
 // We have made alterations and additions for our language's functionality
-%token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
+%token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN INVERT
 %token BEQ BNEQ LTH GTH GEQ LEQ AND OR NOT
 %token ACCESS
 %token RETURN IF ELSE WHILE FOR INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
@@ -23,6 +23,7 @@
 %left MOD //(* mod takes precedence below all arithmetic operators - l.guru approves*)
 %left PLUS MINUS
 %left TIMES DIVIDE //(* Change this order later if necessary \r moved mod up -l.guru*)
+%right INVERT
 %right NOT
 %right POWER
 %left ACCESS    // Built in access methods
@@ -116,8 +117,9 @@ expr:
   | expr MINUS  expr { Binop($1, Sub, $3) }
   | expr TIMES  expr { Binop($1, Mul, $3) }
   | expr DIVIDE expr { Binop($1, Div, $3) }
+  | expr INVERT expr { Binop($1, Inv, $3) }
   | expr BEQ    expr { Relop($1, Beq, $3) }
-  | expr BNEQ   expr { Relop($1, Bneq, $3) }
+  | expr BNEQ   expr { Relop($1, Bneq, $3)}
   | expr LTH    expr { Relop($1, Lth, $3) }
   | expr LEQ    expr { Relop($1, Leq, $3) }
   | expr GTH    expr { Relop($1, Gth, $3) }

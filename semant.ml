@@ -131,7 +131,7 @@ let check_function func =
             (* Determine expression type based on operator and operand types *)
             let ty = match op with
               Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
-            | Add | Sub | Mul | Div | Mod       when same && t1 = Lint -> Lint
+            | Add | Sub | Mul | Div | Mod | Inv when same && t1 = Lint -> Lint
             | Add                               when same && t1 = Point -> Point
 	    | Pow                               when t1 = Lint && t2 = Int -> Lint
 	    | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int

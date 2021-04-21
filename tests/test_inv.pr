@@ -1,0 +1,6 @@
+int main()
+{
+    lint l1 = 7l;
+    lint l2 = 2l;
+    print(l1'l2);
+}

@@ -1,7 +1,7 @@
 (* Create a new operator for assignment and create a new expression*)
 (* sequences of expressions *)
 
-type operator = Add | Sub | Mul | Div | Mod | Pow | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or
+type operator = Add | Sub | Mul | Div | Mod | Pow | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or | Inv
 type eqsign = Eq
 type uoperator = Neg | Not
 
@@ -49,6 +49,7 @@ let string_of_op = function
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "^"
+  | Inv -> "'"
   | Beq -> "=="
   | Bneq -> "!="
   | Leq -> "<=" 
@@ -92,11 +93,11 @@ let rec string_of_stmt = function
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_typ = function
-    Int -> "int"
+    Int -> "int" 
   | String -> "string"
-  | Lint -> "lint"
-  | Point -> "Point"
-  | Void -> "void"
+  | Lint -> "lint" 
+  | Point -> "Point" 
+  | Void -> "void" 
   | _ -> "typ PP not implemented"
 
 
