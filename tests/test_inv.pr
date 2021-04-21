@@ -1,6 +1,8 @@
 int main()
 {
-    lint l1 = 7l;
-    lint l2 = 2l;
+    lint l1;
+    l1 = 7l;
+    lint l2;
+    l2 = 2l;
     print(l1'l2);
 }

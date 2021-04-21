@@ -29,6 +29,7 @@ rule token = parse
 | '/'      { DIVIDE }
 | '^'      { POWER }
 | '%'      { MOD }
+| '\''     { INVERT }
 | '.'      { ACCESS }
 (* | ':'      { OVERLOAD } Not included in this part*)
 | "=="     { BEQ }   (* Relational Ops (which ones of these do we want?)*)
