@@ -49,7 +49,7 @@ let string_of_op = function
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "^"
-  | Inv -> "'"
+  | Inv -> "`"
   | Beq -> "=="
   | Bneq -> "!="
   | Leq -> "<=" 

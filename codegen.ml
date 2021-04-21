@@ -112,8 +112,7 @@ let translate (globals, functions) =
   let lpow_func : L.llvalue =
       L.declare_function "__gmpz_pow_ui" lpow_t the_module in
   let linv_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t;
-      L.pointer_type i32_t|] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let linv_func : L.llvalue =
       L.declare_function "__gmpz_invert" linv_t the_module in
   (* comparator operators *)
@@ -262,7 +261,7 @@ let translate (globals, functions) =
                      | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" 
                                 builder
                      | A.Inv -> L.build_call linv_func [| tmp; e1'; e2' |] "__gmpz_invert"
-                                builder
+                                builder (* add handling for inv does not exist *)
                 )); tmp
       | SRelop ((A.Lint, _) as e1, operator, e2) ->
                let e1' = expr builder e1
