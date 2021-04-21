@@ -112,7 +112,8 @@ let translate (globals, functions) =
   let lpow_func : L.llvalue =
       L.declare_function "__gmpz_pow_ui" lpow_t the_module in
   let linv_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+      L.pointer_type mpz_t |] in
   let linv_func : L.llvalue =
       L.declare_function "__gmpz_invert" linv_t the_module in
   (* comparator operators *)
