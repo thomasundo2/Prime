@@ -3,11 +3,11 @@ int main()
    lint l1;
    lint l2;
    lint l3;
-   l1 = 0l;
+   l1 = 1l;
    l2 = 100l;
    l3 = 1000000000000000000000000000000000000000000l;
    printl(random(l1,l2));
-   printl(random(0l,l3));
-   printl(random(0l,10000l));
+   printl(random(1l,l3));
+   printl(random(1l,10000l));
    return 0;
 }
