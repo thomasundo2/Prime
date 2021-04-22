@@ -344,20 +344,10 @@ let translate (globals, functions) =
           | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) "printl" builder
       | SCall ("random", [(_, ex1) as e1, (_,ex2) as e2]) ->
-          let rnd = llit_helper "0" in
-          and state =    
-          (match e1 with
-            SId s -> (L.build_in_bounds_gep (lookup s)
-                        [| L.const_int i32_t 0 |] "" builder)
-          | SLintlit i -> llit_helper i
-          | _     -> expr builder e2) in
-          and max = 
-          (match e2 with
-            SId s -> (L.build_in_bounds_gep (lookup s)
-                        [| L.const_int i32_t 0 |] "" builder)
-          | SLintlit i -> llit_helper i 
-          | _     -> expr builder e2) in
-          ignore(L.build_call ladd_func [| rnd; state; max |] "rand_func" builder) rnd
+          let rnd = llit_helper "0"
+          and sed = expr builder e1
+          and max = expr builder e2 in 
+          ignore(L.build_call ladd_func [| rnd; sed; max |] "rand_func" builder) rnd
       | SCall ("printpt", [e]) ->
           let ptStr = L.build_call printpt_func [|expr builder e|] "printpt" builder in
           L.build_call printf_func [| string_format_str ; ptStr |] "prints" builder

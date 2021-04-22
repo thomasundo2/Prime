@@ -14,7 +14,6 @@ void printl(mpz_t n)
 
 int rand_func(mpz_t rand, mpz_t seed, mpz_t max)
 {
-    mpz_t random; /*initialize randomly generated lint*/
     gmp_randstate_t state; /*intialize state */
 
     gmp_randinit_mt(state); /* set set state to use the Mersenne Twister Algorithm */
