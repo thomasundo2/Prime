@@ -2,6 +2,7 @@
 // Thank you again to Professor Edwards for the MicroC template.
 // We have made alterations and additions for our language's functionality
 %token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN INVERT
+%token PMOD LPOW
 %token BEQ BNEQ LTH GTH GEQ LEQ AND OR NOT
 %token ACCESS
 %token RETURN IF ELSE WHILE FOR INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
@@ -26,6 +27,7 @@
 %right INVERT
 %right NOT
 %right POWER
+%nonassoc PMOD LPOW
 %left ACCESS    // Built in access methods
 
 %%
@@ -126,6 +128,7 @@ expr:
   | expr GEQ    expr { Relop($1, Geq, $3) }
   | expr AND    expr { Relop($1, And, $3) }
   | expr OR     expr { Relop($1, Or, $3)  }
+  | expr LPOW   expr PMOD expr { Trnop($1, Lpw, $3, Pmd, $5) }
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
   | NOT expr         { Unop(Not, $2)      }
   | ID ASSIGN expr   { Assign($1, $3)     }

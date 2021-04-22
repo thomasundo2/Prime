@@ -160,6 +160,17 @@ let check_function func =
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
                         string_of_typ t2 ^ " in " ^ string_of_expr e))
             in (ty, SRelop((t1, e1'), op, (t2, e2')))
+    | Trnop(e1, o2, e2, o2, e3) as e ->
+            let (t1, e1') = expr e1
+            and (t2, e2') = expr e2
+            and (t3, e3') = expr e3 in
+            let ty = match o1, o2 with
+            Lpw, Pmd when t1 = Lint && t2 = Lint && t3 = Lint -> Lint
+          | _ -> raise (
+              Failure ("illegal ternary operator " ^ string_of_typ t1 ^ " " ^
+              string_of_top o1 ^ " " ^ string_of_typ t2 ^ " " string_of_top o2 ^ " "
+              string_of_typ t3 ^ " in " ^ string_of_expr e))
+            in (ty, STrnop((t1, e1'), o1, (t2, e2'), o2, (t3, e3')))
     | Call(name, args) (* as call *) ->
         let fd = find_func name in
         let param_length = List.length fd.params in
