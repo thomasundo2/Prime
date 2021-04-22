@@ -12,6 +12,20 @@ void printl(mpz_t n)
     printf("\n");
 }
 
+int rand_func(mpz_t rand, mpz_t seed, mpz_t max)
+{
+    mpz_t random; /*initialize randomly generated lint*/
+    gmp_randstate_t state; /*intialize state */
+
+    gmp_randinit_mt(state); /* set set state to use the Mersenne Twister Algorithm */
+    gmp_randseed(state, seed); /*seed the state using user input*/
+
+    mpz_urandomm(random, state, max); /*generate random int*/
+
+    gmp_randclear(state);
+    return(0);
+}
+
 char *sub(char *left, char *right)
 {
     mpz_t n1;

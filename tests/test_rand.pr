@@ -1,0 +1,10 @@
+int main()
+{
+   lint l1;
+   lint l2;
+   l1 = 123456789l;
+   print(random(l1));
+   l2 = random(l1);
+   print(l2);
+   return 0;
+}
