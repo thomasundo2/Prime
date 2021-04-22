@@ -82,23 +82,28 @@ let translate (globals, functions) =
   let lprint_func : L.llvalue =
       L.declare_function "printl" lprint_t the_module in
   let ladd_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
   let ladd_func : L.llvalue =
       L.declare_function "__gmpz_add" ladd_t the_module in
   let lsub_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
   let lsub_func : L.llvalue =
       L.declare_function "__gmpz_sub" lsub_t the_module in
   let lmul_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
   let lmul_func : L.llvalue =
       L.declare_function "__gmpz_mul" lmul_t the_module in
   let ldiv_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
   let ldiv_func : L.llvalue =
       L.declare_function "__gmpz_tdiv_q" ldiv_t the_module in
   let lmod_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
   let lmod_func : L.llvalue =
       L.declare_function "__gmpz_tdiv_r" lmod_t the_module in
   (* This power function will be used to raise to an unsigned int power *)
@@ -106,6 +111,17 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; i32_t |] in
   let lpow_func : L.llvalue =
       L.declare_function "__gmpz_pow_ui" lpow_t the_module in
+  let linv_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
+  let linv_func : L.llvalue =
+      L.declare_function "__gmpz_invert" linv_t the_module in
+  let lpowmod_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t;
+                               L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let lpowmod_func : L.llvalue =
+      L.declare_function "__gmpz_powm" lpowmod_t the_module in
+
   (* comparator operators *)
   let l_eq_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
@@ -131,6 +147,11 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_geq_func : L.llvalue = 
       L.declare_function "geq_func" l_geq_t the_module in
+  let l_rand_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+      L.pointer_type mpz_t |] in
+  let l_rand_func : L.llvalue = 
+      L.declare_function "rand_func" l_rand_t the_module in
 
   (*points and printing points*)
   let init_point_t : L.lltype =
@@ -245,9 +266,14 @@ let translate (globals, functions) =
                        A.Add -> L.build_call ladd_func [| tmp; e1'; e2' |] "__gmpz_add" builder
                      | A.Sub -> L.build_call lsub_func [| tmp; e1'; e2' |] "__gmpz_sub" builder
                      | A.Mul -> L.build_call lmul_func [| tmp; e1'; e2' |] "__gmpz_mul" builder
-                     | A.Div -> L.build_call ldiv_func [| tmp; e1'; e2' |] "__gmpz_tdiv_q" builder
-                     | A.Mod -> L.build_call lmod_func [| tmp; e1'; e2' |] "__gmpz_tdiv_r" builder
-                     | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" builder
+                     | A.Div -> L.build_call ldiv_func [| tmp; e1'; e2' |] "__gmpz_tdiv_q" 
+                                builder
+                     | A.Mod -> L.build_call lmod_func [| tmp; e1'; e2' |] "__gmpz_tdiv_r" 
+                                builder
+                     | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" 
+                                builder
+                     | A.Inv -> L.build_call linv_func [| tmp; e1'; e2' |] "__gmpz_invert"
+                                builder (* add handling for inv does not exist *)
                 )); tmp
       | SRelop ((A.Lint, _) as e1, operator, e2) ->
                let e1' = expr builder e1
@@ -310,6 +336,16 @@ let translate (globals, functions) =
               | A.Not     -> (L.build_zext
                              (L.build_icmp L.Icmp.Eq e' (L.const_int i32_t 0) "tmp" builder)
                              i32_t "tmp" builder))
+      | STrnop(e1, o1, e2, o2, e3) ->
+              let e1' = expr builder e1
+              and e2' = expr builder e2
+              and e3' = expr builder e3 
+              and out = llit_helper "0" in
+              ignore((match o1, o2 with
+                  A.Lpw, A.Pmd ->
+                      L.build_call lpowmod_func [| out; e1'; e2'; e3' |] "__gmpz_powm" builder)
+              );
+              out
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	        "printf" builder
@@ -323,6 +359,11 @@ let translate (globals, functions) =
                         [| L.const_int i32_t 0 |] "" builder) |]
           | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) "printl" builder
+      | SCall ("random", [e1;e2]) ->
+          let rnd = llit_helper "0"
+          and sed = expr builder e1
+          and max = expr builder e2 in 
+          ignore(L.build_call l_rand_func [| rnd; sed; max |] "rand_func" builder); rnd
       | SCall ("printpt", [e]) ->
           let ptStr = L.build_call printpt_func [|expr builder e|] "printpt" builder in
           L.build_call printf_func [| string_format_str ; ptStr |] "prints" builder

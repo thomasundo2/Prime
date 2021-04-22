@@ -3,6 +3,7 @@
 #include <gmp.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "structs.h"
 
 
@@ -10,6 +11,28 @@ void printl(mpz_t n)
 {
     mpz_out_str(stdout, 10, n);
     printf("\n");
+}
+
+int rand_func(mpz_t rnd, mpz_t seed, mpz_t max)
+{
+    /*rand() into mpzt*/
+    //mpz_t newseed;
+    //mpz_init(newseed);
+    if(mpz_sgn(seed) == 0)
+    {
+        srand(time(0));
+        mpz_set_ui(seed, rand());
+    }
+
+    gmp_randstate_t state; /*intialize state */
+
+    gmp_randinit_mt(state); /* set set state to use the Mersenne Twister Algorithm */
+    gmp_randseed(state, seed); /*seed the state using user input*/
+
+    mpz_urandomm(rnd, state, max); /*generate random int*/
+
+    gmp_randclear(state);
+    return(0);
 }
 
 char *sub(char *left, char *right)
