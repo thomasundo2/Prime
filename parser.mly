@@ -128,7 +128,7 @@ expr:
   | expr GEQ    expr { Relop($1, Geq, $3) }
   | expr AND    expr { Relop($1, And, $3) }
   | expr OR     expr { Relop($1, Or, $3)  }
-  | expr LPOW   expr PMOD expr { Trnop($1, Lpw, $3, Pmd, $5) }
+  | expr LPOWER   expr PMOD expr { Trnop($1, Lpw, $3, Pmd, $5) }
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
   | NOT expr         { Unop(Not, $2)      }
   | ID ASSIGN expr   { Assign($1, $3)     }

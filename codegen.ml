@@ -83,27 +83,27 @@ let translate (globals, functions) =
       L.declare_function "printl" lprint_t the_module in
   let ladd_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
-      L.pointer_type mpz_t |] in
+                               L.pointer_type mpz_t |] in
   let ladd_func : L.llvalue =
       L.declare_function "__gmpz_add" ladd_t the_module in
   let lsub_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
-      L.pointer_type mpz_t |] in
+                               L.pointer_type mpz_t |] in
   let lsub_func : L.llvalue =
       L.declare_function "__gmpz_sub" lsub_t the_module in
   let lmul_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
-      L.pointer_type mpz_t |] in
+                               L.pointer_type mpz_t |] in
   let lmul_func : L.llvalue =
       L.declare_function "__gmpz_mul" lmul_t the_module in
   let ldiv_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
-      L.pointer_type mpz_t |] in
+                               L.pointer_type mpz_t |] in
   let ldiv_func : L.llvalue =
       L.declare_function "__gmpz_tdiv_q" ldiv_t the_module in
   let lmod_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
-      L.pointer_type mpz_t |] in
+                               L.pointer_type mpz_t |] in
   let lmod_func : L.llvalue =
       L.declare_function "__gmpz_tdiv_r" lmod_t the_module in
   (* This power function will be used to raise to an unsigned int power *)
@@ -113,9 +113,15 @@ let translate (globals, functions) =
       L.declare_function "__gmpz_pow_ui" lpow_t the_module in
   let linv_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
-      L.pointer_type mpz_t |] in
+                               L.pointer_type mpz_t |] in
   let linv_func : L.llvalue =
       L.declare_function "__gmpz_invert" linv_t the_module in
+  let lpowmod_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t;
+                               L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let lpowmod_func : L.llvalue =
+      L.declare_function "__gmpz_powm" lpowmod_t the_module in
+
   (* comparator operators *)
   let l_eq_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
@@ -330,6 +336,16 @@ let translate (globals, functions) =
               | A.Not     -> (L.build_zext
                              (L.build_icmp L.Icmp.Eq e' (L.const_int i32_t 0) "tmp" builder)
                              i32_t "tmp" builder))
+      | STrnop(e1, o1, e2, o2, e3) ->
+              let e1' = expr builder e1
+              and e2' = expr builder e2
+              and e3' = expr builder e3 
+              and out = llit_helper "0" in
+              ignore((match o1, o2 with
+                  A.Lpw, A.Pmd ->
+                      L.build_call lpowmod_func [| out; e1'; e2'; e3' |] "__gmpz_powm" builder)
+              );
+              out
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	        "printf" builder

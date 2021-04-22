@@ -1,0 +1,7 @@
+int main()
+{
+   lint l1;
+   l1 = 3l ^ 5l @ 17l;
+   printl(l1);
+   return 0;
+}
