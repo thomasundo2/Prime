@@ -4,7 +4,7 @@
 type operator = Add | Sub | Mul | Div | Mod | Pow | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or | Inv
 type eqsign = Eq
 type uoperator = Neg | Not
-(*type top *)
+type toperator = Lpw | Lmd
 
 type typ = Int | Lint | Chr | Ring | String | Point | Poly | Void
 type bind = typ * string
@@ -17,6 +17,7 @@ type expr =
   | Id of string
   | Binop of expr * operator * expr
   | Relop of expr * operator * expr
+  | Trnop of expr * toperator * expr * toperator * expr
   | Unop of uoperator * expr
   | Assign of string * expr
   | Call of string * expr list
@@ -49,7 +50,7 @@ let string_of_op = function
   | Mul -> "*"
   | Div -> "/"
   | Mod -> "%"
-  | Pow -> "^"
+  | Pow -> "/\\"
   | Inv -> "`"
   | Beq -> "=="
   | Bneq -> "!="

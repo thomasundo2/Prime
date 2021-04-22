@@ -10,7 +10,7 @@ int main()
     printl(test + 12l);
     printl(13l + 12l);
     /* Now the other operators */
-    printl(test ^ 2); /* int on rhs expected */
+    printl(test /\ 2); /* int on rhs expected */
     printl(test * 2l);
     printl((test - 1l) / 2l);
     printl(test % 2l);
