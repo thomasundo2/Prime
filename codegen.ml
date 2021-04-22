@@ -143,9 +143,9 @@ let translate (globals, functions) =
       L.declare_function "geq_func" l_geq_t the_module in
   let l_rand_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
-      L.pointer_type mpz_t; |] in
+      L.pointer_type mpz_t |] in
   let l_rand_func : L.llvalue = 
-      L.declaare_function "rand_func" l_rand_t the_module in
+      L.declare_function "rand_func" l_rand_t the_module in
 
   (*points and printing points*)
   let init_point_t : L.lltype =
@@ -343,11 +343,11 @@ let translate (globals, functions) =
                         [| L.const_int i32_t 0 |] "" builder) |]
           | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) "printl" builder
-      | SCall ("random", [(_, ex1) as e1, (_,ex2) as e2]) ->
+      | SCall ("random", [e1;e2]) ->
           let rnd = llit_helper "0"
           and sed = expr builder e1
           and max = expr builder e2 in 
-          ignore(L.build_call ladd_func [| rnd; sed; max |] "rand_func" builder) rnd
+          ignore(L.build_call l_rand_func [| rnd; sed; max |] "rand_func" builder); rnd
       | SCall ("printpt", [e]) ->
           let ptStr = L.build_call printpt_func [|expr builder e|] "printpt" builder in
           L.build_call printf_func [| string_format_str ; ptStr |] "prints" builder

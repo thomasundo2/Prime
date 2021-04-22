@@ -4,6 +4,7 @@
 type operator = Add | Sub | Mul | Div | Mod | Pow | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or | Inv
 type eqsign = Eq
 type uoperator = Neg | Not
+(*type top *)
 
 type typ = Int | Lint | Chr | Ring | String | Point | Poly | Void
 type bind = typ * string

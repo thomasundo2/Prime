@@ -35,10 +35,17 @@ let built_in_decls =
     params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map
-  in List.fold_left add_bind StringMap.empty [ ("print", Int); 
+  in let void_decls = List.fold_left add_bind StringMap.empty [ ("print", Int); 
                                                ("prints", String);
                                                ("printl", Lint);
-                                               ("printpt", Point); ] 
+                                               ("printpt", Point); ]
+  and add_rand map (name, ty) = StringMap.add name {
+      typ = Lint;
+        name = name;
+        params = [(ty, ("x")); (ty, ("y"))];
+        locals = []; body = []
+      } map
+  in List.fold_left add_rand void_decls [ ("random", Lint) ]
   (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 

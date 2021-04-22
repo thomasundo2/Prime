@@ -14,12 +14,13 @@ void printl(mpz_t n)
 
 int rand_func(mpz_t rand, mpz_t seed, mpz_t max)
 {
+    /*rand() into mpzt*/
     gmp_randstate_t state; /*intialize state */
 
     gmp_randinit_mt(state); /* set set state to use the Mersenne Twister Algorithm */
     gmp_randseed(state, seed); /*seed the state using user input*/
 
-    mpz_urandomm(random, state, max); /*generate random int*/
+    mpz_urandomm(rand, state, max); /*generate random int*/
 
     gmp_randclear(state);
     return(0);
