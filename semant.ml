@@ -145,6 +145,8 @@ let check_function func =
             let ty = match op with
               Neg when t = Int -> Int
             | Not when t = Int -> Int
+            | Neg when t = Lint -> Lint
+            | Not when t = Lint -> Lint
             | _ -> raise (Failure ("illegal unary operator " ^
                                    string_of_uop op ^ string_of_typ t ^
                                    " in " ^ string_of_expr ex))

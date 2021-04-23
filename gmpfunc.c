@@ -114,6 +114,18 @@ int geq_func(mpz_t x, mpz_t y){
     }
 }
 
+int lnot_func(mpz_t out, mpz_t in){
+    if(mpz_sgn(in) == 0)
+    {
+        mpz_set_str(out, "1", 10);
+    }
+    else
+    {
+        mpz_set_str(out, "0", 10);
+    }
+    return 0;
+}
+
 #ifdef BUILD_TEST
 int main()
 {
