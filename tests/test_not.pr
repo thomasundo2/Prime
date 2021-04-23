@@ -1,0 +1,13 @@
+int main()
+{
+        int test;
+        int test2;
+        test2 = 5;
+        test = 0;
+        print(!1);
+        print(!0);
+        print(!5);
+        print(!test);
+        print(!test2);
+        return 0;
+}
