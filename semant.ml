@@ -114,13 +114,26 @@ let check_function func =
             string_of_typ rt ^ " in " ^ string_of_expr ex
           in (check_assign lt rt err, SAssign(var, (rt, e')))
   | Ptlit(e1, e2) ->
-	    let (t1, e1') = expr e1 
+	    let e1' = expr e1
+ 	    and e2' = expr e2 in
+	    (Point, SPtlit(e1', e2'))
+    (*let (t1, e1') = expr e1 
  	    and (t2, e2') = expr e2 in
 	    let ty = match t1, t2 with
 	    Lint, Lint -> Point
 	    | Int, Int -> Point
 	    | _ -> raise (Failure ("points must have Lint coordinates"))
-            in (ty, SPtlit((t1, e1'), (t2, e2')))
+            in (ty, SPtlit((t1, e1'), (t2, e2')))*)
+  | Access(var, e2) as ex -> (* Will give us the right index for gep from string *)
+      let lt = type_of_identifier var in
+      (match lt with
+        Point -> (match e2 with
+                    "x" -> (Lint, SAccess(var, 0))
+                  | "y" -> (Lint, SAccess(var, 1))
+                  | _   -> raise (Failure ("invalid access element " ^ e2 ^ " in "
+                                           ^ string_of_expr ex)))
+      | _     -> raise (Failure ("cannot access type: " ^ string_of_typ lt
+                                 ^ " in " ^ string_of_expr ex)))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in
             let ty = match op with
@@ -140,8 +153,8 @@ let check_function func =
               Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
             | Add | Sub | Mul | Div | Mod | Inv when same && t1 = Lint -> Lint
             | Add                               when same && t1 = Point -> Point
-	    | Pow                               when t1 = Lint && t2 = Int -> Lint
-	    | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
+	          | Pow                               when t1 = Lint && t2 = Int -> Lint
+	          | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
             | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int
             | _ -> raise (
                 Failure ("illegal binary operator " ^

@@ -4,6 +4,7 @@
 type operator = Add | Sub | Mul | Div | Mod | Pow | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or | Inv
 type eqsign = Eq
 type uoperator = Neg | Not
+type accessor = Access
 type toperator = Lpw | Pmd
 
 type typ = Int | Lint | Chr | Ring | String | Point | Poly | Void
@@ -20,6 +21,7 @@ type expr =
   | Trnop of expr * toperator * expr * toperator * expr
   | Unop of uoperator * expr
   | Assign of string * expr
+  | Access of string * string (* we will use the second string to convert to gep*)
   | Call of string * expr list
   | Noexpr
 
@@ -39,7 +41,7 @@ type func_decl = {
   body : stmt list;
 }
 
-(* This is probably wrong but needs to be added for parser *)
+
 (* Essentially means variable declarations followed by function defs *)
 type program = bind list * func_decl list
 
@@ -84,6 +86,7 @@ let rec string_of_expr = function
           string_of_expr e1 ^ " " ^ string_of_top o1 ^ " " ^ string_of_expr e2 ^ " " ^
           string_of_top o2
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
+  | Access(v, s) -> v ^ "." ^ s
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""

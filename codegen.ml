@@ -27,15 +27,14 @@ let translate (globals, functions) =
   let i32_t      = L.i32_type    context
   and i1_t       = L.i1_type     context
   and i8_t       = L.i8_type     context
-  and string_t   = L.pointer_type (L.i8_type context)
-  and point_t    = L.pointer_type (L.i8_type context)
   and void_t     = L.void_type   context in
-  let point_t    = L.struct_type context [| i32_t ; i32_t |]
-  and string_t   = L.pointer_type (i8_t)
+  let string_t   = L.pointer_type (i8_t)
   (* and mpz_t      = L.struct_type context [| (L.i32_type context); (L.i32_type context); (L.pointer_type (L.i64_type context)) |] *)
 (* in *)
   and mpz_t      = L.named_struct_type context "mpz_t"
     in let mpz_t = L.struct_set_body mpz_t [| (L.i32_type context); (L.i32_type context); L.pointer_type (L.i64_type context) |] false; mpz_t
+  in let point_t    = L.named_struct_type context "point"
+    in let point_t = L.struct_set_body point_t [| mpz_t ; mpz_t |] false; point_t
   in
 
   (* Return the LLVM type for a MicroC type *)
@@ -154,19 +153,15 @@ let translate (globals, functions) =
       L.declare_function "rand_func" l_rand_t the_module in
 
   (*points and printing points*)
-  let init_point_t : L.lltype =
-     L.function_type point_t [| i32_t; i32_t |] in
+  let init_lintpoint_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type mpz_t ; L.pointer_type mpz_t |] in
   let init_point_func : L.llvalue =
-     L.declare_function "Point" init_point_t the_module in
-  let printpt_t : L.lltype =
-     L.function_type string_t [| point_t |] in
-  let printpt_func : L.llvalue =
-     L.declare_function "printpt" printpt_t the_module in
-  (*point operators*)
-  let ptadd_t : L.lltype =
-      L.function_type point_t [| point_t; point_t |] in
-  let ptadd_func : L.llvalue =
-     L.declare_function "ptadd" ptadd_t the_module in
+      L.declare_function "Point" init_lintpoint_t the_module in
+  let print_point_t : L.lltype = 
+      L.function_type i32_t [| L.pointer_type point_t |] in
+  let print_point_func : L.llvalue =
+      L.declare_function "printpt" print_point_t the_module in
+
 
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
@@ -186,7 +181,7 @@ let translate (globals, functions) =
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
     and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder
-    and point_format_str = L.build_global_stringptr "%s\n" "fmt" builder
+    (* and point_format_str = L.build_global_stringptr "[%\n" "fmt" builder *)
     in
 
     (* Construct the function's "locals": formal arguments and locally
@@ -239,20 +234,33 @@ let translate (globals, functions) =
         SStrlit i     -> L.build_global_stringptr i "string" builder
       | SLintlit i    -> llit_helper i (* Pointer to new mpz*)
       | SLit i        -> L.const_int i32_t i
-      | SPtlit (i, j) ->
-              let e1' = expr builder i
-              and e2' = expr builder j in
-              L.build_call init_point_func [| e1' ; e2' |] "Point" builder
+      | SPtlit (i, j) -> (* call our struct initialiser passing in loc of initialisation *)
+          let e1' = expr builder i
+          and e2' = expr builder j
+          and space = L.build_alloca point_t "tmp_pt" builder
+          in ignore(L.build_call init_point_func [| space; e1' ; e2' |] "Point" builder); space
       | SNoexpr       -> L.const_int i32_t 0
-      | SId s         -> (match stype with
-                          A.Lint -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
-                        | _      -> L.build_load (lookup s) s builder)
+      | SId s         -> (match stype with (* Might be better just to have StructType adt? *)
+                          A.Lint  -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
+                        | A.Point -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
+                        | _       -> L.build_load (lookup s) s builder)
       | SAssign (s, ((A.Lint, _) as e1)) -> let e1' = expr builder e1 in
                 (* Here we have a pointer to mpz val *)
                 ignore(L.build_call linitdup_func
                 [| L.build_in_bounds_gep (lookup s) [| zero |] s builder; e1' |] "" builder); e1'
+      | SAssign (s, ((A.Point, _) as e1))  -> 
+          (* For point lits that already have stack allocated, we get element pointer then store *)
+          let e1' = expr builder e1 in
+          let val_ptr = L.build_in_bounds_gep e1' [| zero |] "" builder in
+          let loaded = L.build_load val_ptr "" builder in
+          ignore(L.build_store loaded (lookup s) builder); e1'
       | SAssign (s, e) -> let e' = expr builder e in
                            ignore(L.build_store e' (lookup s) builder); e'
+        (* Will need to separate out the access into one for the different types *)
+      | SAccess (s, idx) -> 
+          let outer_ptr = L.build_in_bounds_gep (lookup s) [| zero; L.const_int i32_t idx |] "outer" builder 
+          in
+          L.build_in_bounds_gep outer_ptr [| zero |] "inner" builder
       | SBinop ((A.Lint, _) as e1, operator, e2) ->
       (* for e1, e2 take second argument of the tuple (A.Lint, _) and do what printl does.
        * See if its an id or lintlit. If id get inbounds elt pointer to struct.
@@ -311,7 +319,7 @@ let translate (globals, functions) =
               | A.Geq     -> L.build_zext (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
                                 "tmp" builder
               ) 
-      | SBinop((A.Point, _) as e1, operator, e2) ->
+      | SBinop((A.Point, _) as e1, operator, e2) -> (* needs fixing *)
               let e1' = expr builder e1
               and e2' = expr builder e2 in
               (match operator with
@@ -352,9 +360,14 @@ let translate (globals, functions) =
       | SCall ("prints", [e]) -> (*print string*)
           L.build_call printf_func [| string_format_str ; (expr builder e) |]
           "printf" builder
-      | SCall ("printl", [(_, e) as ptr]) ->
-          L.build_call lprint_func
+      | SCall ("printpt", [(_, e) as e1]) -> (* print pt *)
+          let e1' = expr builder e1 in
           (match e with
+            SPtlit _ -> L.build_call print_point_func [| L.build_in_bounds_gep e1' [| zero |] "" builder |] "printpt" builder
+          | _             -> L.build_call print_point_func [| e1' |] "printpt" builder)
+      | SCall ("printl", [(_, e) as ptr]) ->
+          (* L.build_call lprint_func [| expr builder e |] "printl" builder *)
+          L.build_call lprint_func (match e with
             SId s -> [| (L.build_in_bounds_gep (lookup s)
                         [| L.const_int i32_t 0 |] "" builder) |]
           | SLintlit i -> [| llit_helper i |]
@@ -374,7 +387,7 @@ let translate (globals, functions) =
                         A.Void -> ""
                       | _ -> f ^ "_result") in
          L.build_call fdef (Array.of_list llargs) result builder
-      (* | _ -> L.const_int i32_t 0 unused *)
+      (* | _ -> L.const_int i32_t 0 *)
     in
 
     (* LLVM insists each basic block end with exactly one "terminator"
