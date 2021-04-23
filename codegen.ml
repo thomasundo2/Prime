@@ -112,13 +112,19 @@ let translate (globals, functions) =
 
   (*points and printing points*)
   let init_lintpoint_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type mpz_t ; L.pointer_type mpz_t; L.pointer_type poly_t |] in
+      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type mpz_t ; 
+                               L.pointer_type mpz_t; L.pointer_type poly_t |] in
   let init_point_func : L.llvalue =
       L.declare_function "Point" init_lintpoint_t the_module in
   let print_point_t : L.lltype =
       L.function_type i32_t [| L.pointer_type point_t |] in
   let print_point_func : L.llvalue =
       L.declare_function "printpt" print_point_t the_module in
+  let pt_add_t : L.lltype = 
+      L.function_type  (L.pointer_type point_t) [| L.pointer_type point_t;
+                               L.pointer_type point_t |] in
+  let pt_add_func : L.llvalue =
+      L.declare_function "ptadd" pt_add_t the_module in 
 
   (*polys and printing polys*)
   let init_poly_t : L.lltype =
@@ -266,6 +272,25 @@ let translate (globals, functions) =
               | A.Add     -> L.build_call ptadd_func [| e1'; e2' |] "ptadd" builder
               | _         -> raise (Failure "Operator not implemented for Point")
               )*)
+      | SBinop ((A.Point, _) as e1, operator, e2) ->
+              (match operator with
+              A.Add ->
+                  let e1' = expr builder e1
+                  and e2' = expr builder e2 in
+                  
+                  (*let crv = L.build_in_bounds_gep e1' [| zero; L.const_int i32_t 2 |] 
+                            "pt_poly" builder in
+
+                  let x = llit_helper "0"
+                  and y = llit_helper "0" 
+
+                  and sum = L.build_alloca point_t "tmp_pt" builder in
+                  ignore(L.build_call init_point_func [| sum; x; y; crv |] "Point" builder);*)
+
+                  (L.build_call pt_add_func [| e1'; e2' |] "pt_add" builder)
+                  (*sum*)
+            | _ -> raise (Failure "Operator not implemented for Point"))
+
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in
