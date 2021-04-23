@@ -323,13 +323,13 @@ let translate (globals, functions) =
               | A.Geq     -> L.build_zext (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
                                 "tmp" builder
               ) 
-      | SBinop((A.Point, _) as e1, operator, e2) -> (* needs fixing *)
+      (* | SBinop((A.Point, _) as e1, operator, e2) -> (* needs fixing *)
               let e1' = expr builder e1
               and e2' = expr builder e2 in
               (match operator with
               | A.Add     -> L.build_call ptadd_func [| e1'; e2' |] "ptadd" builder
               | _         -> raise (Failure "Operator not implemented for Point")
-              )
+              ) *)
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in
@@ -386,9 +386,6 @@ let translate (globals, functions) =
           and sed = expr builder e1
           and max = expr builder e2 in 
           ignore(L.build_call l_rand_func [| rnd; sed; max |] "rand_func" builder); rnd
-      | SCall ("printpt", [e]) ->
-          let ptStr = L.build_call printpt_func [|expr builder e|] "printpt" builder in
-          L.build_call printf_func [| string_format_str ; ptStr |] "prints" builder
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in

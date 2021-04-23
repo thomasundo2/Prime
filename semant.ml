@@ -120,16 +120,16 @@ let check_function func =
             string_of_typ rt ^ " in " ^ string_of_expr ex
           in (check_assign lt rt err, SAssign(var, (rt, e')))
   | Ptlit(e1, e2) ->
-	    let e1' = expr e1
+	    (* let e1' = expr e1
  	    and e2' = expr e2 in
-	    (Point, SPtlit(e1', e2'))
-    (*let (t1, e1') = expr e1 
+	    (Point, SPtlit(e1', e2')) *)
+      let (t1, e1') = expr e1 
  	    and (t2, e2') = expr e2 in
 	    let ty = match t1, t2 with
 	    Lint, Lint -> Point
-	    | Int, Int -> Point
+	    (* | Int, Int -> Point *)
 	    | _ -> raise (Failure ("points must have Lint coordinates"))
-            in (ty, SPtlit((t1, e1'), (t2, e2')))*)
+            in (ty, SPtlit((t1, e1'), (t2, e2')))
   | Access(var, e2) as ex -> (* Will give us the right index for gep from string *)
       let lt = type_of_identifier var in
       (match lt with
