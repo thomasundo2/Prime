@@ -25,6 +25,7 @@ let translate (globals, functions) =
 
   (* Get types from the context *)
   let i32_t      = L.i32_type    context
+  and i1_t       = L.i1_type     context
   and i8_t       = L.i8_type     context
   and void_t     = L.void_type   context in
   let string_t   = L.pointer_type (i8_t)
@@ -80,23 +81,28 @@ let translate (globals, functions) =
   let lprint_func : L.llvalue =
       L.declare_function "printl" lprint_t the_module in
   let ladd_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
   let ladd_func : L.llvalue =
       L.declare_function "__gmpz_add" ladd_t the_module in
   let lsub_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
   let lsub_func : L.llvalue =
       L.declare_function "__gmpz_sub" lsub_t the_module in
   let lmul_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
   let lmul_func : L.llvalue =
       L.declare_function "__gmpz_mul" lmul_t the_module in
   let ldiv_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
   let ldiv_func : L.llvalue =
       L.declare_function "__gmpz_tdiv_q" ldiv_t the_module in
   let lmod_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
   let lmod_func : L.llvalue =
       L.declare_function "__gmpz_tdiv_r" lmod_t the_module in
   (* This power function will be used to raise to an unsigned int power *)
@@ -104,7 +110,47 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; i32_t |] in
   let lpow_func : L.llvalue =
       L.declare_function "__gmpz_pow_ui" lpow_t the_module in
+  let linv_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+                               L.pointer_type mpz_t |] in
+  let linv_func : L.llvalue =
+      L.declare_function "__gmpz_invert" linv_t the_module in
+  let lpowmod_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t;
+                               L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let lpowmod_func : L.llvalue =
+      L.declare_function "__gmpz_powm" lpowmod_t the_module in
 
+  (* comparator operators *)
+  let l_eq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_eq_func : L.llvalue =
+      L.declare_function "eq_func" l_eq_t the_module in
+  let l_neq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_neq_func : L.llvalue =    
+      L.declare_function "neq_func" l_neq_t the_module in
+  let l_lth_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_lth_func : L.llvalue =
+      L.declare_function "lth_func" l_lth_t the_module in
+  let l_gth_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_gth_func : L.llvalue =
+      L.declare_function "gth_func" l_gth_t the_module in
+  let l_leq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_leq_func : L.llvalue =
+      L.declare_function "leq_func" l_leq_t the_module in
+  let l_geq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_geq_func : L.llvalue = 
+      L.declare_function "geq_func" l_geq_t the_module in
+  let l_rand_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; 
+      L.pointer_type mpz_t |] in
+  let l_rand_func : L.llvalue = 
+      L.declare_function "rand_func" l_rand_t the_module in
 
   (*points and printing points*)
   let init_lintpoint_t : L.lltype =
@@ -228,33 +274,86 @@ let translate (globals, functions) =
                        A.Add -> L.build_call ladd_func [| tmp; e1'; e2' |] "__gmpz_add" builder
                      | A.Sub -> L.build_call lsub_func [| tmp; e1'; e2' |] "__gmpz_sub" builder
                      | A.Mul -> L.build_call lmul_func [| tmp; e1'; e2' |] "__gmpz_mul" builder
-                     | A.Div -> L.build_call ldiv_func [| tmp; e1'; e2' |] "__gmpz_tdiv_q" builder
-                     | A.Mod -> L.build_call lmod_func [| tmp; e1'; e2' |] "__gmpz_tdiv_r" builder
-                     | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" builder
-                     )); tmp
-      (*| SBinop ((A.Point, _) as e1, operator, e2) ->
+                     | A.Div -> L.build_call ldiv_func [| tmp; e1'; e2' |] "__gmpz_tdiv_q" 
+                                builder
+                     | A.Mod -> L.build_call lmod_func [| tmp; e1'; e2' |] "__gmpz_tdiv_r" 
+                                builder
+                     | A.Pow -> L.build_call lpow_func [| tmp; e1'; e2' |] "__gmpz_pow_ui" 
+                                builder
+                     | A.Inv -> L.build_call linv_func [| tmp; e1'; e2' |] "__gmpz_invert"
+                                builder (* add handling for inv does not exist *)
+                )); tmp
+      | SRelop ((A.Lint, _) as e1, operator, e2) ->
+               let e1' = expr builder e1
+               and e2' = expr builder e2 in (match operator with
+                     A.Beq -> L.build_call l_eq_func [| e1'; e2' |] "eq_func" builder
+                     | A.Bneq -> L.build_call l_neq_func [| e1'; e2' |] "neq_func" builder
+                     | A.Lth -> L.build_call l_lth_func [| e1'; e2' |] "lth_func" builder
+                     | A.Gth -> L.build_call l_gth_func [| e1'; e2' |] "gth_func" builder
+                     | A.Leq -> L.build_call l_leq_func [| e1'; e2' |] "leq_func" builder
+                     | A.Geq -> L.build_call l_geq_func [| e1'; e2' |] "geq_func" builder)
+      | SRelop (e1, operator, e2) -> 
+              let e1' = expr builder e1   
+              and e2' = expr builder e2 in
+              (match operator with
+              A.And     -> L.build_zext
+                                (L.build_and
+                                (L.build_icmp L.Icmp.Ne e1' (L.const_int i32_t 0) "tmp" builder)
+                                (L.build_icmp L.Icmp.Ne e2' (L.const_int i32_t 0) "tmp" builder)
+                                "tmp" builder) i32_t "tmp" builder
+              | A.Or    -> L.build_zext
+                                (L.build_or 
+                                (L.build_icmp L.Icmp.Ne e1' (L.const_int i32_t 0) "tmp" builder)
+                                (L.build_icmp L.Icmp.Ne e2' (L.const_int i32_t 0) "tmp" builder)
+                                "tmp" builder) i32_t "tmp" builder
+              | A.Beq     -> L.build_zext (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder)
+                                i32_t "tmp" builder
+              | A.Bneq    -> L.build_zext (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder) i32_t
+                                "tmp" builder
+              | A.Lth     -> L.build_zext (L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder) i32_t
+                                "tmp" builder
+              | A.Leq     -> L.build_zext (L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder) i32_t
+                                "tmp" builder
+              | A.Gth     -> L.build_zext (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder) i32_t
+                                "tmp" builder
+              | A.Geq     -> L.build_zext (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
+                                "tmp" builder
+              ) 
+      | SBinop((A.Point, _) as e1, operator, e2) -> (* needs fixing *)
               let e1' = expr builder e1
               and e2' = expr builder e2 in
               (match operator with
               | A.Add     -> L.build_call ptadd_func [| e1'; e2' |] "ptadd" builder
               | _         -> raise (Failure "Operator not implemented for Point")
-              )*)
+              )
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in
               (match operator with
-                A.Add     -> L.build_add
-              | A.Sub     -> L.build_sub
-              | A.Mul     -> L.build_mul
-              | A.Div     -> L.build_sdiv
-              | A.Mod     -> L.build_srem
-              | A.Pow     -> L.build_mul
-              ) e1' e2' "tmp" builder
+                A.Add     -> L.build_add e1' e2' "tmp" builder
+              | A.Sub     -> L.build_sub e1' e2' "tmp" builder
+              | A.Mul     -> L.build_mul e1' e2' "tmp" builder
+              | A.Div     -> L.build_sdiv e1' e2' "tmp" builder
+              | A.Mod     -> L.build_srem e1' e2' "tmp" builder
+              | A.Pow     -> L.build_mul e1' e2' "tmp" builder
+              ) 
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
               (match op with
-                A.Neg     -> L.build_neg
-              | A.Not     -> L.build_not) e' "tmp" builder
+                A.Neg     -> L.build_neg  e' "tmp" builder
+              | A.Not     -> (L.build_zext
+                             (L.build_icmp L.Icmp.Eq e' (L.const_int i32_t 0) "tmp" builder)
+                             i32_t "tmp" builder))
+      | STrnop(e1, o1, e2, o2, e3) ->
+              let e1' = expr builder e1
+              and e2' = expr builder e2
+              and e3' = expr builder e3 
+              and out = llit_helper "0" in
+              ignore((match o1, o2 with
+                  A.Lpw, A.Pmd ->
+                      L.build_call lpowmod_func [| out; e1'; e2'; e3' |] "__gmpz_powm" builder)
+              );
+              out
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	        "printf" builder
@@ -273,6 +372,14 @@ let translate (globals, functions) =
                         [| L.const_int i32_t 0 |] "" builder) |]
           | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) "printl" builder
+      | SCall ("random", [e1;e2]) ->
+          let rnd = llit_helper "0"
+          and sed = expr builder e1
+          and max = expr builder e2 in 
+          ignore(L.build_call l_rand_func [| rnd; sed; max |] "rand_func" builder); rnd
+      | SCall ("printpt", [e]) ->
+          let ptStr = L.build_call printpt_func [|expr builder e|] "printpt" builder in
+          L.build_call printf_func [| string_format_str ; ptStr |] "prints" builder
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in
@@ -303,8 +410,50 @@ let translate (globals, functions) =
                               (* Special "return nothing" instr *)
                               A.Void -> L.build_ret_void builder
                               (* Build return statement *)
-                            | _ -> L.build_ret (expr builder e) builder );
+                              | _ -> L.build_ret (expr builder e) builder );
                      builder
+      | SIf (predicate, then_stmt, else_stmt) ->
+         let int_val = expr builder predicate in
+         let bool_val = L.build_icmp L.Icmp.Ne int_val (L.const_int i32_t 0) "tmp" builder in
+         (*L.const_int i1_t (* (if int_val = (L.const_int i32_t 0) then 0 else 1)*)
+         ignore(match int_val with
+           (L.const_int i32_t 0) -> 0
+         | (L.const_int i32_t _) -> 1
+         | _ -> raise(Failure "case")
+         )*)
+         let merge_bb = L.append_block context "merge" the_function in
+             let build_br_merge = L.build_br merge_bb in (* partial function *)
+
+         let then_bb = L.append_block context "then" the_function in
+         add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+           build_br_merge;
+
+         let else_bb = L.append_block context "else" the_function in
+         add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
+           build_br_merge;
+
+         ignore(L.build_cond_br bool_val then_bb else_bb builder);
+         L.builder_at_end context merge_bb
+
+      | SWhile (predicate, body) ->
+	  let pred_bb = L.append_block context "while" the_function in
+	  ignore(L.build_br pred_bb builder);
+
+	  let body_bb = L.append_block context "while_body" the_function in
+	  add_terminal (stmt (L.builder_at_end context body_bb) body)
+	    (L.build_br pred_bb);
+
+	  let pred_builder = L.builder_at_end context pred_bb in
+          let int_val = expr pred_builder predicate in
+	  let bool_val = (L.build_icmp L.Icmp.Ne int_val (L.const_int i32_t 0)) "tmp" pred_builder in
+          
+	  let merge_bb = L.append_block context "merge" the_function in
+	  ignore(L.build_cond_br bool_val body_bb merge_bb pred_builder);
+	  L.builder_at_end context merge_bb
+
+      (* Implement for loops as while loops *)
+      | SFor (e1, e2, e3, body) -> stmt builder
+	    ( SBlock [SExpr e1 ; SWhile (e2, SBlock [body ; SExpr e3]) ] )
     in
 
     (* Build the code for each statement in the function *)

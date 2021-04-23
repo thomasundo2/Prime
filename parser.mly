@@ -1,11 +1,11 @@
 %{ open Ast %}
 // Thank you again to Professor Edwards for the MicroC template.
 // We have made alterations and additions for our language's functionality
-
-%token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
-%token EQ NEQ LT LEQ GT GEQ AND OR NOT
+%token SEMI LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN INVERT
+%token PMOD LPOWER
+%token BEQ BNEQ LTH GTH GEQ LEQ AND OR NOT
 %token ACCESS
-%token RETURN IF ELSE FOR WHILE INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
+%token RETURN IF ELSE WHILE FOR INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
 %token <int> LITERAL
 %token <string> STRLIT LINTLIT ID
 %token EOF
@@ -19,13 +19,15 @@
 %right ASSIGN
 %left OR
 %left AND
-%left EQ NEQ
-%left LT GT LEQ GEQ
+%left BEQ BNEQ
+%left LTH GTH LEQ GEQ
 %left MOD //(* mod takes precedence below all arithmetic operators - l.guru approves*)
 %left PLUS MINUS
 %left TIMES DIVIDE //(* Change this order later if necessary \r moved mod up -l.guru*)
+%right INVERT
 %right NOT
 %right POWER
+%nonassoc PMOD LPOW
 %left ACCESS    // Built in access methods
 
 %%
@@ -94,20 +96,12 @@ stmt_list:
 stmt:
     expr_opt SEMI                           { Expr $1 } //(* Expr-stmt *)
   | RETURN expr_opt SEMI                    { Return $2 } //(* Return stmt *)
+  | LBRACE stmt_list RBRACE                 { Block(List.rev $2)    }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7)        }
-  | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
+  | FOR LPAREN expr SEMI expr SEMI expr_opt RPAREN stmt
                                             { For($3, $5, $7, $9)   }
   | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
-
-
-
-  //| LBRACE seq_stmts RBRACE                 {  } //(* Seq stmts (nested?) *)
-  //| IF LPAREN expr RPAREN stmt %prec NOELSE {  } //(* If dangling *)
-  //| IF LPAREN expr RPAREN stmt ELSE stmt    {  } //(* If no dangle *)
-  //| FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
-  //                                          {  } //(* Loops no infinite FOR *)
-  //| WHILE LPAREN expr RPAREN stmt           {  }
 
 expr_opt:
     /* nothing */ { Noexpr }
@@ -125,14 +119,16 @@ expr:
   | expr MINUS  expr { Binop($1, Sub, $3) }
   | expr TIMES  expr { Binop($1, Mul, $3) }
   | expr DIVIDE expr { Binop($1, Div, $3) }
-  //| expr EQ     expr {  }
-  //| expr NEQ    expr {  }
-  //| expr LT     expr {  }
-  //| expr LEQ    expr {  }
-  //| expr GT     expr {  }
-  //| expr GEQ    expr {  }
-  //| expr AND    expr {  }
-  //| expr OR     expr {  }
+  | expr INVERT expr { Binop($1, Inv, $3) }
+  | expr BEQ    expr { Relop($1, Beq, $3) }
+  | expr BNEQ   expr { Relop($1, Bneq, $3)}
+  | expr LTH    expr { Relop($1, Lth, $3) }
+  | expr LEQ    expr { Relop($1, Leq, $3) }
+  | expr GTH    expr { Relop($1, Gth, $3) }
+  | expr GEQ    expr { Relop($1, Geq, $3) }
+  | expr AND    expr { Relop($1, And, $3) }
+  | expr OR     expr { Relop($1, Or, $3)  }
+  | expr LPOWER   expr PMOD expr { Trnop($1, Lpw, $3, Pmd, $5) }
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
   | NOT expr         { Unop(Not, $2)      }
   | ID ASSIGN expr   { Assign($1, $3)     }

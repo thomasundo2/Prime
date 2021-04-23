@@ -10,7 +10,9 @@ and sx =
   | SAccess of string * int
   | SId of string
   | SBinop of sexpr * operator * sexpr
+  | SRelop of sexpr * operator * sexpr
   | SUnop of uoperator * sexpr
+  | STrnop of sexpr * toperator * sexpr * toperator * sexpr
   | SAssign of string * sexpr
   | SCall of string * sexpr list
   | SNoexpr
@@ -45,7 +47,12 @@ let rec string_of_sexpr (t, e) =
   | SId(s) -> s
   | SBinop(e1, o, e2) ->
           string_of_sexpr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_sexpr e2
+  | SRelop(e1, o, e2) ->
+          string_of_sexpr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_sexpr e2
   | SUnop(o, e) -> string_of_uop o ^ string_of_sexpr e
+  | STrnop(e1, o1, e2, o2, e3) ->
+          string_of_sexpr e1 ^ " " ^ string_of_top o1 ^ " " ^ string_of_sexpr e2 ^ " " ^
+          string_of_sexpr e3
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
   | SAssign(v, e) -> v ^ " = " ^ string_of_sexpr e
@@ -57,7 +64,7 @@ let rec string_of_sstmt = function
       "{\n" ^ String.concat "" (List.map string_of_sstmt stmts) ^ "}\n"
   | SExpr(expr) -> string_of_sexpr expr ^ ";\n";
   | SReturn(expr) -> "return " ^ string_of_sexpr expr ^ ";\n";
-  | SIf(e, s, SBlock([])) ->
+  | SIf(e, s, SBlock([])) -> 
       "if (" ^ string_of_sexpr e ^ ")\n" ^ string_of_sstmt s
   | SIf(e, s1, s2) ->  "if (" ^ string_of_sexpr e ^ ")\n" ^
       string_of_sstmt s1 ^ "else\n" ^ string_of_sstmt s2

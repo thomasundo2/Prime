@@ -1,10 +1,11 @@
 (* Create a new operator for assignment and create a new expression*)
 (* sequences of expressions *)
 
-type operator = Add | Sub | Mul | Div | Mod | Pow
+type operator = Add | Sub | Mul | Div | Mod | Pow | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or | Inv
 type eqsign = Eq
 type uoperator = Neg | Not
 type accessor = Access
+type toperator = Lpw | Pmd
 
 type typ = Int | Lint | Chr | Ring | String | Point | Poly | Void
 type bind = typ * string
@@ -16,6 +17,8 @@ type expr =
   | Ptlit of expr * expr
   | Id of string
   | Binop of expr * operator * expr
+  | Relop of expr * operator * expr
+  | Trnop of expr * toperator * expr * toperator * expr
   | Unop of uoperator * expr
   | Assign of string * expr
   | Access of string * string (* we will use the second string to convert to gep*)
@@ -49,11 +52,24 @@ let string_of_op = function
   | Mul -> "*"
   | Div -> "/"
   | Mod -> "%"
-  | Pow -> "^"
+  | Pow -> "/\\"
+  | Inv -> "`"
+  | Beq -> "=="
+  | Bneq -> "!="
+  | Leq -> "<=" 
+  | Geq -> ">="
+  | Lth -> "<"
+  | Gth -> ">"
+  | And -> "&&"
+  | Or -> "||"
 
 let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
+
+let string_of_top = function
+    Lpw -> "^"
+  | Pmd -> "@"
 
 let rec string_of_expr = function
     Strlit(l) -> "\"" ^ l ^ "\""
@@ -63,7 +79,12 @@ let rec string_of_expr = function
   | Ptlit(i, j) -> "[" ^ string_of_expr i ^ "," ^ string_of_expr j ^ "]"
   | Binop(e1, o, e2) ->
           string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
+  | Relop(e1, o, e2) ->
+          string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
+  | Trnop(e1, o1, e2, o2, e3) ->
+          string_of_expr e1 ^ " " ^ string_of_top o1 ^ " " ^ string_of_expr e2 ^ " " ^
+          string_of_top o2
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Access(v, s) -> v ^ "." ^ s
   | Call(f, el) ->
@@ -84,11 +105,11 @@ let rec string_of_stmt = function
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_typ = function
-    Int -> "int"
+    Int -> "int" 
   | String -> "string"
-  | Lint -> "lint"
-  | Point -> "Point"
-  | Void -> "void"
+  | Lint -> "lint" 
+  | Point -> "Point" 
+  | Void -> "void" 
   | _ -> "typ PP not implemented"
 
 
