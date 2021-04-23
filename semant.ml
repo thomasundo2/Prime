@@ -26,7 +26,6 @@ in
 check_binds "global" globals;
 
 (* Start with function declarations for built-ins (just print for now)*)
-(* TODO: Add for scan/compute for rings *)
 (* Just call the formal parameter ID of our inbuit functions x*)
 let built_in_decls =
   let add_bind map (name, ty) = StringMap.add name {
@@ -38,9 +37,16 @@ let built_in_decls =
   in let void_decls = List.fold_left add_bind StringMap.empty [ ("print", Int); 
                                                ("prints", String);
                                                ("printl", Lint);
-                                               ("printpt", Point); ]
-  and add_rand map (name, ty) = StringMap.add name {
-      typ = Lint;
+                                               ("printpt", Point); ] 
+     and add_cast map (name, ty) = StringMap.add name {
+       typ = Lint;
+       name = name;
+       params = [(ty, "x")];
+       locals = []; body = []
+     } map
+  in let void_decls = List.fold_left add_cast void_decls [ ("tolint", Int) ]
+     and add_rand map (name, ty) = StringMap.add name {
+        typ = Lint;
         name = name;
         params = [(ty, ("x")); (ty, ("y"))];
         locals = []; body = []

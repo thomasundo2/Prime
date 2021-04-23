@@ -67,6 +67,10 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; string_t; i32_t |] in
   let linit_func : L.llvalue =
       L.declare_function "__gmpz_init_set_str" linit_t the_module in
+  let lcast_t : L.lltype = 
+      L.function_type i32_t [| L.pointer_type mpz_t; i32_t |] in
+  let lcast_func : L.llvalue = 
+      L.declare_function "__gmpz_init_set_si" lcast_t the_module in
   let linitdup_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let linitdup_func : L.llvalue =
@@ -372,6 +376,11 @@ let translate (globals, functions) =
                         [| L.const_int i32_t 0 |] "" builder) |]
           | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) "printl" builder
+      | SCall ("tolint", [e]) -> (* allocate some lint space and init with value *)
+          let space = L.build_alloca mpz_t "tmp_lint" builder in
+          let ptr   = L.build_in_bounds_gep space [| zero |] "" builder 
+          and e'    = expr builder e in
+          ignore(L.build_call lcast_func [| ptr; e' |] "__gmpz_init_set_si" builder); ptr
       | SCall ("random", [e1;e2]) ->
           let rnd = llit_helper "0"
           and sed = expr builder e1

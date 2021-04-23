@@ -134,6 +134,7 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3)     }
   | ID ACCESS ID     { Access($1, $3) } // will be used for accessor methods
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
+  // | typ LPAREN expr RPAREN   { Cast($3) } (* Can later be generalised to other types *)
   // | LBRACK args_list RBRACK    { Ptlit($1, $2, $3)  }    // Point initialisation
   | LPAREN expr RPAREN {  $2  }
 

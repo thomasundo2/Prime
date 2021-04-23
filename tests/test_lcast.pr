@@ -1,0 +1,13 @@
+int main()
+{
+    int x;
+    lint y;
+    lint z;
+    x = 1;
+    y = tolint(2);
+    z = tolint(x);
+    printl(y);
+    printl(z);
+    printl(tolint(3));
+    return 0;
+}
