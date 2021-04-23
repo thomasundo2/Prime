@@ -125,6 +125,10 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; |] in
   let lneg_func : L.llvalue = 
       L.declare_function "__gmpz_neg" lneg_t the_module in
+  let lnot_t : L.lltype = 
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; |] in
+  let lnot_func : L.llvalue =
+       L.declare_function "lnot_func" lnot_t the_module in
 
   (* comparator operators *)
   let l_eq_t : L.lltype =
@@ -338,7 +342,8 @@ let translate (globals, functions) =
               and tmp = llit_helper "0" in
               ignore(match op with
                 A.Neg -> L.build_call lneg_func [| tmp; e' |] "__gmpz_neg" builder
-              | _ -> raise (Failure "Operator not implemented for Point")
+              | A.Not -> L.build_call lnot_func [| tmp; e' |] "lnot_func" builder
+              | _ -> raise (Failure "Operator not implemented for lints")
                       ); tmp 
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
