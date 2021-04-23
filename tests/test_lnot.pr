@@ -1,0 +1,12 @@
+int main()
+{
+   lint l1;
+   lint l2;
+   l1 = -11l;
+   l2 = !l1;
+   printl(l2);
+   printl(!l2);
+   printl(!-23l);
+   printl(!0l);
+   return 0;
+}
