@@ -25,6 +25,7 @@
 %left TIMES DIVIDE //(* Change this order later if necessary \r moved mod up -l.guru*)
 %right NOT
 %right POWER
+%nonassoc AMP
 %left ACCESS    // Built in access methods
 
 %%

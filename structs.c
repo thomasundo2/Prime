@@ -71,19 +71,14 @@ struct point *ptadd(struct point *p1, struct point *p2)
 
     mpz_t xcoeff;
     mpz_init_set(xcoeff, p1->curve->x_coeff);
-    printf("%d\n", 1);
 
     mpz_t c;
     mpz_init_set(c, p1->curve->c);
-    printf("%d\n", 1);
 
     mpz_t mod;
     mpz_init_set(mod, p1->curve->mod);
-    printf("%d\n", 1);
 
     Poly( curve, xcoeff, c, mod);
-
-    printf("%d\n", 1);
 
     mpz_t zero;
     mpz_init_set_str(zero, "0", 10);
@@ -145,7 +140,6 @@ struct point *ptadd(struct point *p1, struct point *p2)
     mpz_t neg;
     mpz_init(neg);
     mpz_neg(neg, p2y);
-    gmp_printf("%Zd %Zd %Zd\n",p1y, p2y, neg);
     if(mpz_congruent_p(p1y, neg, mod))
     {
         mpz_set_str(p3x, "-1", 10);
@@ -230,10 +224,8 @@ struct point *ptadd(struct point *p1, struct point *p2)
     mpz_mod(tmp, tmp, mod);
     mpz_set(p3y, tmp);
 
-    mpz_clear(tmp);
+    /* build pt */
 
-
-    printf("%d\n", 1);
     Point( sum, p3x, p3y, curve );
 
     mpz_clear(xcoeff);
@@ -250,6 +242,8 @@ struct point *ptadd(struct point *p1, struct point *p2)
     mpz_clear(p3y);
 
     mpz_clear(m);
+
+    mpz_clear(tmp);
 
     return sum;
     /*int i, j;
