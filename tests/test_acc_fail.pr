@@ -1,7 +1,0 @@
-int main()
-{
-    /* access an integer id */
-    int i;
-    i = 1;
-    printl(i.x);
-}
