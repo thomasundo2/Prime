@@ -1,0 +1,24 @@
+int main()
+{
+    /* creation and assignment */
+    pt x;
+    pt inf;
+    pt p1;
+    pt p2;
+    poly crv;
+    poly mycurve;
+    printpt([1l, 2l] & [(100l,200l) : 400l]);
+
+
+    mycurve = [(500l,600l) : 700l];
+    x = [5l, 6l] & mycurve;
+    inf = [(1l-2l),(1l-2l)] & mycurve;
+    printpt(x);
+    printpt(x + inf);
+
+    crv = [(5l, 12l) : 13l];
+    p1 = [2l, 2l] & crv;
+    p2 = [2l, 2l] & crv;
+    printpt(p2 + p1);
+    return 0;
+}

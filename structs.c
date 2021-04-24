@@ -66,8 +66,8 @@ char *printpt(struct point p){
 
 struct point *ptadd(struct point *p1, struct point *p2)
 {
-    struct poly *curve;
-    struct point *sum;
+    struct poly *curve = (struct poly *)malloc(sizeof(struct poly));
+    struct point *sum  = (struct point *)malloc(sizeof(struct point));
 
     mpz_t xcoeff;
     mpz_init_set(xcoeff, p1->curve->x_coeff);
@@ -98,7 +98,7 @@ struct point *ptadd(struct point *p1, struct point *p2)
      * return other point
      */
 
-    if( mpz_sgn(p1->i) == -1 && mpz_sgn( p1->j) == -1 ){
+    if( mpz_sgn(p1->i) == -1 && mpz_sgn(p1->j) == -1 ){
         mpz_set(p3x, p2->i);
         mpz_set(p3y, p2->j);
         Point( sum, p3x, p3y, curve);
@@ -123,7 +123,7 @@ struct point *ptadd(struct point *p1, struct point *p2)
     }
 
     /* build local x and y coords */
-    /*
+    
 
     mpz_t p1x;
     mpz_t p1y;
@@ -138,57 +138,118 @@ struct point *ptadd(struct point *p1, struct point *p2)
     mpz_mod(p1x, p1->i, mod);
     mpz_mod(p1y, p1->j, mod);
     mpz_mod(p2x, p2->i, mod);
-    mpz_mod(p2y, p2->j, mod);*/
+    mpz_mod(p2y, p2->j, mod);
 
     /* check if they are inverses of one another */
 
-    /*mpz_t neg;
+    mpz_t neg;
     mpz_init(neg);
     mpz_neg(neg, p2y);
+    gmp_printf("%Zd %Zd %Zd\n",p1y, p2y, neg);
     if(mpz_congruent_p(p1y, neg, mod))
     {
         mpz_set_str(p3x, "-1", 10);
         mpz_set_str(p3y, "-1", 10);
         Point( sum, p3x, p3y, curve);
 
-        mpz_clear(neg);
+        /*mpz_clear(neg);
         mpz_clear(p1x);
         mpz_clear(p1y);
         mpz_clear(p2x);
-        mpz_clear(p2y);
+        mpz_clear(p2y);*/
 
-        mpz_clear(xcoeff);
+        /*mpz_clear(xcoeff);
         mpz_clear(c);
-        mpz_clear(zero);
-        mpz_clear(mod);
+        mpz_clear(z:qero);
+        mpz_clear(mod);*/
 
         return sum;
-    }*/
+    }
     
 
     //slope
 
-    /* mpz_t m;
+    mpz_t m;
     mpz_init(m);
-
-    if(mpz_cmp(p1x, p2x) == 0 && mpz_cmp(p1y, p2y))
+    
+    /* if pts are not the same */
+    if(mpz_cmp(p1x, p2x) != 0 || mpz_cmp(p1y, p2y) != 0)
     {
         mpz_t tmpy;
         mpz_t tmpx;
-        mpz_t tmpxinv;
-        mpz_t tmp_m
-        
+        mpz_init(tmpy);
+        mpz_init(tmpx);
 
-    }*/
+        mpz_sub(tmpy, p2y, p1y);
+        mpz_sub(tmpy, tmpy, mod);
+        mpz_sub(tmpx, p2x, p1x);
+        mpz_mod(tmpx, tmpx, mod);
+
+        mpz_invert(tmpx, tmpx, mod);
+        mpz_mul(m, tmpy, tmpx);
+        mpz_mod(m, m, mod);
+        
+        mpz_clear(tmpy);
+        mpz_clear(tmpx);
+    } else { /* if points are same */
+        mpz_t tmpx;
+        mpz_t tmpy;
+        mpz_init(tmpx);
+        mpz_init(tmpy);
+
+        mpz_mul(tmpx, p1x, p1x);
+        mpz_mod(tmpx, tmpx, mod);
+        mpz_mul_si(tmpx, tmpx, (long) 3);
+        mpz_mod(tmpx, tmpx, mod);
+        mpz_add(tmpx, tmpx, xcoeff);
+        mpz_mul_si(tmpy, p1y, (long) 2);
+        mpz_mod(tmpy, tmpy, mod);
+        mpz_invert(tmpy, tmpy, mod);
+        mpz_mul(m, tmpx, tmpy);
+        mpz_mod(m, m, mod);
+
+        mpz_clear(tmpx);
+        mpz_clear(tmpy);
+    }
+
+    /* find p3x */
+    mpz_t tmp;
+    mpz_init(tmp);
+    mpz_mul(tmp, m, m);
+    mpz_mod(tmp, tmp, mod);
+    mpz_sub(tmp, tmp, p1x);
+    mpz_sub(tmp, tmp, p2x);
+    mpz_mod(tmp, tmp, mod);
+    mpz_set(p3x, tmp);
+
+    /* find p3y */
+
+    mpz_sub(tmp, p1x, p3x);
+    mpz_mul(tmp, tmp, m);
+    mpz_sub(tmp, tmp, p1y);
+    mpz_mod(tmp, tmp, mod);
+    mpz_set(p3y, tmp);
+
+    mpz_clear(tmp);
+
 
     printf("%d\n", 1);
-    Point( sum, zero, zero, curve );
+    Point( sum, p3x, p3y, curve );
 
     mpz_clear(xcoeff);
     mpz_clear(c);
     mpz_clear(zero);
     mpz_clear(mod);
 
+    mpz_clear(p1x);
+    mpz_clear(p1y);
+    mpz_clear(p2x);
+    mpz_clear(p2y);
+
+    mpz_clear(p3x);
+    mpz_clear(p3y);
+
+    mpz_clear(m);
 
     return sum;
     /*int i, j;
