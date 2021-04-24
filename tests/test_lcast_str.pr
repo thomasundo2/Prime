@@ -1,0 +1,5 @@
+int main()
+{
+    printl(stolint("b"));
+    return 0;
+}

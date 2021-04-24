@@ -44,14 +44,21 @@ let built_in_decls =
        params = [(ty, "x")];
        locals = []; body = []
      } map
-  in let void_decls = List.fold_left add_cast void_decls [ ("tolint", Int) ]
+  in let void_decls = List.fold_left add_cast void_decls [ ("tolint", Int)]
      and add_rand map (name, ty) = StringMap.add name {
         typ = Lint;
         name = name;
         params = [(ty, ("x")); (ty, ("y"))];
         locals = []; body = []
       } map
-  in List.fold_left add_rand void_decls [ ("random", Lint) ]
+  in let void_decls = List.fold_left add_rand void_decls [ ("random", Lint) ]
+     and add_scast map (name, ty) = StringMap.add name {
+        typ = Lint;
+        name = name;
+        params = [(ty, ("x"))];
+        locals = []; body = []
+      } map
+  in List.fold_left add_scast void_decls [ ("stolint", String)]
   (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 
