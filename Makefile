@@ -68,6 +68,6 @@ scanner.cmx : parser.cmx
 .PHONY : clean
 clean :
 	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml prime.out prime
-	rm -rf *.exe *.ll *.s *.test a.out gmpfunc gmpfunc.o structs structs.o
+	rm -rf *.exe *.ll *.s *.test *.diff a.out gmpfunc gmpfunc.o structs structs.o
 	opam config exec -- \
 	ocamlbuild -clean
