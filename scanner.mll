@@ -22,18 +22,19 @@ rule token = parse
 | ']'      { RBRACK }
 | ','      { COMMA  }
 | '='      { ASSIGN } (* Binary Operators (semi perhaps not) *)
-| ';'      { SEMI   }
-| '+'      { PLUS   }
-| '-'      { MINUS  }
-| '*'      { TIMES  }
+| ';'      { SEMI }
+| ':'      { COLON }
+| '+'      { PLUS }
+| '-'      { MINUS }
+| '*'      { TIMES }
 | '/'      { DIVIDE }
 | "/\\"    { POWER  }
 | '%'      { MOD    }
 | '`'      { INVERT }
 | '.'      { ACCESS }
+| '&'      { AMP }
 | '@'      { PMOD   }
 | '^'      { LPOWER }
-(* | ':'      { OVERLOAD } Not included in this part*)
 | "=="     { BEQ    } (* Relational Ops (which ones of these do we want?)*)
 | "!="     { BNEQ   }
 | '<'      { LTH    }

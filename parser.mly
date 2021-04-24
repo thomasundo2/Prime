@@ -27,6 +27,7 @@
 %right INVERT
 %right NOT
 %right POWER
+%nonassoc AMP
 %nonassoc PMOD LPOW
 %left ACCESS    // Built in access methods
 
@@ -63,14 +64,12 @@ params_list:
     typ ID                   { [($1,$2)] }
   | params_list COMMA typ ID { ($3,$4) :: $1 }
 
-// Fill in the following types when we need them after Hello world
+
 typ:
     INT   { Int }
   | LINT  { Lint }
-  //| POLY  {  }
-    | POINT { Point }
-  //| RING  {  }
-  //| CHAR  {  }
+  | POINT { Point }
+  | POLY { Poly }
   | STRING { String }
 
 vars:
@@ -82,9 +81,7 @@ declare_init:
 
 declarator:
     ID { $1 }
-  | ID ASSIGN expr {$1} // Allow assignment
-  //| ID LBRACK expr RBRACK { $1 } // Points
-  //| ID LBRACK expr RBRACK {} // Rings
+  //| ID ASSIGN expr {$1} // Allow assignment
 
 seq_stmts:
     vars stmt_list { ($1, $2) }
@@ -112,7 +109,8 @@ expr:
   | LITERAL          { Lit($1) }
   | STRLIT           { Strlit($1) }
   | LINTLIT          { Lintlit($1) }
-  | LBRACK expr COMMA expr RBRACK { Ptlit ($2, $4) }
+  | LBRACK expr COMMA expr RBRACK AMP expr { Ptlit ($2, $4, $7) }
+  | LBRACK LPAREN expr COMMA expr RPAREN COLON expr RBRACK {Polylit($3, $5, $8)}
   | expr MOD    expr { Binop($1, Mod, $3) }
   | expr POWER  expr { Binop($1, Pow, $3) }
   | expr PLUS   expr { Binop($1, Add, $3) }
@@ -135,7 +133,6 @@ expr:
   | ID ACCESS ID     { Access($1, $3) } // will be used for accessor methods
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
   // | typ LPAREN expr RPAREN   { Cast($3) } (* Can later be generalised to other types *)
-  // | LBRACK args_list RBRACK    { Ptlit($1, $2, $3)  }    // Point initialisation
   | LPAREN expr RPAREN {  $2  }
 
 args_opt:
