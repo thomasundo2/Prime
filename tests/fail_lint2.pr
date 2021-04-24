@@ -1,0 +1,6 @@
+int main()
+{
+    /* Unary operators should not work on lints */
+    printl(!2394653278456834765l);
+    return 0;
+}
