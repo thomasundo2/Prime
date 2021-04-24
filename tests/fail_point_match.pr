@@ -1,7 +1,0 @@
-int main()
-{
-    pt x;
-    printpt([192943924239l,2]);
-    return 0;
-}
-
