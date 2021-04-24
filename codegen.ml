@@ -121,10 +121,15 @@ let translate (globals, functions) =
   let print_point_func : L.llvalue =
       L.declare_function "printpt" print_point_t the_module in
   let pt_add_t : L.lltype = 
-      L.function_type  (L.pointer_type point_t) [| L.pointer_type point_t;
-                               L.pointer_type point_t |] in
+      L.function_type (L.pointer_type point_t) [| L.pointer_type point_t; 
+                                                  L.pointer_type point_t |] in
   let pt_add_func : L.llvalue =
-      L.declare_function "ptadd" pt_add_t the_module in 
+      L.declare_function "ptadd" pt_add_t the_module in
+  let pt_mul_t : L.lltype  =
+      L.function_type (L.pointer_type point_t) [| L.pointer_type mpz_t;
+                                                  L.pointer_type point_t |] in
+  let pt_mul_func : L.llvalue =
+      L.declare_function "ptmul" pt_mul_t the_module in
 
   (*polys and printing polys*)
   let init_poly_t : L.lltype =
@@ -273,10 +278,10 @@ let translate (globals, functions) =
               | _         -> raise (Failure "Operator not implemented for Point")
               )*)
       | SBinop ((A.Point, _) as e1, operator, e2) ->
+              let e1' = expr builder e1 
+              and e2' = expr builder e2 in
               (match operator with
               A.Add ->
-                  let e1' = expr builder e1
-                  and e2' = expr builder e2 in
                   
                   (*let crv = L.build_in_bounds_gep e1' [| zero; L.const_int i32_t 2 |] 
                             "pt_poly" builder in
@@ -289,6 +294,7 @@ let translate (globals, functions) =
 
                   (L.build_call pt_add_func [| e1'; e2' |] "pt_add" builder)
                   (*sum*)
+            | A.Mul -> L.build_call pt_mul_func [| e1'; e2' |] "pt_mul" builder 
             | _ -> raise (Failure "Operator not implemented for Point"))
 
       | SBinop (e1, operator, e2) ->
