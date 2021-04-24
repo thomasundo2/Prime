@@ -392,11 +392,11 @@ let translate (globals, functions) =
                         [| L.const_int i32_t 0 |] "" builder) |]
           | SLintlit i -> [| llit_helper i |]
           | _     -> [| expr builder ptr |]) "printl" builder
-      | SCall ("tolint", [e]) -> (* allocate some lint space and init with value *)
+      | SCall ("tolint", [(A.Int, e) as e1]) -> (* allocate some lint space and init with value *) 
           let space = L.build_alloca mpz_t "tmp_lint" builder in
           let ptr   = L.build_in_bounds_gep space [| zero |] "" builder 
-          and e'    = expr builder e in
-          ignore(L.build_call lcast_func [| ptr; e' |] "__gmpz_init_set_si" builder); ptr
+          and e1'    = expr builder e1 in
+          ignore(L.build_call lcast_func [| ptr; e1' |] "__gmpz_init_set_si" builder); ptr
       | SCall ("random", [e1;e2]) ->
           let rnd = llit_helper "0"
           and sed = expr builder e1

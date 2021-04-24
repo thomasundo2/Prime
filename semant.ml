@@ -6,17 +6,6 @@ open Sast
 (* Make a map to keep track of globals *)
 module StringMap = Map.Make(String)
 
-(* Hashtbl for string lint conversion *) 
-(* e.g. use case -> RSA *)
-
-module StringHash = Hashtbl.Make(struct
-   type t = string
-   let equal x y = x = y
-   let hash = Hashtbl.hash
- end);;
-
-let vals : int StringHash.t = StringHash.create 10;;
-
 (* Begin Semantic checking sast if good else error *)
 
 let check (globals, functions) =
