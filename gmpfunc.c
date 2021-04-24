@@ -3,13 +3,36 @@
 #include <gmp.h>
 #include <stdlib.h>
 #include <string.h>
-#include"structs.h"
+#include <time.h>
+#include "structs.h"
 
 
 void printl(mpz_t n)
 {
     mpz_out_str(stdout, 10, n);
     printf("\n");
+}
+
+int rand_func(mpz_t rnd, mpz_t seed, mpz_t max)
+{
+    /*rand() into mpzt*/
+    //mpz_t newseed;
+    //mpz_init(newseed);
+    if(mpz_sgn(seed) == 0)
+    {
+        srand(time(0));
+        mpz_set_ui(seed, rand());
+    }
+
+    gmp_randstate_t state; /*intialize state */
+
+    gmp_randinit_mt(state); /* set set state to use the Mersenne Twister Algorithm */
+    gmp_randseed(state, seed); /*seed the state using user input*/
+
+    mpz_urandomm(rnd, state, max); /*generate random int*/
+
+    gmp_randclear(state);
+    return(0);
 }
 
 char *sub(char *left, char *right)
@@ -35,6 +58,72 @@ char *sub(char *left, char *right)
     mpz_clear(n1);
     mpz_clear(n2);
     return ret_str;
+}
+
+int eq_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) == 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int neq_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) == 0){
+        return 0;
+    }
+    else{
+        return 1;
+    }
+}
+
+int lth_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) < 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int gth_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) > 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int leq_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) <= 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int geq_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, y) >= 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int lnot_func(mpz_t out, mpz_t in){
+    if(mpz_sgn(in) == 0)
+    {
+        mpz_set_str(out, "1", 10);
+    }
+    else
+    {
+        mpz_set_str(out, "0", 10);
+    }
+    return 0;
 }
 
 #ifdef BUILD_TEST
