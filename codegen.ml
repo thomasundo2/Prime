@@ -343,19 +343,7 @@ let translate (globals, functions) =
                let e1' = expr builder e1
                and e2' = expr builder e2 in
                (match operator with
-               A.Add ->
-
-                   (*let crv = L.build_in_bounds_gep e1' [| zero; L.const_int i32_t 2 |]
-                             "pt_poly" builder in
-
-                   let x = llit_helper "0"
-                   and y = llit_helper "0"
-
-                   and sum = L.build_alloca point_t "tmp_pt" builder in
-                   ignore(L.build_call init_point_func [| sum; x; y; crv |] "Point" builder);*)
-
-                   (L.build_call pt_add_func [| e1'; e2' |] "pt_add" builder)
-                   (*sum*)
+               A.Add -> (L.build_call pt_add_func [| e1'; e2' |] "pt_add" builder)
              | A.Mul -> L.build_call pt_mul_func [| e2'; e1' |] "pt_mul" builder
              | _ -> raise (Failure "Operator not implemented for Point"))
       (*special binop for lint times pt*)
