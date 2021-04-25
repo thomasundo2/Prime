@@ -25,7 +25,6 @@ let translate (globals, functions) =
 
   (* Get types from the context *)
   let i32_t      = L.i32_type    context
-  and i1_t       = L.i1_type     context
   and i8_t       = L.i8_type     context
   and void_t     = L.void_type   context in
   let string_t   = L.pointer_type (i8_t)
@@ -80,7 +79,7 @@ let translate (globals, functions) =
       L.declare_function "__gmpz_init_set" linitdup_t the_module in
   let lclear_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t |] in
-  let lclear_func : L.llvalue =
+  let lclear_func : L.llvalue = (* free lints - define usage *)
       L.declare_function "__gmpz_clear" lclear_t the_module in
   (* We don't use the mpz_out_str because FILE* is a pain *)
   let lprint_t : L.lltype =
@@ -157,6 +156,14 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_leq_func : L.llvalue =
       L.declare_function "leq_func" l_leq_t the_module in
+  let l_or_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_or_func : L.llvalue =
+      L.declare_function "or_func" l_or_t the_module in
+  let l_and_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_and_func : L.llvalue =
+      L.declare_function "and_func" l_and_t the_module in
   let l_geq_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_geq_func : L.llvalue = 
@@ -185,7 +192,7 @@ let translate (globals, functions) =
   let pt_mul_t : L.lltype  =
       L.function_type (L.pointer_type point_t) [| L.pointer_type mpz_t;
                                                   L.pointer_type point_t |] in
-  let pt_mul_func : L.llvalue =
+  let pt_mul_func : L.llvalue = (* pt multiplication - define usage *)
       L.declare_function "ptmul" pt_mul_t the_module in
   let pt_neg_t : L.lltype = 
       L.function_type (L.pointer_type point_t) [| L.pointer_type point_t |] in
@@ -210,6 +217,16 @@ let translate (globals, functions) =
   let print_poly_func : L.llvalue =
       L.declare_function "printpoly" print_poly_t the_module in
 
+  (* Encoding and decoding strings for encryption *)
+  let encode_t : L.lltype = 
+      L.function_type i32_t [| L.pointer_type mpz_t; string_t |] in
+  let encode_func : L.llvalue = 
+      L.declare_function "encode" encode_t the_module in
+  let decode_t : L.lltype = 
+      L.function_type string_t [| L.pointer_type mpz_t |] in
+  let decode_func : L.llvalue = 
+      L.declare_function "decode" decode_t the_module in
+  
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
   let function_decls : (L.llvalue * sfunc_decl) StringMap.t =
@@ -369,6 +386,7 @@ let translate (globals, functions) =
                                 builder
                      | A.Inv -> L.build_call linv_func [| tmp; e1'; e2' |] "__gmpz_invert"
                                 builder (* add handling for inv does not exist *)
+                     | _ -> raise (Failure "Binary operator not implemented for Lint")  
                 )); tmp
       | SRelop ((A.Lint, _) as e1, operator, e2) ->
                let e1' = expr builder e1
@@ -378,7 +396,11 @@ let translate (globals, functions) =
                      | A.Lth -> L.build_call l_lth_func [| e1'; e2' |] "lth_func" builder
                      | A.Gth -> L.build_call l_gth_func [| e1'; e2' |] "gth_func" builder
                      | A.Leq -> L.build_call l_leq_func [| e1'; e2' |] "leq_func" builder
-                     | A.Geq -> L.build_call l_geq_func [| e1'; e2' |] "geq_func" builder)
+                     | A.Geq -> L.build_call l_geq_func [| e1'; e2' |] "geq_func" builder
+                     | A.And -> L.build_call l_and_func [| e1'; e2' |] "and_func" builder
+                     | A.Or  -> L.build_call l_or_func [| e1'; e2' |] "or_func" builder
+                     | _ -> raise (Failure "Relational operator not implemented for Lint")
+                 )
       | SRelop ((A.Point, _) as e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in
@@ -412,6 +434,7 @@ let translate (globals, functions) =
                                 "tmp" builder
               | A.Geq     -> L.build_zext (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
                                 "tmp" builder
+              | _ -> raise (Failure "Relational operator not implemented for Lint")
               ) 
       | SBinop ((A.Point, _) as e1, operator, e2) ->
               let e1' = expr builder e1 
@@ -442,19 +465,20 @@ let translate (globals, functions) =
               | A.Div     -> L.build_sdiv e1' e2' "tmp" builder
               | A.Mod     -> L.build_srem e1' e2' "tmp" builder
               | A.Pow     -> L.build_mul e1' e2' "tmp" builder
+              | _ -> raise (Failure "Binary operator not implemented")       
               )
       | SUnop(op, ((A.Lint, _) as e)) ->
               let e' = expr builder e 
               and tmp = llit_helper "0" in
               ignore(match op with
                 A.Neg -> L.build_call lneg_func [| tmp; e' |] "__gmpz_neg" builder
-              | A.Not -> L.build_call lnot_func [| tmp; e' |] "lnot_func" builder
-                      ); tmp 
+              | A.Not -> L.build_call lnot_func [| tmp; e' |] "lnot_func" builder 
+              ); tmp 
       | SUnop(op, ((A.Point, _) as e)) ->
               let e' = expr builder e in
               (match op with
               A.Neg -> (L.build_call pt_neg_func [|e'|] "ptneg" builder))
-      | SUnop(op, ((t, _) as e)) ->
+      | SUnop(op, ((_, _) as e)) ->
               let e' = expr builder e in
               (match op with
                 A.Neg     -> L.build_neg  e' "tmp" builder
@@ -468,8 +492,9 @@ let translate (globals, functions) =
               and out = llit_helper "0" in
               ignore((match o1, o2 with
                   A.Lpw, A.Pmd ->
-                      L.build_call lpowmod_func [| out; e1'; e2'; e3' |] "__gmpz_powm" builder)
-              );
+                      L.build_call lpowmod_func [| out; e1'; e2'; e3' |] "__gmpz_powm" builder
+                  | _ -> raise (Failure "Trinary operator not implemented"))
+                );
               out
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
@@ -504,6 +529,13 @@ let translate (globals, functions) =
           and sed = expr builder e1
           and max = expr builder e2 in 
           ignore(L.build_call l_rand_func [| rnd; sed; max |] "rand_func" builder); rnd
+      | SCall ("decode", [e]) ->
+          let e' = expr builder e in
+          L.build_call decode_func [| e' |] "decode" builder
+      | SCall ("encode", [e1; e2]) ->
+          let e1' = expr builder e1 
+          and e2' = expr builder e2 in
+          ignore(L.build_call encode_func [| e1'; e2' |] "encode" builder); e1'
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in

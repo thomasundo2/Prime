@@ -1,0 +1,6 @@
+int main()
+{
+    lint x;
+    x = decode(67l);
+    return 0;
+}

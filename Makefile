@@ -28,6 +28,12 @@ structs: structs.c
 structs.o: structs.c
 	cc -c structs.c
 
+input: gmp input.c
+	cc -o input -DBUILD_TEST input.c -lgmp
+
+input.o: input.c
+	cc -c input.c
+	
 
 # Some old stuff:
 prime : parser.cmo scanner.cmo prime.cmo
@@ -68,6 +74,6 @@ scanner.cmx : parser.cmx
 .PHONY : clean
 clean :
 	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml prime.out prime
-	rm -rf *.exe *.ll *.s *.test a.out gmpfunc gmpfunc.o structs structs.o
+	rm -rf *.exe *.ll *.s *.test *.diff a.out gmpfunc gmpfunc.o structs structs.o input input.o
 	opam config exec -- \
 	ocamlbuild -clean

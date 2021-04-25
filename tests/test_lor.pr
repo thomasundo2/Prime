@@ -1,0 +1,15 @@
+int main()
+{
+    lint test;
+    lint test2;
+    test = 1l;
+    test2 = 0l;
+    if(test || test2) {
+	print(1);
+    }
+    else{
+	print(0);
+    }
+
+    return 0;
+}

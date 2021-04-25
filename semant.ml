@@ -6,6 +6,18 @@ open Sast
 (* Make a map to keep track of globals *)
 module StringMap = Map.Make(String)
 
+(* String hashmap for lint string conversion *)
+(* e.g. RSA *)
+
+module StringHash = Hashtbl.Make(struct
+  type t = string
+  let equal x y = x = y
+  let hash = Hashtbl.hash
+  end);;
+
+let vals : int StringHash.t = StringHash.create 10;;
+
+
 (* Begin Semantic checking sast if good else error *)
 
 let check (globals, functions) =
@@ -52,7 +64,21 @@ let built_in_decls =
         params = [(ty, ("x")); (ty, ("y"))];
         locals = []; body = []
       } map
-  in List.fold_left add_rand void_decls [ ("random", Lint) ]
+  in let void_decls = List.fold_left add_rand void_decls [ ("random", Lint) ]
+     and add_decode map (name, ty) = StringMap.add name {
+       typ = String;
+       name = name;
+       params = [(ty, "x")];
+       locals = []; body = []
+     } map
+     and add_encode map (name, _) = StringMap.add name {
+       typ = Void;
+       name = name;
+       params = [(Lint, "x"); (String, "y")]; (* Don't necessarily have to hard-code this but time is short *)
+       locals = []; body = [];
+     } map
+  in let built_decls = List.fold_left add_decode void_decls [ ("decode", Lint)]
+  in List.fold_left add_encode built_decls [ ("encode", (Lint, String)) ]
   (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 
@@ -171,7 +197,7 @@ let check_function func =
 	    | Pow                               when t1 = Lint && t2 = Int -> Lint
             | Mul                               when t1 = Lint && t2 = Point -> Point
             | Mul                               when t2 = Lint && t1 = Point -> Point
-	          | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
+	    | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
             | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int
             | _ -> raise (
                 Failure ("illegal binary operator " ^
@@ -184,8 +210,8 @@ let check_function func =
             let same = t1 = t2 in
             let ty = match op with
             | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
-            | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int
             | Beq | Bneq                                    when same && t1 = Point -> Int 
+            | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Lint -> Int 
             | _ -> raise (
                 Failure ("illegal relational operator " ^
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
@@ -241,7 +267,6 @@ let check_function func =
   | For(e1, e2, e3, st) ->
 	SFor(expr e1, check_int_expr e2, expr e3, check_stmt st)
   | While(p, s) -> SWhile(check_int_expr p, check_stmt s)
-  | _   -> raise (Failure "stmt type not implemented")
   in
   { styp = func.typ;
     sname = func.name;

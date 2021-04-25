@@ -1,6 +1,7 @@
 .vscode
 _build
 prime.native
+*.diff
 *.test
 *.exe
 *.s

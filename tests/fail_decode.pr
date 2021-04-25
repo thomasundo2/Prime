@@ -1,0 +1,5 @@
+int main()
+{
+    decode(0);
+    return 0;
+}

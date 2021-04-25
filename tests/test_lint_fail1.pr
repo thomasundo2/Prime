@@ -1,6 +1,0 @@
-int main()
-{
-    /* for pow we raise by unsigned int */
-    printl(21973469182365874353456l /\ 2l);
-    return 0;
-}

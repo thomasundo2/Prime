@@ -1,0 +1,14 @@
+int main()
+{
+  int i;
+
+  while (i < 2) {
+    i = i + 1;
+    int a;
+    a = 7;
+  }
+
+  print(a);/* out of scope */
+
+  return 0;
+}

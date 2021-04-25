@@ -1,7 +1,9 @@
 %{ open Ast %}
 // Thank you again to Professor Edwards for the MicroC template.
 // We have made alterations and additions for our language's functionality
-%token SEMI COLON AMP LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN INVERT
+
+%token SEMI COLON LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA AMP
+%token PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN INVERT
 %token PMOD LPOWER
 %token BEQ BNEQ LTH GTH GEQ LEQ AND OR NOT
 %token ACCESS
