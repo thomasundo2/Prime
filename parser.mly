@@ -16,7 +16,6 @@
 // (*precedence*)
 %nonassoc NOELSE
 %nonassoc ELSE
-%nonassoc PMOD LPOW
 %right ASSIGN
 %left OR
 %left AND
@@ -29,6 +28,8 @@
 %right NOT
 %right POWER
 %nonassoc AMP
+%right PMOD
+%left LPOWER
 %left ACCESS    // Built in access methods
 
 %%
