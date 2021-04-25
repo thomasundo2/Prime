@@ -127,24 +127,24 @@ int lnot_func(mpz_t out, mpz_t in){
 }
 
 int and_func(mpz_t x, mpz_t y){
-    if(mpz_cmp(x, 0) != 0 && mpz_cmp(y, 0) != 0)
+    if(mpz_get_si(x) == 0 || mpz_get_si(y) == 0)
     {
-      return 1;
+      return 0;
     }
     else 
     {
-      return 0;
+      return 1;
     }
 }
 
 int or_func(mpz_t x, mpz_t y){
-    if(mpz_cmp(x, 0) != 0 || mpz_cmp(y, 0) != 0)
+    if(mpz_get_si(x) == 0 && mpz_get_si(y) == 0)
     {
-      return 1;
+      return 0;
     }
     else
     {
-      return 0;
+      return 1;
     }
 }
 
