@@ -437,25 +437,6 @@ let translate (globals, functions) =
               | A.Geq     -> L.build_zext (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
                                "tmp" builder
               | _ -> raise (Failure "Relational operator not implemented"))
-      | SBinop ((A.Point, _) as e1, operator, e2) ->
-              let e1' = expr builder e1 
-              and e2' = expr builder e2 in
-              (match operator with
-              A.Add ->
-                  
-                  (*let crv = L.build_in_bounds_gep e1' [| zero; L.const_int i32_t 2 |] 
-                            "pt_poly" builder in
-
-                  let x = llit_helper "0"
-                  and y = llit_helper "0" 
-
-                  and sum = L.build_alloca point_t "tmp_pt" builder in
-                  ignore(L.build_call init_point_func [| sum; x; y; crv |] "Point" builder);*)
-
-                  (L.build_call pt_add_func [| e1'; e2' |] "pt_add" builder)
-                  (*sum*)
-            (*| A.Mul -> L.build_call pt_mul_func [| e1'; e2' |] "pt_mul" builder *)
-            | _ -> raise (Failure "Operator not implemented for Point"))
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in

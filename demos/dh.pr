@@ -1,4 +1,4 @@
-int alice(int p, int g) 
+/* int alice(int p, int g) 
 {
   int a;
   a = 1000000;
@@ -14,7 +14,7 @@ int bob(int p, int g)
   prints("b:");
   print(b);
   return (g^b)%p;
-}
+} */
 
 int main()
 {
@@ -34,12 +34,14 @@ int main()
   /* Step 1: Alice chooses a random large integer a. */
   /* Step 2: Alice sends g^a (mod p) to Bob. */
   int a;
-  a = alice(p, g);
+  a = 1;
+  /* a = alice(p, g); */
 
   /* Step 3: Bob chooses a random large integer b. */
   /* Step 4: Bob sends g^b (mod p) to Alice. */
   int b;
-  b = bob(p, g);
+  b = 1;
+  /* b = bob(p, g); */
 
   int secret;
   secret = a * b; 
