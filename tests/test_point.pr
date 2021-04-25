@@ -2,11 +2,12 @@ int main()
 {
     /* creation and assignment */
     pt x;
-    printpt([1l, 2l]);
-    x = [99l, 22l];
-    printpt(x);
+    poly mycurve;
+    printpt([1l, 2l] & [(100l,200l) : 400l]);
 
-    /* ops: add, multiply, subtract */
-    /* printpt([1l, 2l] + [1l, 2l]); */
+
+    mycurve = [(500l,600l) : 700l];
+    x = [5l, 6l] & mycurve;
+    printpt(x);
     return 0;
 }

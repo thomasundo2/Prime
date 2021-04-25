@@ -33,8 +33,10 @@ let translate (globals, functions) =
 (* in *)
   and mpz_t      = L.named_struct_type context "mpz_t"
     in let mpz_t = L.struct_set_body mpz_t [| (L.i32_type context); (L.i32_type context); L.pointer_type (L.i64_type context) |] false; mpz_t
+  in let poly_t = L.named_struct_type context "poly"
+    in let poly_t = L.struct_set_body poly_t [| mpz_t ; mpz_t; mpz_t |] false; poly_t
   in let point_t    = L.named_struct_type context "point"
-    in let point_t = L.struct_set_body point_t [| mpz_t ; mpz_t |] false; point_t
+    in let point_t = L.struct_set_body point_t [| mpz_t ; mpz_t; poly_t |] false; point_t
   in
 
   (* Return the LLVM type for a MicroC type *)
@@ -42,6 +44,7 @@ let translate (globals, functions) =
     A.String   -> string_t
   | A.Lint     -> mpz_t
   | A.Point    -> point_t
+  | A.Poly     -> poly_t
   | A.Int      -> i32_t
   | A.Void     -> void_t
   | _          -> void_t
@@ -124,6 +127,14 @@ let translate (globals, functions) =
                                L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let lpowmod_func : L.llvalue =
       L.declare_function "__gmpz_powm" lpowmod_t the_module in
+  let lneg_t : L.lltype = 
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; |] in
+  let lneg_func : L.llvalue = 
+      L.declare_function "__gmpz_neg" lneg_t the_module in
+  let lnot_t : L.lltype = 
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t; |] in
+  let lnot_func : L.llvalue =
+       L.declare_function "lnot_func" lnot_t the_module in
 
   (* comparator operators *)
   let l_eq_t : L.lltype =
@@ -158,14 +169,34 @@ let translate (globals, functions) =
 
   (*points and printing points*)
   let init_lintpoint_t : L.lltype =
-      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type mpz_t ; L.pointer_type mpz_t |] in
+      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type mpz_t ; 
+                               L.pointer_type mpz_t; L.pointer_type poly_t |] in
   let init_point_func : L.llvalue =
       L.declare_function "Point" init_lintpoint_t the_module in
-  let print_point_t : L.lltype = 
+  let print_point_t : L.lltype =
       L.function_type i32_t [| L.pointer_type point_t |] in
   let print_point_func : L.llvalue =
       L.declare_function "printpt" print_point_t the_module in
+  let pt_add_t : L.lltype = 
+      L.function_type (L.pointer_type point_t) [| L.pointer_type point_t; 
+                                                  L.pointer_type point_t |] in
+  let pt_add_func : L.llvalue =
+      L.declare_function "ptadd" pt_add_t the_module in
+  let pt_mul_t : L.lltype  =
+      L.function_type (L.pointer_type point_t) [| L.pointer_type mpz_t;
+                                                  L.pointer_type point_t |] in
+  let pt_mul_func : L.llvalue =
+      L.declare_function "ptmul" pt_mul_t the_module in
 
+  (*polys and printing polys*)
+  let init_poly_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type poly_t; L.pointer_type mpz_t ; L.pointer_type mpz_t;  L.pointer_type mpz_t |] in
+  let init_poly_func : L.llvalue =
+      L.declare_function "Poly" init_poly_t the_module in
+  let print_poly_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type poly_t |] in
+  let print_poly_func : L.llvalue =
+      L.declare_function "printpoly" print_poly_t the_module in
 
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
@@ -229,6 +260,7 @@ let translate (globals, functions) =
       (* how to free after done using *)
     in
 
+
     (* Helpful when writing geps *)
     let zero = L.const_int i32_t 0
     in
@@ -238,22 +270,35 @@ let translate (globals, functions) =
         SStrlit i     -> L.build_global_stringptr i "string" builder
       | SLintlit i    -> llit_helper i (* Pointer to new mpz*)
       | SLit i        -> L.const_int i32_t i
-      | SPtlit (i, j) -> (* call our struct initialiser passing in loc of initialisation *)
+      | SPtlit (i, j, p) -> (* call our struct initialiser passing in loc of initialisation *)
           let e1' = expr builder i
           and e2' = expr builder j
+          and e3' = expr builder p
           and space = L.build_alloca point_t "tmp_pt" builder
-          in ignore(L.build_call init_point_func [| space; e1' ; e2' |] "Point" builder); space
+          in ignore(L.build_call init_point_func [| space; e1' ; e2'; e3' |] "Point" builder); space
+      | SPolylit (i, j, m) -> (* call our struct initialiser passing in loc of initialisation *)
+          let e1' = expr builder i
+          and e2' = expr builder j
+          and e3' = expr builder m
+          and space = L.build_alloca poly_t "tmp_poly" builder
+          in ignore(L.build_call init_poly_func [| space; e1' ; e2'; e3' |] "Poly" builder); space
       | SNoexpr       -> L.const_int i32_t 0
       | SId s         -> (match stype with (* Might be better just to have StructType adt? *)
                           A.Lint  -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
                         | A.Point -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
+                        | A.Poly -> L.build_in_bounds_gep (lookup s) [| zero |] s builder
                         | _       -> L.build_load (lookup s) s builder)
       | SAssign (s, ((A.Lint, _) as e1)) -> let e1' = expr builder e1 in
                 (* Here we have a pointer to mpz val *)
                 ignore(L.build_call linitdup_func
                 [| L.build_in_bounds_gep (lookup s) [| zero |] s builder; e1' |] "" builder); e1'
-      | SAssign (s, ((A.Point, _) as e1))  -> 
+      | SAssign (s, ((A.Point, _) as e1))  ->
           (* For point lits that already have stack allocated, we get element pointer then store *)
+          let e1' = expr builder e1 in
+          let val_ptr = L.build_in_bounds_gep e1' [| zero |] "" builder in
+          let loaded = L.build_load val_ptr "" builder in
+          ignore(L.build_store loaded (lookup s) builder); e1'
+      | SAssign (s, ((A.Poly, _) as e1))  ->
           let e1' = expr builder e1 in
           let val_ptr = L.build_in_bounds_gep e1' [| zero |] "" builder in
           let loaded = L.build_load val_ptr "" builder in
@@ -261,8 +306,8 @@ let translate (globals, functions) =
       | SAssign (s, e) -> let e' = expr builder e in
                            ignore(L.build_store e' (lookup s) builder); e'
         (* Will need to separate out the access into one for the different types *)
-      | SAccess (s, idx) -> 
-          let outer_ptr = L.build_in_bounds_gep (lookup s) [| zero; L.const_int i32_t idx |] "outer" builder 
+      | SAccess (s, idx) ->
+          let outer_ptr = L.build_in_bounds_gep (lookup s) [| zero; L.const_int i32_t idx |] "outer" builder
           in
           L.build_in_bounds_gep outer_ptr [| zero |] "inner" builder
       | SBinop ((A.Lint, _) as e1, operator, e2) ->
@@ -300,7 +345,7 @@ let translate (globals, functions) =
               let e1' = expr builder e1   
               and e2' = expr builder e2 in
               (match operator with
-              A.And     -> L.build_zext
+                A.And     -> L.build_zext
                                 (L.build_and
                                 (L.build_icmp L.Icmp.Ne e1' (L.const_int i32_t 0) "tmp" builder)
                                 (L.build_icmp L.Icmp.Ne e2' (L.const_int i32_t 0) "tmp" builder)
@@ -323,13 +368,25 @@ let translate (globals, functions) =
               | A.Geq     -> L.build_zext (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
                                 "tmp" builder
               ) 
-      (* | SBinop((A.Point, _) as e1, operator, e2) -> (* needs fixing *)
-              let e1' = expr builder e1
+      | SBinop ((A.Point, _) as e1, operator, e2) ->
+              let e1' = expr builder e1 
               and e2' = expr builder e2 in
               (match operator with
-              | A.Add     -> L.build_call ptadd_func [| e1'; e2' |] "ptadd" builder
-              | _         -> raise (Failure "Operator not implemented for Point")
-              ) *)
+              A.Add ->
+                  
+                  (*let crv = L.build_in_bounds_gep e1' [| zero; L.const_int i32_t 2 |] 
+                            "pt_poly" builder in
+
+                  let x = llit_helper "0"
+                  and y = llit_helper "0" 
+
+                  and sum = L.build_alloca point_t "tmp_pt" builder in
+                  ignore(L.build_call init_point_func [| sum; x; y; crv |] "Point" builder);*)
+
+                  (L.build_call pt_add_func [| e1'; e2' |] "pt_add" builder)
+                  (*sum*)
+            (*| A.Mul -> L.build_call pt_mul_func [| e1'; e2' |] "pt_mul" builder *)
+            | _ -> raise (Failure "Operator not implemented for Point"))
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1
               and e2' = expr builder e2 in
@@ -340,7 +397,14 @@ let translate (globals, functions) =
               | A.Div     -> L.build_sdiv e1' e2' "tmp" builder
               | A.Mod     -> L.build_srem e1' e2' "tmp" builder
               | A.Pow     -> L.build_mul e1' e2' "tmp" builder
-              ) 
+              )
+      | SUnop(op, ((A.Lint, _) as e)) ->
+              let e' = expr builder e 
+              and tmp = llit_helper "0" in
+              ignore(match op with
+                A.Neg -> L.build_call lneg_func [| tmp; e' |] "__gmpz_neg" builder
+              | A.Not -> L.build_call lnot_func [| tmp; e' |] "lnot_func" builder
+                      ); tmp 
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
               (match op with
@@ -369,6 +433,11 @@ let translate (globals, functions) =
           (match e with
             SPtlit _ -> L.build_call print_point_func [| L.build_in_bounds_gep e1' [| zero |] "" builder |] "printpt" builder
           | _             -> L.build_call print_point_func [| e1' |] "printpt" builder)
+      | SCall ("printpoly", [(_, e) as e1]) -> (* print poly *)
+          let e1' = expr builder e1 in
+          (match e with
+            SPolylit _ -> L.build_call print_poly_func [| L.build_in_bounds_gep e1' [| zero |] "" builder |] "printpoly" builder
+          | _             -> L.build_call print_poly_func [| e1' |] "printpoly" builder)
       | SCall ("printl", [(_, e) as ptr]) ->
           (* L.build_call lprint_func [| expr builder e |] "printl" builder *)
           L.build_call lprint_func (match e with
@@ -452,7 +521,6 @@ let translate (globals, functions) =
 	  let pred_builder = L.builder_at_end context pred_bb in
           let int_val = expr pred_builder predicate in
 	  let bool_val = (L.build_icmp L.Icmp.Ne int_val (L.const_int i32_t 0)) "tmp" pred_builder in
-          
 	  let merge_bb = L.append_block context "merge" the_function in
 	  ignore(L.build_cond_br bool_val body_bb merge_bb pred_builder);
 	  L.builder_at_end context merge_bb

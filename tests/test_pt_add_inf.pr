@@ -1,0 +1,23 @@
+int main()
+{
+    /* creation and assignment */
+    pt p1;
+    pt p2;
+    pt p3;
+    lint m1;
+    poly crv;
+
+    m1 = 1l - 2l;
+
+    crv = [(5l, 12l) : 13l];
+    p1 = [m1, m1] & crv;
+    p2 = [7l, 0l] & crv;
+    printpt(p2 + p1);
+    p3 = p2 + p1;
+    printpt(p3);
+    printpt([m1, m1] & [(5l, 12l) : 13l] + [7l, 0l] & [(5l, 12l) : 13l]);
+    printpt([7l, 0l] & [(5l, 12l) : 13l] + [m1, m1] & [(5l, 12l) : 13l]);
+
+    return 0;
+}
+

@@ -16,8 +16,8 @@ IsError() {
 }
 
 Difference() {
-    echo diff -b -q $1 $2 > $logfile 1>&2
-    diff -b -q "$1" "$2" > "$logfile" 2>&1 || {
+    echo diff -b -q $1 $2 ">" $logfile 1>&2
+    diff -b "$1" "$2" > "$1.diff" 2>&1 || {
     IsError "Difference in $1"
     }
 }
@@ -118,26 +118,6 @@ done
 # Compile/link in gmpfunc file
 cc -c gmpfunc.c
 cc -c structs.c
-
-# all tests
-
-# Tests we want to do for now
-# if [ $# -ge 1 ]
-# then
-#     for file in $files
-#     do
-#         Test $file 2>> $logfile
-#     done
-# else
-#     # Test tests/test_hello.pr 2>> $logfile
-#     # Test tests/test_add.pr 2>> $logfile
-#     # Test tests/test_mod.pr 2>> $logfile
-#     # Test tests/test_neg.pr 2>> $logfile
-#     # Test tests/test_print.pr 2>> $logfile
-#     # Test tests/test_lint.pr 2>> $logfile
-
-# fi
-
 
 # clean up ()
 # rm -rf *.exe *.test *.ll *.s

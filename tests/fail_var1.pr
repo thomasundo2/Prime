@@ -1,0 +1,7 @@
+/* Assignment mismatch */
+int main()
+{
+    int test;
+    test = "hi";
+    return 1;
+}

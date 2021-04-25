@@ -37,7 +37,8 @@ let built_in_decls =
   in let void_decls = List.fold_left add_bind StringMap.empty [ ("print", Int); 
                                                ("prints", String);
                                                ("printl", Lint);
-                                               ("printpt", Point); ] 
+                                               ("printpt", Point); 
+                                               ("printpoly", Poly);] 
      and add_cast map (name, ty) = StringMap.add name {
        typ = Lint;
        name = name;
@@ -86,7 +87,7 @@ let check_function func =
   (* All #TODO: *)
   (* check type and identifiers in formal parameters and local vars *)
   (* check all assignments are valid types. Should we co-erce? *)
-  let check_assign lvaltype rvaltype err =  
+  let check_assign lvaltype rvaltype err =
     (* print_string ("param: " ^ (string_of_typ lvaltype) ^ " actual: " ^ (string_of_typ rvaltype) ^ "\n"); *)
     match lvaltype with
       (* Lint -> if rvaltype = String || rvaltype = Lint then lvaltype else raise (Failure err) *)
@@ -119,17 +120,14 @@ let check_function func =
           let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
             string_of_typ rt ^ " in " ^ string_of_expr ex
           in (check_assign lt rt err, SAssign(var, (rt, e')))
-  | Ptlit(e1, e2) ->
-	    (* let e1' = expr e1
- 	    and e2' = expr e2 in
-	    (Point, SPtlit(e1', e2')) *)
-      let (t1, e1') = expr e1 
- 	    and (t2, e2') = expr e2 in
-	    let ty = match t1, t2 with
-	    Lint, Lint -> Point
-	    (* | Int, Int -> Point *)
-	    | _ -> raise (Failure ("points must have Lint coordinates"))
-            in (ty, SPtlit((t1, e1'), (t2, e2')))
+  | Ptlit(e1, e2, e3) ->
+	    let (t1, e1') = expr e1
+ 	    and (t2, e2') = expr e2
+ 	    and (t3, e3') = expr e3 in
+	    let ty = match t1, t2, t3 with
+	    Lint, Lint, Poly -> Point
+	    | _ -> raise (Failure ("points must have Lint coordinates and be defined under a Poly"))
+            in (ty, SPtlit((t1, e1'), (t2, e2'), (t3, e3')))
   | Access(var, e2) as ex -> (* Will give us the right index for gep from string *)
       let lt = type_of_identifier var in
       (match lt with
@@ -140,11 +138,21 @@ let check_function func =
                                            ^ string_of_expr ex)))
       | _     -> raise (Failure ("cannot access type: " ^ string_of_typ lt
                                  ^ " in " ^ string_of_expr ex)))
+  | Polylit(e1, e2, e3) ->
+	    let (t1, e1') = expr e1
+ 	    and (t2, e2') = expr e2
+ 	    and (t3, e3') = expr e3 in
+	    let ty = match t1, t2, t3 with
+	    Lint, Lint, Lint -> Poly
+	    | _ -> raise (Failure ("Polynomials must have Lint coefficients and a Lint modulus"))
+            in (ty, SPolylit((t1, e1'), (t2, e2'), (t3, e3')))
     | Unop(op, e) as ex ->
             let (t, e') = expr e in
             let ty = match op with
               Neg when t = Int -> Int
             | Not when t = Int -> Int
+            | Neg when t = Lint -> Lint
+            | Not when t = Lint -> Lint
             | _ -> raise (Failure ("illegal unary operator " ^
                                    string_of_uop op ^ string_of_typ t ^
                                    " in " ^ string_of_expr ex))
@@ -160,6 +168,7 @@ let check_function func =
             | Add | Sub | Mul | Div | Mod | Inv when same && t1 = Lint -> Lint
             | Add                               when same && t1 = Point -> Point
 	          | Pow                               when t1 = Lint && t2 = Int -> Lint
+            | Mul                               when t1 = Lint && t2 = Point -> Point
 	          | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
             | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int
             | _ -> raise (
