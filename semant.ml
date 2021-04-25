@@ -250,7 +250,6 @@ let check_function func =
   | For(e1, e2, e3, st) ->
 	SFor(expr e1, check_int_expr e2, expr e3, check_stmt st)
   | While(p, s) -> SWhile(check_int_expr p, check_stmt s)
-  | _   -> raise (Failure "stmt type not implemented")
   in
   { styp = func.typ;
     sname = func.name;

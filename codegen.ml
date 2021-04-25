@@ -25,7 +25,6 @@ let translate (globals, functions) =
 
   (* Get types from the context *)
   let i32_t      = L.i32_type    context
-  and i1_t       = L.i1_type     context
   and i8_t       = L.i8_type     context
   and void_t     = L.void_type   context in
   let string_t   = L.pointer_type (i8_t)
@@ -80,7 +79,7 @@ let translate (globals, functions) =
       L.declare_function "__gmpz_init_set" linitdup_t the_module in
   let lclear_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t |] in
-  let lclear_func : L.llvalue =
+  let lclear_func : L.llvalue = (* free lints - define usage *)
       L.declare_function "__gmpz_clear" lclear_t the_module in
   (* We don't use the mpz_out_str because FILE* is a pain *)
   let lprint_t : L.lltype =
@@ -193,7 +192,7 @@ let translate (globals, functions) =
   let pt_mul_t : L.lltype  =
       L.function_type (L.pointer_type point_t) [| L.pointer_type mpz_t;
                                                   L.pointer_type point_t |] in
-  let pt_mul_func : L.llvalue =
+  let pt_mul_func : L.llvalue = (* pt multiplication - define usage *)
       L.declare_function "ptmul" pt_mul_t the_module in
 
   (*polys and printing polys*)
@@ -339,6 +338,7 @@ let translate (globals, functions) =
                                 builder
                      | A.Inv -> L.build_call linv_func [| tmp; e1'; e2' |] "__gmpz_invert"
                                 builder (* add handling for inv does not exist *)
+                     | _ -> raise (Failure "Binary operator not implemented for Lint")  
                 )); tmp
       | SRelop ((A.Lint, _) as e1, operator, e2) ->
                let e1' = expr builder e1
@@ -351,6 +351,7 @@ let translate (globals, functions) =
                      | A.Geq -> L.build_call l_geq_func [| e1'; e2' |] "geq_func" builder
                      | A.And -> L.build_call l_and_func [| e1'; e2' |] "and_func" builder
                      | A.Or  -> L.build_call l_or_func [| e1'; e2' |] "or_func" builder
+                     | _ -> raise (Failure "Relational operator not implemented for Lint")       
                  )
       | SRelop (e1, operator, e2) -> 
               let e1' = expr builder e1   
@@ -378,6 +379,7 @@ let translate (globals, functions) =
                                 "tmp" builder
               | A.Geq     -> L.build_zext (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
                                 "tmp" builder
+              | _ -> raise (Failure "Relational operator not implemented for Lint")
               ) 
       | SBinop ((A.Point, _) as e1, operator, e2) ->
               let e1' = expr builder e1 
@@ -408,6 +410,7 @@ let translate (globals, functions) =
               | A.Div     -> L.build_sdiv e1' e2' "tmp" builder
               | A.Mod     -> L.build_srem e1' e2' "tmp" builder
               | A.Pow     -> L.build_mul e1' e2' "tmp" builder
+              | _ -> raise (Failure "Binary operator not implemented")       
               )
       | SUnop(op, ((A.Lint, _) as e)) ->
               let e' = expr builder e 
@@ -415,8 +418,8 @@ let translate (globals, functions) =
               ignore(match op with
                 A.Neg -> L.build_call lneg_func [| tmp; e' |] "__gmpz_neg" builder
               | A.Not -> L.build_call lnot_func [| tmp; e' |] "lnot_func" builder
-                      ); tmp 
-      | SUnop(op, ((t, _) as e)) ->
+                ); tmp 
+      | SUnop(op, ((_, _) as e)) ->
               let e' = expr builder e in
               (match op with
                 A.Neg     -> L.build_neg  e' "tmp" builder
@@ -430,8 +433,9 @@ let translate (globals, functions) =
               and out = llit_helper "0" in
               ignore((match o1, o2 with
                   A.Lpw, A.Pmd ->
-                      L.build_call lpowmod_func [| out; e1'; e2'; e3' |] "__gmpz_powm" builder)
-              );
+                      L.build_call lpowmod_func [| out; e1'; e2'; e3' |] "__gmpz_powm" builder
+                  | _ -> raise (Failure "Trinary operator not implemented"))
+                );
               out
       | SCall ("print", [e]) -> (*keep print delete printb printf*)
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
