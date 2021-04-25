@@ -418,7 +418,6 @@ let translate (globals, functions) =
               ignore(match op with
                 A.Neg -> L.build_call lneg_func [| tmp; e' |] "__gmpz_neg" builder
               | A.Not -> L.build_call lnot_func [| tmp; e' |] "lnot_func" builder
-              | _ -> raise (Failure "Unary operator not implemented for Lint")       
                 ); tmp 
       | SUnop(op, ((_, _) as e)) ->
               let e' = expr builder e in
@@ -426,8 +425,7 @@ let translate (globals, functions) =
                 A.Neg     -> L.build_neg  e' "tmp" builder
               | A.Not     -> (L.build_zext
                              (L.build_icmp L.Icmp.Eq e' (L.const_int i32_t 0) "tmp" builder)
-                             i32_t "tmp" builder)
-              | _ -> raise (Failure "Unary operator not implemented"))
+                             i32_t "tmp" builder))
       | STrnop(e1, o1, e2, o2, e3) ->
               let e1' = expr builder e1
               and e2' = expr builder e2
