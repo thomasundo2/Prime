@@ -160,7 +160,7 @@ let check_function func =
         Point -> (match e2 with
                     "x"     -> (Lint, SAccess(var, 0))
                   | "y"     -> (Lint, SAccess(var, 1))
-                  | "curve" -> (Poly,SAccess(var, 2));
+                  | "crv" -> (Poly, SAccess(var, 2));
                   | _   -> raise (Failure ("invalid access element " ^ e2 ^ " in "
                                            ^ string_of_expr ex)))
       | _     -> raise (Failure ("cannot access type: " ^ string_of_typ lt
