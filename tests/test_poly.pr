@@ -1,6 +1,6 @@
 int main()
 {
-    poly x;
+    curve x;
     x = [(1l, 2l) : 3l];
     printpoly(x);
     printpoly([(4l, 5l) : 6l]);

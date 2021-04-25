@@ -53,7 +53,7 @@ rule token = parse
 | "char"   { CHAR   }
 | "string" { STRING }
 | "lint"   { LINT   }  (* OUR CUSTOM TYPES *)
-| "poly"   { POLY   } (*More needs to be done here*)
+| "curve"   { POLY   } (*More needs to be done here*)
 | "pt"     { POINT  }
 | "ring"   { RING   }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { ID(name) } (*ids can be alpha followed by alphanum and _*)

@@ -54,7 +54,7 @@ let rec string_of_sexpr (t, e) =
   | SUnop(o, e) -> string_of_uop o ^ string_of_sexpr e
   | STrnop(e1, o1, e2, o2, e3) ->
           string_of_sexpr e1 ^ " " ^ string_of_top o1 ^ " " ^ string_of_sexpr e2 ^ " " ^
-          string_of_top o2 ^ " " ^ string_of_sexpr e3
+            string_of_top o2 ^ " " ^ string_of_sexpr e3
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
   | SAssign(v, e) -> v ^ " = " ^ string_of_sexpr e

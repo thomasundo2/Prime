@@ -179,6 +179,7 @@ let check_function func =
             | Not when t = Int -> Int
             | Neg when t = Lint -> Lint
             | Not when t = Lint -> Lint
+            | Neg when t = Point -> Point
             | _ -> raise (Failure ("illegal unary operator " ^
                                    string_of_uop op ^ string_of_typ t ^
                                    " in " ^ string_of_expr ex))
@@ -195,6 +196,7 @@ let check_function func =
             | Add                               when same && t1 = Point -> Point
 	    | Pow                               when t1 = Lint && t2 = Int -> Lint
             | Mul                               when t1 = Lint && t2 = Point -> Point
+            | Mul                               when t2 = Lint && t1 = Point -> Point
 	    | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
             | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int
             | _ -> raise (
@@ -208,6 +210,7 @@ let check_function func =
             let same = t1 = t2 in
             let ty = match op with
             | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
+            | Beq | Bneq                                    when same && t1 = Point -> Int 
             | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Lint -> Int 
             | _ -> raise (
                 Failure ("illegal relational operator " ^

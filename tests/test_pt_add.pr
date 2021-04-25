@@ -4,7 +4,7 @@ int main()
     pt p1;
     pt p2;
     pt p3;
-    poly crv;
+    curve crv;
 
     crv = [(5l, 12l) : 13l];
     p1 = [2l, 2l] & crv;

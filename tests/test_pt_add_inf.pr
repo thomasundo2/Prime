@@ -5,7 +5,7 @@ int main()
     pt p2;
     pt p3;
     lint m1;
-    poly crv;
+    curve crv;
 
     m1 = 1l - 2l;
 
