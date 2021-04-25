@@ -7,6 +7,7 @@ int main()
 
     crv = [(5l, 12l) : 13l];
     p1 = [2l, 2l] & crv;
-    printpt(2l * p1);
+    printpt(8l * p1);
+    printpt(p1 * 8l);
     return 0;
 }

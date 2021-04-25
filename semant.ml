@@ -167,8 +167,9 @@ let check_function func =
               Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
             | Add | Sub | Mul | Div | Mod | Inv when same && t1 = Lint -> Lint
             | Add                               when same && t1 = Point -> Point
-	          | Pow                               when t1 = Lint && t2 = Int -> Lint
+	    | Pow                               when t1 = Lint && t2 = Int -> Lint
             | Mul                               when t1 = Lint && t2 = Point -> Point
+            | Mul                               when t2 = Lint && t1 = Point -> Point
 	          | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
             | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int
             | _ -> raise (
