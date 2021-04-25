@@ -1,0 +1,9 @@
+lint bye(){
+return 0l;
+}
+int main()
+{
+lint hi;
+hi = bye();
+return 0;
+}
