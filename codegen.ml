@@ -363,7 +363,8 @@ let translate (globals, functions) =
               let e1' = expr builder e1
               and e2' = expr builder e2 in
               (match operator with 
-              A.Mul -> L.build_call pt_mul_func [| e1'; e2' |] "pt_mul" builder)
+                 A.Mul -> L.build_call pt_mul_func [| e1'; e2' |] "pt_mul" builder
+              | _ -> raise (Failure "Operator not implemented for Lint, Point"))
 
       | SBinop ((A.Lint, _) as e1, operator, e2) ->
       (* for e1, e2 take second argument of the tuple (A.Lint, _) and do what printl does.
@@ -407,6 +408,7 @@ let translate (globals, functions) =
               (match operator with
                 A.Beq -> L.build_call pt_eq_func [| e1'; e2' |] "eq_func" builder
               | A.Bneq -> L.build_call pt_neq_func [| e1'; e2' |] "neq_func" builder
+              | _ -> raise (Failure "Relational operator not implemented for Point")
               )
       | SRelop (e1, operator, e2) -> 
               let e1' = expr builder e1   
@@ -433,9 +435,8 @@ let translate (globals, functions) =
               | A.Gth     -> L.build_zext (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder) i32_t
                                 "tmp" builder
               | A.Geq     -> L.build_zext (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder) i32_t
-                                "tmp" builder
-              | _ -> raise (Failure "Relational operator not implemented for Lint")
-              ) 
+                               "tmp" builder
+              | _ -> raise (Failure "Relational operator not implemented"))
       | SBinop ((A.Point, _) as e1, operator, e2) ->
               let e1' = expr builder e1 
               and e2' = expr builder e2 in
@@ -477,7 +478,9 @@ let translate (globals, functions) =
       | SUnop(op, ((A.Point, _) as e)) ->
               let e' = expr builder e in
               (match op with
-              A.Neg -> (L.build_call pt_neg_func [|e'|] "ptneg" builder))
+                 A.Neg -> (L.build_call pt_neg_func [|e'|] "ptneg" builder)
+               |  _ -> raise (Failure "Unary operator not implemented")
+              )
       | SUnop(op, ((_, _) as e)) ->
               let e' = expr builder e in
               (match op with
