@@ -108,7 +108,41 @@ struct point *ptadd(struct point *p1, struct point *p2){
     Poly( curve, xcoeff, c, mod);
     return ptaddhelper( sum, p1, p2);
 }*/
+struct point *ptneg(struct point *p1)
+{
+    struct poly *curve = (struct poly *)malloc(sizeof(struct poly));
+    struct point *neg  = (struct point *)malloc(sizeof(struct point));
 
+    mpz_t xcoeff;
+    mpz_init_set(xcoeff, p1->curve->x_coeff);
+
+    mpz_t c;
+    mpz_init_set(c, p1->curve->c);
+
+    mpz_t mod;
+    mpz_init_set(mod, p1->curve->mod);
+
+    Poly( curve, xcoeff, c, mod);
+    if( mpz_sgn(p1->i) == -1 && mpz_sgn(p1->j) == -1 ){
+        Point( neg, p1->i, p1->j, curve);
+    }
+    else{
+        mpz_t inv;
+        mpz_init(inv);
+        mpz_neg(inv, p1->j);
+        mpz_mod(inv, inv, mod);
+
+        Point( neg, p1->i, inv, curve );
+
+        mpz_clear(inv);
+    }
+
+    mpz_clear(xcoeff);
+    mpz_clear(c);
+    mpz_clear(mod);
+
+    return neg;
+}
 
 struct point *ptadd(struct point *p1, struct point *p2)
 {

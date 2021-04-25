@@ -187,6 +187,10 @@ let translate (globals, functions) =
                                                   L.pointer_type point_t |] in
   let pt_mul_func : L.llvalue =
       L.declare_function "ptmul" pt_mul_t the_module in
+  let pt_neg_t : L.lltype = 
+      L.function_type (L.pointer_type point_t) [| L.pointer_type point_t |] in
+  let pt_neg_func : L.llvalue =
+      L.declare_function "ptneg" pt_neg_t the_module in
 
   (*polys and printing polys*)
   let init_poly_t : L.lltype =
@@ -431,6 +435,10 @@ let translate (globals, functions) =
                 A.Neg -> L.build_call lneg_func [| tmp; e' |] "__gmpz_neg" builder
               | A.Not -> L.build_call lnot_func [| tmp; e' |] "lnot_func" builder
                       ); tmp 
+      | SUnop(op, ((A.Point, _) as e)) ->
+              let e' = expr builder e in
+              (match op with
+              A.Neg -> (L.build_call pt_neg_func [|e'|] "ptneg" builder))
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
               (match op with

@@ -1,0 +1,17 @@
+int main()
+{
+    /* creation and assignment */
+    pt p1;
+    pt p2;
+    pt p3;
+    poly crv;
+
+    crv = [(5l, 12l) : 13l];
+    p1 = [2l, 2l] & crv;
+    p2 = -p1;
+    printpt(-p1);
+    printpt(p2);
+    printpt(-[2l, 2l] & crv);
+    printpt(-[-1l, -1l] & crv);
+    return 0;
+}

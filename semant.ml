@@ -153,6 +153,7 @@ let check_function func =
             | Not when t = Int -> Int
             | Neg when t = Lint -> Lint
             | Not when t = Lint -> Lint
+            | Neg when t = Point -> Point
             | _ -> raise (Failure ("illegal unary operator " ^
                                    string_of_uop op ^ string_of_typ t ^
                                    " in " ^ string_of_expr ex))
