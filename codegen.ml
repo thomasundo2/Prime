@@ -339,6 +339,7 @@ let translate (globals, functions) =
                                 builder
                      | A.Inv -> L.build_call linv_func [| tmp; e1'; e2' |] "__gmpz_invert"
                                 builder (* add handling for inv does not exist *)
+                     | _ -> raise (Failure "Binary operator not implemented for Lint")  
                 )); tmp
       | SRelop ((A.Lint, _) as e1, operator, e2) ->
                let e1' = expr builder e1
@@ -351,6 +352,7 @@ let translate (globals, functions) =
                      | A.Geq -> L.build_call l_geq_func [| e1'; e2' |] "geq_func" builder
                      | A.And -> L.build_call l_and_func [| e1'; e2' |] "and_func" builder
                      | A.Or  -> L.build_call l_or_func [| e1'; e2' |] "or_func" builder
+                     | _ -> raise (Failure "Relational operator not implemented for Lint")       
                  )
       | SRelop (e1, operator, e2) -> 
               let e1' = expr builder e1   
@@ -408,6 +410,7 @@ let translate (globals, functions) =
               | A.Div     -> L.build_sdiv e1' e2' "tmp" builder
               | A.Mod     -> L.build_srem e1' e2' "tmp" builder
               | A.Pow     -> L.build_mul e1' e2' "tmp" builder
+              | _ -> raise (Failure "Binary operator not implemented")       
               )
       | SUnop(op, ((A.Lint, _) as e)) ->
               let e' = expr builder e 
@@ -415,7 +418,8 @@ let translate (globals, functions) =
               ignore(match op with
                 A.Neg -> L.build_call lneg_func [| tmp; e' |] "__gmpz_neg" builder
               | A.Not -> L.build_call lnot_func [| tmp; e' |] "lnot_func" builder
-                      ); tmp 
+              | _ -> raise (Failure "Unary operator not implemented for Lint")       
+                ); tmp 
       | SUnop(op, ((t, _) as e)) ->
               let e' = expr builder e in
               (match op with
