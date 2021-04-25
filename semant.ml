@@ -6,6 +6,18 @@ open Sast
 (* Make a map to keep track of globals *)
 module StringMap = Map.Make(String)
 
+(* String hashmap for lint string conversion *)
+(* e.g. RSA *)
+
+module StringHash = Hashtbl.Make(struct
+  type t = string
+  let equal x y = x = y
+  let hash = Hashtbl.hash
+  end);;
+
+let vals : int StringHash.t = StringHash.create 10;;
+
+
 (* Begin Semantic checking sast if good else error *)
 
 let check (globals, functions) =
@@ -167,9 +179,9 @@ let check_function func =
               Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
             | Add | Sub | Mul | Div | Mod | Inv when same && t1 = Lint -> Lint
             | Add                               when same && t1 = Point -> Point
-	          | Pow                               when t1 = Lint && t2 = Int -> Lint
+	    | Pow                               when t1 = Lint && t2 = Int -> Lint
             | Mul                               when t1 = Lint && t2 = Point -> Point
-	          | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
+	    | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
             | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int
             | _ -> raise (
                 Failure ("illegal binary operator " ^
@@ -182,7 +194,7 @@ let check_function func =
             let same = t1 = t2 in
             let ty = match op with
             | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
-            | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int 
+            | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Lint -> Int 
             | _ -> raise (
                 Failure ("illegal relational operator " ^
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^

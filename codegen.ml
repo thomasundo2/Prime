@@ -157,6 +157,14 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_leq_func : L.llvalue =
       L.declare_function "leq_func" l_leq_t the_module in
+  let l_or_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_or_func : L.llvalue =
+      L.declare_function "or_func" l_or_t the_module in
+  let l_and_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
+  let l_and_func : L.llvalue =
+      L.declare_function "and_func" l_and_t the_module in
   let l_geq_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_geq_func : L.llvalue = 
@@ -340,7 +348,10 @@ let translate (globals, functions) =
                      | A.Lth -> L.build_call l_lth_func [| e1'; e2' |] "lth_func" builder
                      | A.Gth -> L.build_call l_gth_func [| e1'; e2' |] "gth_func" builder
                      | A.Leq -> L.build_call l_leq_func [| e1'; e2' |] "leq_func" builder
-                     | A.Geq -> L.build_call l_geq_func [| e1'; e2' |] "geq_func" builder)
+                     | A.Geq -> L.build_call l_geq_func [| e1'; e2' |] "geq_func" builder
+                     | A.And -> L.build_call l_and_func [| e1'; e2' |] "and_func" builder
+                     | A.Or  -> L.build_call l_or_func [| e1'; e2' |] "or_func" builder
+                 )
       | SRelop (e1, operator, e2) -> 
               let e1' = expr builder e1   
               and e2' = expr builder e2 in

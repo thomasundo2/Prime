@@ -126,6 +126,28 @@ int lnot_func(mpz_t out, mpz_t in){
     return 0;
 }
 
+int and_func(mpz_t x, mpz_t y){
+    if(mpz_get_si(x) == 0 || mpz_get_si(y) == 0)
+    {
+      return 0;
+    }
+    else 
+    {
+      return 1;
+    }
+}
+
+int or_func(mpz_t x, mpz_t y){
+    if(mpz_get_si(x) == 0 && mpz_get_si(y) == 0)
+    {
+      return 0;
+    }
+    else
+    {
+      return 1;
+    }
+}
+
 #ifdef BUILD_TEST
 int main()
 {

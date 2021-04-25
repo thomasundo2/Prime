@@ -1,5 +1,0 @@
-int main()
-{
-    lint x;
-    x = tolint(12l);
-}
