@@ -221,8 +221,16 @@ let translate (globals, functions) =
     let function_decl m fdecl =
       let name = fdecl.sname(*sfname*)
       and formal_types =
-	Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.sparams)
-      in let ftype = L.function_type (ltype_of_typ fdecl.styp) formal_types in
+	Array.of_list (let new_params = (match fdecl.styp with
+                                      A.Lint -> (A.Lint, "sret") :: fdecl.sparams
+                                    | _      -> fdecl.sparams
+                                    ) in
+                   List.map (fun (t,n) -> match t with
+                     A.Lint when n = "sret" -> L.pointer_type (ltype_of_typ t)        
+                   | _      -> ltype_of_typ t) new_params)
+      in let ftype = L.function_type (match fdecl.styp with
+                                        A.Lint -> L.pointer_type mpz_t
+                                      | _      -> ltype_of_typ fdecl.styp) formal_types in
       StringMap.add name (L.define_function name ftype the_module, fdecl) m in
     List.fold_left function_decl StringMap.empty functions in
 
@@ -230,7 +238,10 @@ let translate (globals, functions) =
   let build_function_body fdecl =
     let (the_function, _) = StringMap.find fdecl.sname function_decls in
     let builder = L.builder_at_end context (L.entry_block the_function) in
-
+    let new_params = (match fdecl.styp with
+                         A.Lint -> (A.Lint, "sret") :: fdecl.sparams
+                       | _      -> fdecl.sparams
+                       ) in
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
     and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder
     (* and point_format_str = L.build_global_stringptr "[%\n" "fmt" builder *)
@@ -242,7 +253,9 @@ let translate (globals, functions) =
     let local_vars =
       let add_formal m (t, n) p =
         L.set_value_name n p;
-      let local = L.build_alloca (ltype_of_typ t) n builder in
+      let local = L.build_alloca (match t with
+                                    A.Lint when n = "sret" -> L.pointer_type (ltype_of_typ t)
+                                  | _      -> ltype_of_typ t) n builder in
             ignore (L.build_store p local builder);
       StringMap.add n local m
 
@@ -252,8 +265,7 @@ let translate (globals, functions) =
 	let local_var = L.build_alloca (ltype_of_typ t) n builder
 	in StringMap.add n local_var m
       in
-
-      let formals = List.fold_left2 add_formal StringMap.empty fdecl.sparams
+      let formals = List.fold_left2 add_formal StringMap.empty new_params (*fdecl.sparams*)
           (Array.to_list (L.params the_function)) in
       List.fold_left add_local formals fdecl.slocals
     in
@@ -489,10 +501,20 @@ let translate (globals, functions) =
           ignore(L.build_call encode_func [| e1'; e2' |] "encode" builder); e1'
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
-	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in
+     (* let args = match fdecl.styp with 
+            A.Lint -> (A.Lint, "sret") :: args 
+        | _        -> args in *)
+	 let llargs = List.rev (List.map (fun (ty, se) -> match ty with
+                              A.Lint -> L.build_load (expr builder (ty, se)) "lint_param" builder
+                            | _      -> expr builder (ty, se)) (List.rev args)) in
 	 let result = (match fdecl.styp with
                         A.Void -> ""
                       | _ -> f ^ "_result") in
+     let llargs = (match fdecl.styp with
+                    A.Lint -> let space = L.build_alloca mpz_t "sret_space" builder 
+                              in 
+                              L.build_in_bounds_gep space [| zero |] "" builder :: llargs
+                  | _      -> llargs) in
          L.build_call fdef (Array.of_list llargs) result builder
       (* | _ -> L.const_int i32_t 0 *)
     in
@@ -515,9 +537,18 @@ let translate (globals, functions) =
       | SExpr e -> ignore(expr builder e); builder
       | SReturn e -> ignore(match fdecl.styp with
                               (* Special "return nothing" instr *)
-                              A.Void -> L.build_ret_void builder
+                                A.Void -> L.build_ret_void builder
+                              (* Add return statements for structs *)
+                              | A.Lint -> (*let local_val = match (snd e) with
+                                      SId s  -> L.build_load (expr builder e) "val_ptr" builder
+                                    | _      -> expr builder e;*)
+                                    let local_val = expr builder e
+                                    and loaded = L.build_load (lookup (snd (List.hd new_params))) "ret_ptr" builder in
+                                    ignore(L.build_call linitdup_func
+                                    [| loaded; local_val |] "ret_set" builder);
+                                    L.build_ret loaded builder
                               (* Build return statement *)
-                              | _ -> L.build_ret (expr builder e) builder );
+                              | _      -> L.build_ret (expr builder e) builder );
                      builder
       | SIf (predicate, then_stmt, else_stmt) ->
          let int_val = expr builder predicate in
@@ -556,7 +587,7 @@ let translate (globals, functions) =
 	  let merge_bb = L.append_block context "merge" the_function in
 	  ignore(L.build_cond_br bool_val body_bb merge_bb pred_builder);
 	  L.builder_at_end context merge_bb
-
+   
       (* Implement for loops as while loops *)
       | SFor (e1, e2, e3, body) -> stmt builder
 	    ( SBlock [SExpr e1 ; SWhile (e2, SBlock [body ; SExpr e3]) ] )

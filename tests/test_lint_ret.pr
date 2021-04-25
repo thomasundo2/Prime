@@ -1,0 +1,10 @@
+lint retLint(lint a)
+{
+    printl(a);
+    return a;
+}
+
+int main()
+{
+    printl(retLint(42l));
+}
