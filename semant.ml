@@ -50,7 +50,7 @@ let built_in_decls =
                                                ("prints", String);
                                                ("printl", Lint);
                                                ("printpt", Point); 
-                                               ("printpoly", Poly);] 
+                                               ("printc", Poly);] 
      and add_cast map (name, ty) = StringMap.add name {
        typ = Lint;
        name = name;

@@ -215,7 +215,7 @@ let translate (globals, functions) =
   let print_poly_t : L.lltype =
       L.function_type i32_t [| L.pointer_type poly_t |] in
   let print_poly_func : L.llvalue =
-      L.declare_function "printpoly" print_poly_t the_module in
+      L.declare_function "printc" print_poly_t the_module in
 
   (* Encoding and decoding strings for encryption *)
   let encode_t : L.lltype = 
@@ -490,11 +490,11 @@ let translate (globals, functions) =
           (match e with
             SPtlit _ -> L.build_call print_point_func [| L.build_in_bounds_gep e1' [| zero |] "" builder |] "printpt" builder
           | _             -> L.build_call print_point_func [| e1' |] "printpt" builder)
-      | SCall ("printpoly", [(_, e) as e1]) -> (* print poly *)
+      | SCall ("printc", [(_, e) as e1]) -> (* print poly *)
           let e1' = expr builder e1 in
           (match e with
-            SPolylit _ -> L.build_call print_poly_func [| L.build_in_bounds_gep e1' [| zero |] "" builder |] "printpoly" builder
-          | _             -> L.build_call print_poly_func [| e1' |] "printpoly" builder)
+            SPolylit _ -> L.build_call print_poly_func [| L.build_in_bounds_gep e1' [| zero |] "" builder |] "printc" builder
+          | _             -> L.build_call print_poly_func [| e1' |] "printc" builder)
       | SCall ("printl", [(_, e) as ptr]) ->
           (* L.build_call lprint_func [| expr builder e |] "printl" builder *)
           L.build_call lprint_func (match e with
