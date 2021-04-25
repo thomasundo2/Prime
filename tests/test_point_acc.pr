@@ -1,7 +1,7 @@
 int main()
 {
     pt a;
-    a = [1l, 2l];
+    a = [1l, 2l] & [(4l, 5l) : 7l];
     printl(a.x);
     printl(a.y);
     /* Will add the poly element soon */
