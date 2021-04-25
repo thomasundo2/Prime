@@ -1,0 +1,9 @@
+int main()
+{
+  int i;  
+
+  i = 15;
+  print(i);
+  return i;
+  /* Notes after a return are ok */
+}
