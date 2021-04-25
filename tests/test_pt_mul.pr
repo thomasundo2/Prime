@@ -1,0 +1,13 @@
+int main()
+{
+    /* creation and assignment */
+    pt p1;
+    pt p2;
+    curve crv;
+
+    crv = [(5l, 12l) : 13l];
+    p1 = [2l, 2l] & crv;
+    printpt(8l * p1);
+    printpt(p1 * 8l);
+    return 0;
+}

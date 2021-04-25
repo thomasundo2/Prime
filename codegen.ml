@@ -194,6 +194,18 @@ let translate (globals, functions) =
                                                   L.pointer_type point_t |] in
   let pt_mul_func : L.llvalue = (* pt multiplication - define usage *)
       L.declare_function "ptmul" pt_mul_t the_module in
+  let pt_neg_t : L.lltype = 
+      L.function_type (L.pointer_type point_t) [| L.pointer_type point_t |] in
+  let pt_neg_func : L.llvalue =
+      L.declare_function "ptneg" pt_neg_t the_module in
+  let pt_eq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type point_t |] in
+  let pt_eq_func : L.llvalue =
+      L.declare_function "pteq" pt_eq_t the_module in
+  let pt_neq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type point_t |] in 
+  let pt_neq_func : L.llvalue =
+      L.declare_function "ptneq" pt_neq_t the_module in
 
   (*polys and printing polys*)
   let init_poly_t : L.lltype =
@@ -327,6 +339,32 @@ let translate (globals, functions) =
           let outer_ptr = L.build_in_bounds_gep (lookup s) [| zero; L.const_int i32_t idx |] "outer" builder
           in
           L.build_in_bounds_gep outer_ptr [| zero |] "inner" builder
+      | SBinop ((A.Point, _) as e1, operator, e2) ->
+               let e1' = expr builder e1
+               and e2' = expr builder e2 in
+               (match operator with
+               A.Add ->
+
+                   (*let crv = L.build_in_bounds_gep e1' [| zero; L.const_int i32_t 2 |]
+                             "pt_poly" builder in
+
+                   let x = llit_helper "0"
+                   and y = llit_helper "0"
+
+                   and sum = L.build_alloca point_t "tmp_pt" builder in
+                   ignore(L.build_call init_point_func [| sum; x; y; crv |] "Point" builder);*)
+
+                   (L.build_call pt_add_func [| e1'; e2' |] "pt_add" builder)
+                   (*sum*)
+             | A.Mul -> L.build_call pt_mul_func [| e2'; e1' |] "pt_mul" builder
+             | _ -> raise (Failure "Operator not implemented for Point"))
+      (*special binop for lint times pt*)
+      | SBinop (((A.Lint, _) as e1), operator, ((A.Point, _) as e2)) ->
+              let e1' = expr builder e1
+              and e2' = expr builder e2 in
+              (match operator with 
+              A.Mul -> L.build_call pt_mul_func [| e1'; e2' |] "pt_mul" builder)
+
       | SBinop ((A.Lint, _) as e1, operator, e2) ->
       (* for e1, e2 take second argument of the tuple (A.Lint, _) and do what printl does.
        * See if its an id or lintlit. If id get inbounds elt pointer to struct.
@@ -361,8 +399,15 @@ let translate (globals, functions) =
                      | A.Geq -> L.build_call l_geq_func [| e1'; e2' |] "geq_func" builder
                      | A.And -> L.build_call l_and_func [| e1'; e2' |] "and_func" builder
                      | A.Or  -> L.build_call l_or_func [| e1'; e2' |] "or_func" builder
-                     | _ -> raise (Failure "Relational operator not implemented for Lint")       
+                     | _ -> raise (Failure "Relational operator not implemented for Lint")
                  )
+      | SRelop ((A.Point, _) as e1, operator, e2) ->
+              let e1' = expr builder e1
+              and e2' = expr builder e2 in
+              (match operator with
+                A.Beq -> L.build_call pt_eq_func [| e1'; e2' |] "eq_func" builder
+              | A.Bneq -> L.build_call pt_neq_func [| e1'; e2' |] "neq_func" builder
+              )
       | SRelop (e1, operator, e2) -> 
               let e1' = expr builder e1   
               and e2' = expr builder e2 in
@@ -427,8 +472,12 @@ let translate (globals, functions) =
               and tmp = llit_helper "0" in
               ignore(match op with
                 A.Neg -> L.build_call lneg_func [| tmp; e' |] "__gmpz_neg" builder
-              | A.Not -> L.build_call lnot_func [| tmp; e' |] "lnot_func" builder
-                ); tmp 
+              | A.Not -> L.build_call lnot_func [| tmp; e' |] "lnot_func" builder 
+              ); tmp 
+      | SUnop(op, ((A.Point, _) as e)) ->
+              let e' = expr builder e in
+              (match op with
+              A.Neg -> (L.build_call pt_neg_func [|e'|] "ptneg" builder))
       | SUnop(op, ((_, _) as e)) ->
               let e' = expr builder e in
               (match op with

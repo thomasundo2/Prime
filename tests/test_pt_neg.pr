@@ -8,12 +8,10 @@ int main()
 
     crv = [(5l, 12l) : 13l];
     p1 = [2l, 2l] & crv;
-    p2 = [2l, 11l] & crv;
-    printpt(p2 + p1);
-    p3 = p1 + p2;
-    printpt(p3);
-    printpt([2l, 2l] & [(5l, 12l) : 13l] + [2l, 11l] & [(5l, 12l) : 13l]);
-
+    p2 = -p1;
+    printpt(-p1);
+    printpt(p2);
+    printpt(-[2l, 2l] & crv);
+    printpt(-[-1l, -1l] & crv);
     return 0;
 }
-

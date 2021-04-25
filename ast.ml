@@ -85,8 +85,8 @@ let rec string_of_expr = function
           string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
   | Trnop(e1, o1, e2, o2, e3) ->
-    string_of_expr e1 ^ " " ^ string_of_top o1 ^ " " ^ string_of_expr e2 ^ " " ^
-    string_of_top o2 ^ " " ^ string_of_expr e3
+          string_of_expr e1 ^ " " ^ string_of_top o1 ^ " " ^ string_of_expr e2 ^ " " ^
+          string_of_top o2 ^  " " ^  string_of_expr e3
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Access(v, s) -> v ^ "." ^ s
   | Call(f, el) ->
