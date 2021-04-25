@@ -1,0 +1,9 @@
+int main()
+{
+    lint x;
+    string out;
+    x = 72101108108111087111114108100l;
+    out = decode(x);
+    prints(out);
+    return 0;
+}

@@ -1,0 +1,5 @@
+int main()
+{
+    lint x;
+    printl(encode(x, "3"));
+}

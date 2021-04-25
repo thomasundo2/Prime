@@ -198,6 +198,16 @@ let translate (globals, functions) =
   let print_poly_func : L.llvalue =
       L.declare_function "printpoly" print_poly_t the_module in
 
+  (* Encoding and decoding strings for encryption *)
+  let encode_t : L.lltype = 
+      L.function_type i32_t [| L.pointer_type mpz_t; string_t |] in
+  let encode_func : L.llvalue = 
+      L.declare_function "encode" encode_t the_module in
+  let decode_t : L.lltype = 
+      L.function_type string_t [| L.pointer_type mpz_t |] in
+  let decode_func : L.llvalue = 
+      L.declare_function "decode" decode_t the_module in
+  
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
   let function_decls : (L.llvalue * sfunc_decl) StringMap.t =
@@ -455,6 +465,13 @@ let translate (globals, functions) =
           and sed = expr builder e1
           and max = expr builder e2 in 
           ignore(L.build_call l_rand_func [| rnd; sed; max |] "rand_func" builder); rnd
+      | SCall ("decode", [e]) ->
+          let e' = expr builder e in
+          L.build_call decode_func [| e' |] "decode" builder
+      | SCall ("encode", [e1; e2]) ->
+          let e1' = expr builder e1 
+          and e2' = expr builder e2 in
+          ignore(L.build_call encode_func [| e1'; e2' |] "encode" builder); e1'
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
 	 let llargs = List.rev (List.map (expr builder) (List.rev args)) in

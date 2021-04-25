@@ -1,0 +1,7 @@
+int main()
+{
+    string x;
+    x = "fail";
+    /* encode(34l, x); UNDEFINED: set but can't reference */
+    encode(x, 34l);
+}

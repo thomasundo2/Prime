@@ -52,7 +52,21 @@ let built_in_decls =
         params = [(ty, ("x")); (ty, ("y"))];
         locals = []; body = []
       } map
-  in List.fold_left add_rand void_decls [ ("random", Lint) ]
+  in let void_decls = List.fold_left add_rand void_decls [ ("random", Lint) ]
+     and add_decode map (name, ty) = StringMap.add name {
+       typ = String;
+       name = name;
+       params = [(ty, "x")];
+       locals = []; body = []
+     } map
+     and add_encode map (name, _) = StringMap.add name {
+       typ = Void;
+       name = name;
+       params = [(Lint, "x"); (String, "y")]; (* Don't necessarily have to hard-code this but time is short *)
+       locals = []; body = [];
+     } map
+  in let built_decls = List.fold_left add_decode void_decls [ ("decode", Lint)]
+  in List.fold_left add_encode built_decls [ ("encode", (Lint, String)) ]
   (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 

@@ -25,14 +25,27 @@ char *decode(mpz_t in)
 {
     int i;
     char *lintStr = mpz_get_str(NULL, 10, in);
-    int padLen = strlen(lintStr) % 3;
-    char *tmp = (char *) malloc(strlen(lintStr)+padLen+1);
+    int padLen = 3 - (strlen(lintStr) % 3);
+    char *tmp = (char *) malloc(strlen(lintStr)+padLen+1); // will leak unless freed
     for (i = 0; i < padLen; i++)
         tmp[i] = '0';
     tmp[i] = '\0';
+    
     strncat(tmp, lintStr, strlen(lintStr));
     free(lintStr);
-    return tmp;
+    
+    int newlength = strlen(tmp)/3 + 1;
+    char *ret = (char *) malloc(newlength);
+    for (i = 0; i < newlength; i++) {
+        char buf[4];
+        strncpy(buf, tmp+3*i, 3);
+        buf[3] = '\0';
+        char c = (char) atoi(buf);
+        // printf("%c", c);
+        ret[i] = c;
+    }
+    free(tmp);
+    return ret;
 }
 
 #ifdef BUILD_TEST
@@ -44,6 +57,8 @@ int main()
     encode(res, testStr);
     mpz_out_str(stdout, 10, res);
     printf("\n");
-    printf("%s\n", decode(res));
+    char *retVal = decode(res);
+    printf("%s\n", retVal);
+    free(retVal);
 }
 #endif
