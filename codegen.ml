@@ -160,7 +160,7 @@ let translate (globals, functions) =
   let l_or_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_or_func : L.llvalue =
-      L.declare_function "l_or_func" l_or_t the_module in
+      L.declare_function "or_func" l_or_t the_module in
   let l_and_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let l_and_func : L.llvalue =

@@ -126,6 +126,28 @@ int lnot_func(mpz_t out, mpz_t in){
     return 0;
 }
 
+int and_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, 0) != 0 && mpz_cmp(y, 0) != 0)
+    {
+      return 1;
+    }
+    else 
+    {
+      return 0;
+    }
+}
+
+int or_func(mpz_t x, mpz_t y){
+    if(mpz_cmp(x, 0) != 0 || mpz_cmp(y, 0) != 0)
+    {
+      return 1;
+    }
+    else
+    {
+      return 0;
+    }
+}
+
 #ifdef BUILD_TEST
 int main()
 {
