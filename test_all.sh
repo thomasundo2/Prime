@@ -46,7 +46,7 @@ Test() {
     # Run the various compilation parts
     Run "./prime.native" "$1" ">" "$filename.ll" &&
     Run "llc" "-relocation-model=pic" "$filename.ll" ">" "$filename.s" &&
-    Run "cc" "-o" "$filename.exe" "$filename.s" "gmpfunc.o" "structs.o" "-lgmp" &&
+    Run "cc" "-o" "$filename.exe" "$filename.s" "gmpfunc.o" "structs.o" "input.o" "-lgmp" &&
     Run "./$filename.exe" > "$filename.test" &&
     Difference $filename.test ./tests/$filename.out
 
@@ -118,7 +118,7 @@ done
 # Compile/link in gmpfunc file
 cc -c gmpfunc.c
 cc -c structs.c
-
+cc -c input.c
 # clean up ()
 # rm -rf *.exe *.test *.ll *.s
 

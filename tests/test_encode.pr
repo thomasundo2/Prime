@@ -1,0 +1,11 @@
+int main()
+{
+    string in;
+    lint encoded;
+    in = "HelloWorld";
+    prints(in);
+    encode(encoded, in);
+    printl(encoded);
+    prints(decode(encoded));
+    return 0;
+}
