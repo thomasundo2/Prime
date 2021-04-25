@@ -123,6 +123,24 @@ int pteq(struct point *p1, struct point *p2)
         return 0;
     }
 }
+
+int ptneq(struct point *p1, struct point *p2)
+{
+    if(mpz_cmp(p1->i, p2->i) != 0 ||
+            mpz_cmp(p1->j, p2->j) != 0 ||
+            mpz_cmp(p1->curve->mod, p2->curve->mod) != 0 ||
+            mpz_cmp(p1->curve->c, p2->curve->c) != 0 ||
+            mpz_cmp(p1->curve->x_coeff, p2->curve->x_coeff) != 0)
+    {         
+        return 1;
+    }
+    else
+    {
+
+         return 0;
+    }
+}
+
 struct point *ptneg(struct point *p1)
 {
     struct poly *curve = (struct poly *)malloc(sizeof(struct poly));

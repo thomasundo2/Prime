@@ -195,6 +195,10 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type point_t; L.pointer_type point_t |] in
   let pt_eq_func : L.llvalue =
       L.declare_function "pteq" pt_eq_t the_module in
+  let pt_neq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type point_t |] in 
+  let pt_neq_func : L.llvalue =
+      L.declare_function "ptneq" pt_neq_t the_module in
 
   (*polys and printing polys*)
   let init_poly_t : L.lltype =
@@ -379,7 +383,9 @@ let translate (globals, functions) =
               let e1' = expr builder e1
               and e2' = expr builder e2 in
               (match operator with
-              A.Beq -> L.build_call pt_eq_func [| e1'; e2' |] "eq_func" builder)
+                A.Beq -> L.build_call pt_eq_func [| e1'; e2' |] "eq_func" builder
+              | A.Bneq -> L.build_call pt_neq_func [| e1'; e2' |] "neq_func" builder
+              )
       | SRelop (e1, operator, e2) -> 
               let e1' = expr builder e1   
               and e2' = expr builder e2 in
