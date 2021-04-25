@@ -93,6 +93,11 @@ TestFail() {
     fi
 }
 
+# make sure C files ready
+# Compile/link in gmpfunc file
+cc -c gmpfunc.c
+cc -c structs.c
+cc -c input.c
 
 # Run test_hello.pr
 # check if specific files to test
@@ -115,10 +120,6 @@ do
     fi
 done
 
-# Compile/link in gmpfunc file
-cc -c gmpfunc.c
-cc -c structs.c
-cc -c input.c
 # clean up ()
 # rm -rf *.exe *.test *.ll *.s
 
