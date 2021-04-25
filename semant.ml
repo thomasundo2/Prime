@@ -184,7 +184,8 @@ let check_function func =
             let same = t1 = t2 in
             let ty = match op with
             | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
-            | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int 
+            | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int
+            | Beq | Bneq                                    when same && t1 = Point -> Int 
             | _ -> raise (
                 Failure ("illegal relational operator " ^
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^

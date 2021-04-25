@@ -191,6 +191,10 @@ let translate (globals, functions) =
       L.function_type (L.pointer_type point_t) [| L.pointer_type point_t |] in
   let pt_neg_func : L.llvalue =
       L.declare_function "ptneg" pt_neg_t the_module in
+  let pt_eq_t : L.lltype =
+      L.function_type i32_t [| L.pointer_type point_t; L.pointer_type point_t |] in
+  let pt_eq_func : L.llvalue =
+      L.declare_function "pteq" pt_eq_t the_module in
 
   (*polys and printing polys*)
   let init_poly_t : L.lltype =
@@ -371,6 +375,11 @@ let translate (globals, functions) =
                      | A.Gth -> L.build_call l_gth_func [| e1'; e2' |] "gth_func" builder
                      | A.Leq -> L.build_call l_leq_func [| e1'; e2' |] "leq_func" builder
                      | A.Geq -> L.build_call l_geq_func [| e1'; e2' |] "geq_func" builder)
+      | SRelop ((A.Point, _) as e1, operator, e2) ->
+              let e1' = expr builder e1
+              and e2' = expr builder e2 in
+              (match operator with
+              A.Beq -> L.build_call pt_eq_func [| e1'; e2' |] "eq_func" builder)
       | SRelop (e1, operator, e2) -> 
               let e1' = expr builder e1   
               and e2' = expr builder e2 in
