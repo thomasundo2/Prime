@@ -84,7 +84,6 @@ declare_init:
 
 declarator:
     ID { $1 }
-  //| ID ASSIGN expr {$1} // Allow assignment
 
 seq_stmts:
     vars stmt_list { ($1, $2) }
@@ -135,7 +134,6 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3)     }
   | ID ACCESS ID     { Access($1, $3) } // will be used for accessor methods
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
-  // | typ LPAREN expr RPAREN   { Cast($3) } (* Can later be generalised to other types *)
   | LPAREN expr RPAREN {  $2  }
 
 args_opt:

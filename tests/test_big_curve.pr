@@ -1,0 +1,45 @@
+int main()
+{
+    /* creation variables */
+    lint p;
+    lint a;
+    lint b;
+
+    lint x1;
+    lint y1;
+    lint x2;
+    lint y2;
+    lint x3;
+    lint y3;
+
+    pt q;
+    pt r;
+    pt s;
+
+    curve crv;
+
+    /* create the curve */
+
+    /* prime number from Microsoft Digital Rights Management 
+     * As seen in Lecture Slides 13 - MATH UN3025 Prof. Dorial Goldfeld - November, 2020
+     *
+     * coefficients and point q geneerated on
+     * http://www.christelbach.com/ECCalculator.aspx
+     */
+
+    p = 785963102379428822376694789446897396207498568951l;
+    a = 31768908125132550347631746413827693272746955927l;
+    b = 48571406791775727346184082881005620597345426652l;
+
+    crv = [(a, b) : p];
+
+    /* use subgroup generator q */
+
+    x1 = 771507216262649826170648268565579889907769254176l;
+    y1 = 390157510246556628525279459266514995562533196655l;
+
+    q = [x1, y1] & crv;
+    printpt(q + q);
+
+    return 0;
+}
