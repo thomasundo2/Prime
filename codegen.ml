@@ -253,6 +253,32 @@ let translate (globals, functions) =
           let outer_ptr = L.build_in_bounds_gep (lookup s) [| zero; L.const_int i32_t idx |] "outer" builder
           in
           L.build_in_bounds_gep outer_ptr [| zero |] "inner" builder
+      | SBinop ((A.Point, _) as e1, operator, e2) ->
+               let e1' = expr builder e1
+               and e2' = expr builder e2 in
+               (match operator with
+               A.Add ->
+
+                   (*let crv = L.build_in_bounds_gep e1' [| zero; L.const_int i32_t 2 |]
+                             "pt_poly" builder in
+
+                   let x = llit_helper "0"
+                   and y = llit_helper "0"
+
+                   and sum = L.build_alloca point_t "tmp_pt" builder in
+                   ignore(L.build_call init_point_func [| sum; x; y; crv |] "Point" builder);*)
+
+                   (L.build_call pt_add_func [| e1'; e2' |] "pt_add" builder)
+                   (*sum*)
+             | A.Mul -> L.build_call pt_mul_func [| e2'; e1' |] "pt_mul" builder
+             | _ -> raise (Failure "Operator not implemented for Point"))
+      (*special binop for lint times pt*)
+      | SBinop ((A.Lint, _) as e1, operator, (A.Point, _) as e2) ->
+              let e1' = expr builder e1
+              and e2' = expr builder e2 in
+              A.Mul -> L.build_call pt_mul_func [| e1'; e2' |] "pt_mul" builder
+
+
       | SBinop ((A.Lint, _) as e1, operator, e2) ->
       (* for e1, e2 take second argument of the tuple (A.Lint, _) and do what printl does.
        * See if its an id or lintlit. If id get inbounds elt pointer to struct.
@@ -277,7 +303,7 @@ let translate (globals, functions) =
               | A.Add     -> L.build_call ptadd_func [| e1'; e2' |] "ptadd" builder
               | _         -> raise (Failure "Operator not implemented for Point")
               )*)
-      | SBinop ((A.Point, _) as e1, operator, e2) ->
+(*      | SBinop ((A.Point, _) as e1, operator, e2) ->
               let e1' = expr builder e1 
               and e2' = expr builder e2 in
               (match operator with
@@ -294,8 +320,8 @@ let translate (globals, functions) =
 
                   (L.build_call pt_add_func [| e1'; e2' |] "pt_add" builder)
                   (*sum*)
-            | A.Mul -> L.build_call pt_mul_func [| e1'; e2' |] "pt_mul" builder 
-            | _ -> raise (Failure "Operator not implemented for Point"))
+            | A.Mul -> L.build_call pt_mul_func [| e1'; e2' |] "pt_mul" builder
+            | _ -> raise (Failure "Operator not implemented for Point"))*)
 
       | SBinop (e1, operator, e2) ->
               let e1' = expr builder e1

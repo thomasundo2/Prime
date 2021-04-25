@@ -51,7 +51,7 @@ void printpt(struct point *p)
     printf("] & ");
     printpoly(p->curve);
 }
-
+struct point *ptadd(struct point *p1, struct point *p2);
 /*
 char *printpt(struct point p){
 
@@ -61,6 +61,21 @@ char *printpt(struct point p){
     mpz_out_str(stdout, 10, p.j);
     printf("]");
     printf("\n");
+}*/
+struct point *ptmul( mpz_t n, struct point *p1)
+{
+    struct point *product = p1;
+    //copy n into new mpz_t
+    mpz_sub_ui( n, n, (unsigned long) 1);
+    while( mpz_sgn(n) != 0)
+    {
+        product = ptadd(product, p1);
+        mpz_sub_ui( n, n, (unsigned long) 1);
+    }
+    return product;
+}
+
+/*struct point *ptaddhelp(struct point *p1, struct point *p2){
 }*/
 
 
