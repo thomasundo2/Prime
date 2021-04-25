@@ -7,7 +7,7 @@ int main()
     lint m1;
     curve crv;
 
-    m1 = 1l - 2l;
+    m1 = -1l;
 
     crv = [(5l, 12l) : 13l];
     p1 = [m1, m1] & crv;

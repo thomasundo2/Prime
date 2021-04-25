@@ -15,6 +15,7 @@ int main()
     pt q;
     pt r;
     pt s;
+    pt t;
 
     curve crv;
 
@@ -39,7 +40,15 @@ int main()
     y1 = 390157510246556628525279459266514995562533196655l;
 
     q = [x1, y1] & crv;
-    printpt(q + q);
+
+    /* do point arithmetic */
+
+    r = q + q;
+    printpt(r);
+    s = q + r;
+    printpt(s);
+    t = q * 3l;
+    printpt(t);
 
     return 0;
 }

@@ -1,0 +1,7 @@
+int main()
+{
+     pt p1;
+     p1 = ([1l, 2l] & [(1l, 1l) : 1l]);
+     p1.x = 4l;
+     return 0;
+}
