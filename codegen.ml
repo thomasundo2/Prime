@@ -434,7 +434,9 @@ let translate (globals, functions) =
               | A.Mul     -> L.build_mul e1' e2' "tmp" builder
               | A.Div     -> L.build_sdiv e1' e2' "tmp" builder
               | A.Mod     -> L.build_srem e1' e2' "tmp" builder
-              | A.Pow     -> L.build_mul e1' e2' "tmp" builder
+              | A.Pow     -> L.build_mul e1' e2' "tmp" builder 
+                     (* let rec exponent : i32_t -> i32_t 
+                        L.build_mul e1' e1' "tmp" builder *)
               | _ -> raise (Failure "Binary operator not implemented")       
               )
       | SUnop(op, ((A.Lint, _) as e)) ->
