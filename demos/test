@@ -1,0 +1,18 @@
+lint alice(lint p, lint g) 
+{
+  lint a;
+  a = 100000l);
+  return 1l;
+}
+
+lint bob(lint p, lint g) 
+{
+  lint b; 
+  b = 100000000l;
+  return 1l;
+}
+
+int main() {
+  print(0);
+  return 0;
+}

@@ -1,0 +1,11 @@
+int add(lint a, lint b) 
+{
+  return 0;
+}
+
+int main()
+{
+  print(add(1l, 2l));
+
+  return 0;
+}
