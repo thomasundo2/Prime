@@ -28,6 +28,12 @@ structs: structs.c
 structs.o: structs.c
 	cc -c structs.c
 
+input: gmp input.c
+	cc -o input -DBUILD_TEST input.c -lgmp
+
+input.o: input.c
+	cc -c input.c
+	
 
 # Some old stuff:
 prime : parser.cmo scanner.cmo prime.cmo
