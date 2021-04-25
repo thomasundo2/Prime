@@ -1,0 +1,4 @@
+int main(){
+    printl(3l ^ 5 @ 17l);
+    return 0;
+}

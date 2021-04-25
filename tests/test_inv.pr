@@ -1,0 +1,12 @@
+int main()
+{
+    lint test1;
+    lint test2;
+    test2 = 7l;
+    test1 = 2l;
+    printl(2l ` 7l);
+    printl(2l ` test2);
+    printl(test1 ` 7l);
+    printl(test1 ` test2);
+    return 0;
+}

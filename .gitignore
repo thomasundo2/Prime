@@ -7,3 +7,4 @@ prime.native
 *.ll
 *.log
 *.o
+*.swp

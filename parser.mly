@@ -1,7 +1,8 @@
 %{ open Ast %}
 // Thank you again to Professor Edwards for the MicroC template.
 // We have made alterations and additions for our language's functionality
-%token SEMI COLON AMP LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN
+%token SEMI COLON AMP LPAREN RPAREN LBRACE RBRACE RBRACK LBRACK COMMA PLUS MINUS TIMES DIVIDE MOD POWER ASSIGN INVERT
+%token PMOD LPOWER
 %token BEQ BNEQ LTH GTH GEQ LEQ AND OR NOT
 %token ACCESS
 %token RETURN IF ELSE WHILE FOR INT LINT POLY POINT RING CHAR STRING //(*add float/void here if wanted*)
@@ -15,6 +16,7 @@
 // (*precedence*)
 %nonassoc NOELSE
 %nonassoc ELSE
+%nonassoc PMOD LPOW
 %right ASSIGN
 %left OR
 %left AND
@@ -23,6 +25,7 @@
 %left MOD //(* mod takes precedence below all arithmetic operators - l.guru approves*)
 %left PLUS MINUS
 %left TIMES DIVIDE //(* Change this order later if necessary \r moved mod up -l.guru*)
+%right INVERT
 %right NOT
 %right POWER
 %nonassoc AMP
@@ -61,15 +64,12 @@ params_list:
     typ ID                   { [($1,$2)] }
   | params_list COMMA typ ID { ($3,$4) :: $1 }
 
-// Fill in the following types when we need them after Hello world
+
 typ:
     INT   { Int }
   | LINT  { Lint }
-  //| POLY  {  }
-    | POINT { Point }
-    |POLY { Poly }
-  //| RING  {  }
-  //| CHAR  {  }
+  | POINT { Point }
+  | POLY { Poly }
   | STRING { String }
 
 vars:
@@ -81,9 +81,7 @@ declare_init:
 
 declarator:
     ID { $1 }
-  | ID ASSIGN expr {$1} // Allow assignment
-  //| ID LBRACK expr RBRACK { $1 } // Points
-  //| ID LBRACK expr RBRACK {} // Rings
+  //| ID ASSIGN expr {$1} // Allow assignment
 
 seq_stmts:
     vars stmt_list { ($1, $2) }
@@ -119,20 +117,22 @@ expr:
   | expr MINUS  expr { Binop($1, Sub, $3) }
   | expr TIMES  expr { Binop($1, Mul, $3) }
   | expr DIVIDE expr { Binop($1, Div, $3) }
-  | expr BEQ    expr { Binop($1, Beq, $3) }
-  | expr BNEQ    expr { Binop($1, Bneq, $3) }
-  | expr LTH    expr { Binop($1, Lth, $3) }
-  | expr LEQ    expr { Binop($1, Leq, $3) }
-  | expr GTH    expr { Binop($1, Gth, $3) }
-  | expr GEQ    expr { Binop($1, Geq, $3) }
-  | expr AND    expr { Binop($1, And, $3) }
-  | expr OR     expr { Binop($1, Or, $3)  }
+  | expr INVERT expr { Binop($1, Inv, $3) }
+  | expr BEQ    expr { Relop($1, Beq, $3) }
+  | expr BNEQ   expr { Relop($1, Bneq, $3)}
+  | expr LTH    expr { Relop($1, Lth, $3) }
+  | expr LEQ    expr { Relop($1, Leq, $3) }
+  | expr GTH    expr { Relop($1, Gth, $3) }
+  | expr GEQ    expr { Relop($1, Geq, $3) }
+  | expr AND    expr { Relop($1, And, $3) }
+  | expr OR     expr { Relop($1, Or, $3)  }
+  | expr LPOWER   expr PMOD expr { Trnop($1, Lpw, $3, Pmd, $5) }
   | MINUS expr %prec NOT { Unop(Neg, $2)  }
   | NOT expr         { Unop(Not, $2)      }
   | ID ASSIGN expr   { Assign($1, $3)     }
   | ID ACCESS ID     { Access($1, $3) } // will be used for accessor methods
   | ID LPAREN args_opt RPAREN { Call($1, $3) }
-  // | LBRACK args_list RBRACK    { Ptlit($1, $2, $3)  }    // Point initialisation
+  // | typ LPAREN expr RPAREN   { Cast($3) } (* Can later be generalised to other types *)
   | LPAREN expr RPAREN {  $2  }
 
 args_opt:

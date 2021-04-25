@@ -26,7 +26,6 @@ in
 check_binds "global" globals;
 
 (* Start with function declarations for built-ins (just print for now)*)
-(* TODO: Add for scan/compute for rings *)
 (* Just call the formal parameter ID of our inbuit functions x*)
 let built_in_decls =
   let add_bind map (name, ty) = StringMap.add name {
@@ -35,11 +34,25 @@ let built_in_decls =
     params = [(ty, "x")];
     locals = []; body = [] (* In-built don't have body. Determine semantics here *)
   } map
-  in List.fold_left add_bind StringMap.empty [ ("print", Int);
+  in let void_decls = List.fold_left add_bind StringMap.empty [ ("print", Int); 
                                                ("prints", String);
                                                ("printl", Lint);
-                                               ("printpt", Point);
-                                               ("printpoly", Poly);]
+                                               ("printpt", Point); 
+                                               ("printpoly", Poly);] 
+     and add_cast map (name, ty) = StringMap.add name {
+       typ = Lint;
+       name = name;
+       params = [(ty, "x")];
+       locals = []; body = []
+     } map
+  in let void_decls = List.fold_left add_cast void_decls [ ("tolint", Int) ]
+     and add_rand map (name, ty) = StringMap.add name {
+        typ = Lint;
+        name = name;
+        params = [(ty, ("x")); (ty, ("y"))];
+        locals = []; body = []
+      } map
+  in List.fold_left add_rand void_decls [ ("random", Lint) ]
   (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 
@@ -138,6 +151,8 @@ let check_function func =
             let ty = match op with
               Neg when t = Int -> Int
             | Not when t = Int -> Int
+            | Neg when t = Lint -> Lint
+            | Not when t = Lint -> Lint
             | _ -> raise (Failure ("illegal unary operator " ^
                                    string_of_uop op ^ string_of_typ t ^
                                    " in " ^ string_of_expr ex))
@@ -150,16 +165,40 @@ let check_function func =
             (* Determine expression type based on operator and operand types *)
             let ty = match op with
               Add | Sub | Mul | Div | Mod | Pow when same && t1 = Int -> Int
-            | Add | Sub | Mul | Div | Mod       when t2 = Lint && t1 = Lint -> Lint
+            | Add | Sub | Mul | Div | Mod | Inv when same && t1 = Lint -> Lint
             | Add                               when same && t1 = Point -> Point
+	          | Pow                               when t1 = Lint && t2 = Int -> Lint
             | Mul                               when t1 = Lint && t2 = Point -> Point
-	    | Pow                               when t1 = Lint && t2 = Int -> Lint
-	    | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
+	          | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
+            | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int
             | _ -> raise (
                 Failure ("illegal binary operator " ^
                         string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
                         string_of_typ t2 ^ " in " ^ string_of_expr e))
             in (ty, SBinop((t1, e1'), op, (t2, e2')))
+    | Relop(e1, op, e2) as e ->
+            let (t1, e1') = expr e1
+            and (t2, e2') = expr e2 in
+            let same = t1 = t2 in
+            let ty = match op with
+            | Beq | Bneq | Leq | Geq | Lth | Gth | And | Or when same && t1 = Int -> Int
+            | Beq | Bneq | Leq | Geq | Lth | Gth            when same && t1 = Lint -> Int 
+            | _ -> raise (
+                Failure ("illegal relational operator " ^
+                        string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+                        string_of_typ t2 ^ " in " ^ string_of_expr e))
+            in (ty, SRelop((t1, e1'), op, (t2, e2')))
+    | Trnop(e1, o1, e2, o2, e3) as e ->
+            let (t1, e1') = expr e1
+            and (t2, e2') = expr e2
+            and (t3, e3') = expr e3 in
+            let ty = match o1, o2 with
+            Lpw, Pmd when t1 = Lint && t2 = Lint && t3 = Lint -> Lint
+          | _ -> raise (
+              Failure ("illegal ternary operator " ^ string_of_typ t1 ^ " " ^
+              string_of_top o1 ^ " " ^ string_of_typ t2 ^ " " ^ string_of_top o2 ^ " " ^
+              string_of_typ t3 ^ " in " ^ string_of_expr e))
+            in (ty, STrnop((t1, e1'), o1, (t2, e2'), o2, (t3, e3')))
     | Call(name, args) (* as call *) ->
         let fd = find_func name in
         let param_length = List.length fd.params in
