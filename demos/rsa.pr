@@ -1,16 +1,68 @@
+lint encrypt(lint n, lint e)
+{
+     string plntxt;
+     lint encotxt;
+     lint ciphtxt;
+
+     plntxt = "Hey Professor Edwards";
+     encode(encotxt, plntxt);
+     prints(""); prints("Encoded text:");
+     printl(encotxt);
+     ciphtxt = encotxt ^ e @ n;
+     prints(""); prints("Cipher text:");
+     printl(ciphtxt);
+     return ciphtxt;
+}
+
+
 int main () 
 { 
 
   /* RSA Algorithm Demonstration */
-  /* Example drawn from http://www.math.toronto.edu/mathnet/soar/Spring/PDF/RSA.pdf */
+  /* Primes taken from RSA Factor Challenge - RSA 250*/
   
-  /* Select p and q, and compute n = pq */
+  /* declaration */
   lint p;
-  p = 419;
   lint q;
-  q = 541;
   lint n;
+  lint e;
+  lint d;
+  lint phi;
+  lint max;
+  lint ciphtxt;
+  lint encotxt;
+  string mess;
+
+  /* Select p and q, and compute n = pq */
+
+  p = 64135289477071580278790190170577389084825014742943447208116859632024532344630238623598752668347708737661925585694639798853367l;
+  q = 33372027594978156556226010605355114227940760344767554666784520987023841729210037080257448673296881877565718986258036932062711l;
+
   n = p * q;
-  print(1);
+
+  /* randomly select e */
+  max = 1000000000000000000000000000000000000000000l;
+  e = random(10l, max);
+  prints("Public key (n, e):");
+  printl(n);
+  prints(""); printl(e);
+  /* n, e are the public key */
+  ciphtxt = encrypt(n,e);
+
+  /* find phi(n) and use that to find d */
+  phi = (p-1l)*(q-1l);
+  d = e`phi;
+
+  /* decrypt message */
+  encotxt = ciphtxt ^ d @ n;
+  prints(""); prints("Decrypted enoded text:");
+  printl(encotxt);
+
+
+  /* decode message */
+  prints(""); prints("Decoded message:");
+  mess = decode(encotxt);
+  prints(mess);
+
   return 0;
 }
