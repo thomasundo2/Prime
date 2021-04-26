@@ -77,10 +77,11 @@ let translate (globals, functions) =
       L.function_type i32_t [| L.pointer_type mpz_t; L.pointer_type mpz_t |] in
   let linitdup_func : L.llvalue =
       L.declare_function "__gmpz_init_set" linitdup_t the_module in
-  let lclear_t : L.lltype =
+      (* The following would be needed in future work to free mpz memory *)
+  (* let lclear_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t |] in
   let lclear_func : L.llvalue = (* free lints - define usage *)
-      L.declare_function "__gmpz_clear" lclear_t the_module in
+      L.declare_function "__gmpz_clear" lclear_t the_module in *)
   (* We don't use the mpz_out_str because FILE* is a pain *)
   let lprint_t : L.lltype =
       L.function_type i32_t [| L.pointer_type mpz_t |] in
