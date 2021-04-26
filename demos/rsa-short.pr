@@ -2,7 +2,7 @@ lint encrypt(lint n, lint e){
      string plntxt; lint encotxt; lint ciphtxt;
 
      plntxt = "Hey Professor Edwards";
-     encode(encotxt, plntxt);
+     encotxt = encode(plntxt);
      ciphtxt = encotxt ^ e @ n;
      return ciphtxt;
 }
