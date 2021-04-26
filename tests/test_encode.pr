@@ -4,7 +4,7 @@ int main()
     lint encoded;
     in = "HelloWorld";
     prints(in);
-    encode(encoded, in);
+    encoded = encode(in);
     printl(encoded);
     prints(decode(encoded));
     return 0;

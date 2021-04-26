@@ -521,10 +521,11 @@ let translate (globals, functions) =
       | SCall ("decode", [e]) ->
           let e' = expr builder e in
           L.build_call decode_func [| e' |] "decode" builder
-      | SCall ("encode", [e1; e2]) ->
-          let e1' = expr builder e1 
-          and e2' = expr builder e2 in
-          ignore(L.build_call encode_func [| e1'; e2' |] "encode" builder); e1'
+      | SCall ("encode", [e]) ->
+          let e' = expr builder e 
+          and ret_space = L.build_alloca mpz_t "" builder in
+          let ret_ptr = L.build_in_bounds_gep ret_space [| zero |] "" builder in
+          ignore(L.build_call encode_func [| ret_ptr; e' |] "encode" builder); ret_ptr
       | SCall (f, args) ->
           let (fdef, fdecl) = StringMap.find f function_decls in
      (* let args = match fdecl.styp with 
