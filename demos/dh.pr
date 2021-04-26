@@ -1,53 +1,91 @@
-/* int alice(int p, int g) 
+pt alice_cpk(pt q) /* Alice computes public key */
 {
-  int a;
-  a = 1000000;
-  prints("a:");
-  print(a);
-  return (g^a)%p;
+  lint alpha;
+  alpha = 537l;
+  return alpha*q;
 }
 
-int bob(int p, int g) 
+pt bob_cpk(pt q) /* Bob computes public key */
 {
-  int b; 
-  b = 10000000;
-  prints("b:");
-  print(b);
-  return (g^b)%p;
-} */
+  lint beta; 
+  beta = 792l;
+  return beta*q;  
+}  
+
+int alice_csecret(pt b_public_key) /* Alice computes shared secret */
+{
+  lint alpha;
+  alpha = 537l; /* Alice still has access to alpha */
+  prints("Alice's Computed Shared Secret:");
+  printpt(alpha*b_public_key); 
+  return 0;
+}
+
+int bob_csecret(pt a_public_key) /* Bob computes shared secret */
+{  
+  lint beta;
+  beta = 792l; /* Bob still has access to beta */
+  prints("Bob's Computed Shared Secret:"); 
+  printpt(beta*a_public_key);
+  return 0;
+}  
 
 int main()
 {
-  /* Diffie-Hellman Key Exchange */
-    
-  /* p = large prime, g = primitive root (mod p) */
-  int p; 
-  p = 101;
-  int g;
-  g = 2;
+  /* Diffie-Hellman Key Exchange on Elliptic Curves */
+  /* prime number from Microsoft Digital Rights Management 
+   * As seen in Lecture Slides 13 - MATH UN3025 Prof. Dorial Goldfeld - November, 2020
+   *
+   * coefficients and point q geneerated on
+   * http://www.christelbach.com/ECCalculator.aspx
+  */
 
-  prints("p:");
-  print(p);
-  prints("g:");
-  print(g);
-
-  /* Step 1: Alice chooses a random large integer a. */
-  /* Step 2: Alice sends g^a (mod p) to Bob. */
-  int a;
-  a = 1;
-  /* a = alice(p, g); */
-
-  /* Step 3: Bob chooses a random large integer b. */
-  /* Step 4: Bob sends g^b (mod p) to Alice. */
-  int b;
-  b = 1;
-  /* b = bob(p, g); */
-
-  int secret;
-  secret = a * b; 
+  /* create variables */
   
-  prints("shared secret (g^(ab) (mod p)):");
-  print(secret);
+  lint p; 
+  lint a;
+  lint b;
+
+  lint x1;
+  lint y1;
+
+  pt q;
+  pt a_public_key;
+  pt b_public_key;
+
+  curve crv; 
+
+  /* create the curve */
+
+  p = 785963102379428822376694789446897396207498568951l;
+  a = 31768908125132550347631746413827693272746955927l;
+  b = 48571406791775727346184082881005620597345426652l;
+  
+  crv = [(a, b) : p]; 
+
+  /* use subgroup generator q */
+ 
+  x1 = 771507216262649826170648268565579889907769254176l;
+  y1 = 390157510246556628525279459266514995562533196655l;
+
+  prints("Elliptic Curve E:");
+  printc(crv); 
+
+  /* create the point */
+  
+  q = [x1, y1] & crv;
+  prints("Point q:");
+  printpt(q); 
+
+  /* Alice computes a Public Key using private alpha */
+  a_public_key = alice_cpk(q); 
+
+  /* Bob computes a Public Key using private beta */
+  b_public_key = bob_cpk(q);
+
+  /* Alice and Bob compute their shared secret using the public transmission from the other */
+  alice_csecret(b_public_key);
+  bob_csecret(a_public_key); 
 
   return 0;
 }
