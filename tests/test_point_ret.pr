@@ -1,0 +1,15 @@
+pt retPoint(pt a)
+{
+    printpt(a);
+    return a;
+}
+
+int main()
+{
+    curve mycurve;
+    pt b;
+    mycurve = [(1l, 2l) : 2l];
+    b = [0l, 1l] & mycurve;
+    printpt(retPoint(b));
+    return 0;
+}

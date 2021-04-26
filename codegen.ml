@@ -234,14 +234,17 @@ let translate (globals, functions) =
       let name = fdecl.sname(*sfname*)
       and formal_types =
 	Array.of_list (let new_params = (match fdecl.styp with
-                                      A.Lint -> (A.Lint, "sret") :: fdecl.sparams
+                                      A.Lint  -> (A.Lint, "sret") :: fdecl.sparams
+                                    | A.Point -> (A.Point, "sret") :: fdecl.sparams
                                     | _      -> fdecl.sparams
                                     ) in
                    List.map (fun (t,n) -> match t with
-                     A.Lint when n = "sret" -> L.pointer_type (ltype_of_typ t)        
+                     A.Lint  when n = "sret" -> L.pointer_type (ltype_of_typ t)        
+                   | A.Point when n = "sret" -> L.pointer_type (ltype_of_typ t)        
                    | _      -> ltype_of_typ t) new_params)
       in let ftype = L.function_type (match fdecl.styp with
                                         A.Lint -> L.pointer_type mpz_t
+                                      | A.Point -> L.pointer_type point_t
                                       | _      -> ltype_of_typ fdecl.styp) formal_types in
       StringMap.add name (L.define_function name ftype the_module, fdecl) m in
     List.fold_left function_decl StringMap.empty functions in
@@ -252,6 +255,7 @@ let translate (globals, functions) =
     let builder = L.builder_at_end context (L.entry_block the_function) in
     let new_params = (match fdecl.styp with
                          A.Lint -> (A.Lint, "sret") :: fdecl.sparams
+                       | A.Point -> (A.Point, "sret") :: fdecl.sparams
                        | _      -> fdecl.sparams
                        ) in
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
@@ -267,6 +271,7 @@ let translate (globals, functions) =
         L.set_value_name n p;
       let local = L.build_alloca (match t with
                                     A.Lint when n = "sret" -> L.pointer_type (ltype_of_typ t)
+                                  | A.Point when n = "sret" -> L.pointer_type (ltype_of_typ t)
                                   | _      -> ltype_of_typ t) n builder in
             ignore (L.build_store p local builder);
       StringMap.add n local m
@@ -526,12 +531,16 @@ let translate (globals, functions) =
         | _        -> args in *)
 	 let llargs = List.rev (List.map (fun (ty, se) -> match ty with
                               A.Lint -> L.build_load (expr builder (ty, se)) "lint_param" builder
+                            | A.Point -> L.build_load (expr builder (ty, se)) "pt_param" builder
                             | _      -> expr builder (ty, se)) (List.rev args)) in
 	 let result = (match fdecl.styp with
                         A.Void -> ""
                       | _ -> f ^ "_result") in
      let llargs = (match fdecl.styp with
                     A.Lint -> let space = L.build_alloca mpz_t "sret_space" builder 
+                              in 
+                              L.build_in_bounds_gep space [| zero |] "" builder :: llargs
+                  | A.Point -> let space = L.build_alloca point_t "sret_space" builder 
                               in 
                               L.build_in_bounds_gep space [| zero |] "" builder :: llargs
                   | _      -> llargs) in
@@ -566,6 +575,12 @@ let translate (globals, functions) =
                                     and loaded = L.build_load (lookup (snd (List.hd new_params))) "ret_ptr" builder in
                                     ignore(L.build_call linitdup_func
                                     [| loaded; local_val |] "ret_set" builder);
+                                    L.build_ret loaded builder
+                              | A.Point -> 
+                                    let local_val = expr builder e in 
+                                    let value = L.build_load local_val "" builder 
+                                    and loaded = L.build_load (lookup (snd (List.hd new_params))) "ret_ptr" builder in
+                                    ignore(L.build_store value loaded builder);
                                     L.build_ret loaded builder
                               (* Build return statement *)
                               | _      -> L.build_ret (expr builder e) builder );
