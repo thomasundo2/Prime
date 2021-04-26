@@ -42,21 +42,21 @@ int main()
     printc(crv);
 
     q = [x1, y1] & crv;
-    prints("Point q:");
+    prints(""); prints("Point q:");
     printpt(q);
 
     r = q + q;
-    prints("Point r = q + q");
+    prints(""); prints("Point r = q + q");
     printpt(r);
 
-    prints("-q:");
+    prints(""); prints("-q:");
     printpt(-q);
 
-    prints("q + -q:");
+    prints(""); prints("q + -q:");
     printpt(q + -q);
 
     s = 123l*q;
-    prints("123*q");
+    prints(""); prints("123*q");
     printpt(s);
 
     return 0;

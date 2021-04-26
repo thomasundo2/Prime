@@ -72,13 +72,13 @@ let built_in_decls =
        locals = []; body = []
      } map
      and add_encode map (name, _) = StringMap.add name {
-       typ = Void;
+       typ = Lint;
        name = name;
-       params = [(Lint, "x"); (String, "y")]; (* Don't necessarily have to hard-code this but time is short *)
+       params = [(*(Lint, "x");*) (String, "y")]; (* Don't necessarily have to hard-code this but time is short *)
        locals = []; body = [];
      } map
   in let built_decls = List.fold_left add_decode void_decls [ ("decode", Lint)]
-  in List.fold_left add_encode built_decls [ ("encode", (Lint, String)) ]
+  in List.fold_left add_encode built_decls [ ("encode", (String)) ]
   (* We likely don't need the GMP functions here because they are not called directly (in fact should not be) *)
 in
 
