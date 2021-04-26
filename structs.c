@@ -5,16 +5,6 @@
 #include <string.h>
 
 #include"structs.h"
-// struct point Point(mpz_t i, mpz_t j)
-// {
-//     // printf("testing!\n");
-//     struct point p;
-//     mpz_init_set(p.i, i);
-//     mpz_init_set(p.j, j);
-//     return p;
-// }
-
-
 
 // POLYS
 void Poly(struct poly *p, mpz_t x_coeff, mpz_t c, mpz_t mod)
@@ -23,7 +13,8 @@ void Poly(struct poly *p, mpz_t x_coeff, mpz_t c, mpz_t mod)
     mpz_init_set(p->c, c);
     mpz_init_set(p->mod, mod);
 }
-void printpoly(struct poly *p)
+
+void printc(struct poly *p)
 {
     printf("[(");
     mpz_out_str(stdout, 10, p->x_coeff);
@@ -49,7 +40,7 @@ void printpt(struct point *p)
     printf(",");
     mpz_out_str(stdout, 10, p->j);
     printf("] & ");
-    printpoly(p->curve);
+    printc(p->curve);
 }
 struct point *ptadd(struct point *p1, struct point *p2);
 /*
