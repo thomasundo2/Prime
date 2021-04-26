@@ -59,7 +59,8 @@ rule token = parse
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as name { ID(name) } (*ids can be alpha followed by alphanum and _*)
 | digits as lit { LITERAL(int_of_string lit) }
 | (digits as lit)('l')  { LINTLIT(lit) }
-| '"'(_* as lit)'"' { STRLIT(lit) }  (* Make a separate rule for looking through string literals and comment literals *)
+| '"'(([' '-'!' '#'-'[' ']'-'~'])* as lit)'"' { STRLIT(lit) }
+(*| '"'(_* as lit)'"' { STRLIT(lit) } Make a separate rule for looking through string literals and comment literals *)
 | eof      { EOF }
 | _  as char      { raise (Failure("Undefined character " ^ Char.escaped char)) } (* any other character is not allowed *)
 

@@ -1,3 +1,8 @@
+string encrypt(lint p)
+{
+}
+
+
 int main () 
 { 
 
