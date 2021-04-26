@@ -1,1 +1,1 @@
-Fatal error: exception Failure("illegal argument void expected lint in encode(x, "3")")
+Fatal error: exception Failure("expecting 1 arguments in encode")
