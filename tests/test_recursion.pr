@@ -1,0 +1,21 @@
+int gcd(int a, int b)
+{
+  if(b != 0){
+    return gcd(b, a % b);
+  }
+  else{
+    return a;
+  }
+}
+
+int main()
+{
+  int a;
+  int b;
+  int c;
+  a = 25;
+  b = 100;
+  c = gcd(a, b);
+  print(c);
+  return 0;
+}
