@@ -32,6 +32,7 @@ int main ()
   lint ciphtxt;
   lint decotxt;
   string mess;
+  int cp;
 
   /* Select p and q, compute n = pq, and phi(n)  */
 
@@ -44,6 +45,7 @@ int main ()
   /* randomly select e */
   max = 1000000000000000000000000000000000000000000l;
   e = random(10l, max);
+
   prints("Public key (n, e):");
   printl(n);
   prints(""); printl(e);
