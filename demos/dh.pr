@@ -70,12 +70,14 @@ int main()
 
   prints("Elliptic Curve E:");
   printc(crv); 
+  prints("");
 
   /* create the point */
   
   q = [x1, y1] & crv;
   prints("Point q:");
-  printpt(q); 
+  printpt(q);
+  prints(""); 
 
   /* Alice computes a Public Key using private alpha */
   a_public_key = alice_cpk(q); 
@@ -85,6 +87,7 @@ int main()
 
   /* Alice and Bob compute their shared secret using the public transmission from the other */
   alice_csecret(b_public_key);
+  prints("");
   bob_csecret(a_public_key); 
 
   return 0;
