@@ -55,30 +55,45 @@ char *printpt(struct point p){
 }*/
 struct point *ptmul( mpz_t n, struct point *p1)
 {
-    /*struct poly *curve = (struct poly *)malloc(sizeof(struct poly));
-    struct point *sum  = (struct point *)malloc(sizeof(struct point));
- 
-    mpz_t xcoeff;
-    mpz_init_set(xcoeff, p1->curve->x_coeff);
-
-    mpz_t c;
-    mpz_init_set(c, p1->curve->c);
- 
-    mpz_t mod;
-    mpz_init_set(mod, p1->curve->mod);
- 
-    Poly( curve, xcoeff, c, mod);*/
 
     struct point *product = p1;
+    struct point *dub = p1;
     //copy n into new mpz_t
     mpz_t i;
+    mpz_t j;
+    mpz_t k;
+
     mpz_init(i);
+    mpz_init(j);
+    mpz_init(k);
+
     mpz_set(i, n);
-    mpz_sub_ui( i, i, (unsigned long) 1);
-    while( mpz_sgn(i) != 0)
+    mpz_set_si(j, (long) 1);
+    mpz_set_si(k, (long) 2);
+    //mpz_sub_ui( i, i, (unsigned long) 1);
+    int stopdub = 0;
+    while( mpz_sgn(i) == 1)
     {
-        product = ptadd(product, p1);
-        mpz_sub_ui( i, i, (unsigned long) 1);
+        gmp_printf("%Zd", i);
+        if(mpz_cmp(i, k) >= 0){
+            product = ptadd(product, product);
+            mpz_mul_si(j, j, (long) 2);
+            mpz_mul_si(k, k, (long) 2);
+            stopdub = 1;
+            printf("%d", 1);
+        }
+        else{
+            if(stopdub == 1){
+                mpz_sub(i, i, j);
+                stopdub = 0;
+            }
+            if(mpz_sgn(i) <= 0){}
+            else{
+                product = ptadd(product, p1);
+                mpz_sub_ui( i, i, (unsigned long) 1);
+                printf("%d", 2);
+            }
+        }
     }
     return product;
 }
