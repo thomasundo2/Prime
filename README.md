@@ -1,7 +1,7 @@
 # Prime
 A programming language designed for cryptography. Developed for Professor Edwards' Programming Languages and Tanslators Class (COMS W4115) Spring '21 at Columbia Univesity. 
 
-#Setup
+# Setup
 Run in Professor Edward's MicroC docker container.
 ```
 docker run --rm -it -v `pwd`:/home/microc -w=/home/microc columbiasedwards/plt
