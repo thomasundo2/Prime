@@ -7,6 +7,9 @@ A programming language designed for cryptography.
 - Thomas (Architect)
 - Pedro (Tester)
 
+## Rounding out Ints and Lints Stage
+Entire suite of operators for ints and lints implemented, control flow.
+
 ## Lint Stage
 At this point, we have implemented basic arithmetic operator for integers and large intergers. Assignment operators are functional for intergers, large integers, and strings.
 
