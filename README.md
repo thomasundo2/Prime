@@ -1,5 +1,19 @@
 # Prime
-A programming language designed for cryptography. 
+A programming language designed for cryptography. Developed for Professor Edwards' Programming Languages and Tanslators Class (COMS W4115) Spring '21 at Columbia Univesity. 
+
+#Setup
+Run in Professor Edward's MicroC docker container
+'''
+docker run --rm -it -v `pwd`:/home/microc -w=/home/microc columbiasedwards/plt
+'''
+Run make to install the C GMP library, build prime.native, and run test suite
+'''
+make
+'''
+To execte a single .pr file filename.pr use `test_file.sh`. Don't include  `.pr` in the filename. Make sure to run make at the start of the docker session to install the C GMP library.
+'''
+./test_file.sh filepath/filename
+'''
 
 ## Team Members and Roles:
 - Nikhil (Language Guru)
