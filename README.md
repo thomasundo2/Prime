@@ -1,6 +1,12 @@
 # Prime
 A programming language designed for cryptography. Developed for [Professor Edwards'](http://www.cs.columbia.edu/~sedwards/) Programming Languages and Translators Class (COMS W4115) Spring '21 at Columbia Univesity. 
 
+## Team Members and Roles:
+- Nikhil (Language Guru)
+- Alex (Project Manager)
+- Thomas (Architect)
+- Pedro (Tester)
+
 # Setup
 Run in Professor Edwards' [MicroC](http://www.cs.columbia.edu/~sedwards/classes/2021/4115-spring/microc.tar.gz) docker container. (Requires downloading Professor Edwards' MicroC source)
 ```
@@ -16,13 +22,9 @@ To execte a single .pr file filename.pr use `test_file.sh`. Don't include  `.pr`
 ```
 For more, read the language tutoral and language reference manual in our [Final Report](http://www.cs.columbia.edu/~sedwards/classes/2021/4115-spring/reports/PRIME.pdf)
 
-## Team Members and Roles:
-- Nikhil (Language Guru)
-- Alex (Project Manager)
-- Thomas (Architect)
-- Pedro (Tester)
+# Development Stages
 
-## Rounding out Ints and Lints Stage
+## Rounding Out Ints and Lints Stage
 Entire suite of operators for ints and lints implemented, control flow.
 
 ## Lint Stage
