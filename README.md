@@ -4,10 +4,10 @@ A programming language designed for cryptography. Developed for [Professor Edwar
 [Prime Final Report](http://www.cs.columbia.edu/~sedwards/classes/2021/4115-spring/reports/PRIME.pdf)
 
 ## Team Members and Roles:
-- Nikhil Mehta *Language Guru*
-- Alex Liebeskindd *Project Manager*
-- Thomas Tran *Architect*
-- Pedro B. T. Santos *Tester*
+- Nikhil Mehta - *Language Guru*
+- Alex Liebeskind - *Project Manager*
+- Thomas Tran - *Architect*
+- Pedro B. T. Santos - *Tester*
 
 # Setup
 Run in Professor Edwards' [MicroC](http://www.cs.columbia.edu/~sedwards/classes/2021/4115-spring/microc.tar.gz) docker container. (Requires downloading Professor Edwards' MicroC source)
