@@ -1,11 +1,13 @@
 # Prime
 A programming language designed for cryptography. Developed for [Professor Edwards'](http://www.cs.columbia.edu/~sedwards/) Programming Languages and Translators Class (COMS W4115) Spring '21 at Columbia Univesity. 
 
+[Prime Final Report](http://www.cs.columbia.edu/~sedwards/classes/2021/4115-spring/reports/PRIME.pdf)
+
 ## Team Members and Roles:
-- Nikhil (Language Guru)
-- Alex (Project Manager)
-- Thomas (Architect)
-- Pedro (Tester)
+- Nikhil Mehta *Language Guru*
+- Alex Liebeskindd *Project Manager*
+- Thomas Tran *Architect*
+- Pedro B. T. Santos *Tester*
 
 # Setup
 Run in Professor Edwards' [MicroC](http://www.cs.columbia.edu/~sedwards/classes/2021/4115-spring/microc.tar.gz) docker container. (Requires downloading Professor Edwards' MicroC source)
@@ -34,7 +36,7 @@ At this point, we have implemented basic arithmetic operator for integers and la
 At this point, we have decided to limit our program to printing integers and strings. 
 Return statements are also included.
 
-## Developments:
+### Developments:
 Since the last milestone, we have: 
 - Implemented reduced versions of lexer through to top-level using MicroC as a reference guide to structure.
 - Left structures in place (commented) to iteratively add more features.
