@@ -1,5 +1,5 @@
 # Prime
-A programming language designed for cryptography. Developed for [Professor Edwards'](http://www.cs.columbia.edu/~sedwards/) Programming Languages and Translators Class (COMS W4115) Spring '21 at Columbia Univesity. 
+A programming language designed for cryptography. Developed for [Professor Edwards'](http://www.cs.columbia.edu/~sedwards/) Programming Languages and Translators Class (COMS W4115) Spring '21 at Columbia Univesity. Prime's compiler is primarily written in OCaml and uses LLVM to generate three address code.
 
 [Prime Final Report](http://www.cs.columbia.edu/~sedwards/classes/2021/4115-spring/reports/PRIME.pdf)
 
@@ -10,7 +10,7 @@ A programming language designed for cryptography. Developed for [Professor Edwar
 - Pedro B. T. Santos - *Tester*
 
 # Setup
-Run in Professor Edwards' [MicroC](http://www.cs.columbia.edu/~sedwards/classes/2021/4115-spring/microc.tar.gz) docker container. (Requires downloading Professor Edwards' MicroC source)
+Run in Professor Edwards' [MicroC](http://www.cs.columbia.edu/~sedwards/classes/2021/4115-spring/microc.tar.gz) Docker container. (Requires downloading Professor Edwards' MicroC source and installing Docker)
 ```
 docker run --rm -it -v `pwd`:/home/microc -w=/home/microc columbiasedwards/plt
 ```
@@ -26,8 +26,11 @@ For more, read the language tutoral and language reference manual in our [Final 
 
 # Development Stages
 
+## Final Stage
+`curve`s and `pt`s implmeneted along with elliptic curve arithmetic and opeations. Support for functions and added return types.
+
 ## Rounding Out Ints and Lints Stage
-Entire suite of operators for ints and lints implemented, control flow.
+Entire suite of operators for `int`s and `lint`s implemented, control flow.
 
 ## Lint Stage
 At this point, we have implemented basic arithmetic operator for integers and large intergers. Assignment operators are functional for intergers, large integers, and strings.
