@@ -1,5 +1,5 @@
 # Prime
-A programming language designed for cryptography. Developed for [Professor Edwards'](http://www.cs.columbia.edu/~sedwards/) Programming Languages and Translators Class (COMS W4115) Spring '21 at Columbia Univesity. Prime's compiler is primarily written in OCaml and uses LLVM to generate three address code.
+A programming language designed for cryptography with built in support for large integers and elliptic curves. Developed for [Professor Edwards'](http://www.cs.columbia.edu/~sedwards/) Programming Languages and Translators Class (COMS W4115) Spring '21 at Columbia Univesity. Prime's compiler is primarily written in OCaml and uses LLVM to generate three address code.
 
 [Prime Final Report](http://www.cs.columbia.edu/~sedwards/classes/2021/4115-spring/reports/PRIME.pdf)
 
