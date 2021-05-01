@@ -27,7 +27,7 @@ For more, read the language tutoral and language reference manual in our [Final 
 # Development Stages
 
 ## Final Stage
-`curve`s and `pt`s implmeneted along with elliptic curve arithmetic and opeations. Support for functions and added return types.
+`curve`s and `pt`s implmeneted along with elliptic curve arithmetic and operations. Support for functions and added return types.
 
 ## Rounding Out Ints and Lints Stage
 Entire suite of operators for `int`s and `lint`s implemented, control flow.
